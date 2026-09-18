@@ -4,6 +4,7 @@
 
 ## 会话记录
 
+- 2026-09-19，本次会话目标：P1 权限+表单域（RBAC/tenant 隔离、统一 forms 模型、4 类 schema、状态机、多维过滤器、埋点中间件、统一异常、审计事件、OpenAPI 导出与需求覆盖矩阵骨架）。
 - 2026-09-18 23:41，本次会话目标：P0 脚手架（compose、Makefile、环境体检、10w 合成数据生成器、P0 证据落盘与 commit）。
 
 ## Phase 状态
@@ -11,7 +12,7 @@
 | Phase | 状态 | DoD | 证据 | Commit | 遗留 |
 |---|---|---|---|---|---|
 | P0 | 已完成 | `make env-check` pass；`make seed N=100000` pass | `artifacts/env/check.json`; `artifacts/data/seed_summary.json`; `artifacts/data/forms_seed.csv` | `6d2751d` | 无 |
-| P1 | 未开始 | - | - | - | - |
+| P1 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_auth.py backend/tests/test_forms.py --junitxml=artifacts/test/p1.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p1.xml`; `artifacts/openapi.json`; `docs/08-需求覆盖矩阵.md` | `c47caf4` | P0 seed 遗留已修复：`4054f46`；README 后续注明 MySQL 3306 冲突 |
 | P2 | 未开始 | - | - | - | - |
 | P3 | 未开始 | - | - | - | - |
 | P4 | 未开始 | - | - | - | - |
