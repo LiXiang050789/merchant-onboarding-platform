@@ -1,1 +1,10 @@
 numpy==2.3.1
+asyncmy==0.2.10
+cryptography==46.0.1
+fastapi==0.117.1
+httpx==0.28.1
+PyJWT==2.10.1
+pytest==8.4.2
+pytest-asyncio==1.2.0
+SQLAlchemy==2.0.43
+uvicorn==0.36.0
