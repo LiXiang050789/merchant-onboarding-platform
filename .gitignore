@@ -1,0 +1,33 @@
+# 注意：artifacts/ 是证据树，必须入库（勿加入忽略）
+
+# secrets
+.env
+.env.*
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# node / next
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+npm-debug.log*
+
+# spark 本地产物
+spark-warehouse/
+metastore_db/
+derby.log
+
+# 编辑器 / 系统
+.DS_Store
+.idea/
+*.swp
+*.log
