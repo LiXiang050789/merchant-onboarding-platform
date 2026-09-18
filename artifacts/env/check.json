@@ -1,0 +1,103 @@
+{
+  "generated_at": "2026-09-18T15:53:50.132742+00:00",
+  "status": "pass",
+  "required": [
+    "python_version",
+    "numpy_import",
+    "docker_command",
+    "docker_info",
+    "docker_compose",
+    "mysql_image",
+    "mongo_image",
+    "node_version",
+    "npm_version",
+    "redis_cli",
+    "redis_ping",
+    "gitignore_env",
+    "env_file"
+  ],
+  "checks": {
+    "python_version": {
+      "cmd": "/home/lx/miniconda3/bin/python -V",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Python 3.13.11",
+      "stderr": ""
+    },
+    "numpy_import": {
+      "cmd": "/home/lx/miniconda3/bin/python -c import numpy; print(getattr(numpy, '__version__', 'ok'))",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "2.3.1",
+      "stderr": ""
+    },
+    "docker_command": {
+      "cmd": "which docker",
+      "ok": true,
+      "path": "/usr/bin/docker"
+    },
+    "docker_info": {
+      "cmd": "docker info",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "syslog\n CDI spec directories:\n  /etc/cdi\n  /var/run/cdi\n Discovered Devices:\n  cdi: docker.com/gpu=webgpu\n Swarm: inactive\n Runtimes: io.containerd.runc.v2 nvidia runc\n Default Runtime: runc\n Init Binary: docker-init\n containerd version: aad11006b869517fcd3009450b6f82da282e1a9b\n runc version: v1.4.3-0-gbb14dabe\n init version: de40ad0\n Security Options:\n  seccomp\n   Profile: builtin\n  cgroupns\n Kernel Version: 6.6.87.2-microsoft-standard-WSL2\n Operating System: Docker Desktop\n OSType: linux\n Architecture: x86_64\n CPUs: 8\n Total Memory: 11.68GiB\n Name: docker-desktop\n ID: 47b3bab3-01d4-4c29-bd39-9343ad5b4541\n Docker Root Dir: /var/lib/docker\n Debug Mode: false\n  File Descriptors: 44\n  Goroutines: 84\n  System Time: 2026-09-18T15:53:49.316530155Z\n  EventsListeners: 12\n HTTP Proxy: http.docker.internal:3128\n HTTPS Proxy: http.docker.internal:3128\n No Proxy: hubproxy.docker.internal\n Labels:\n  com.docker.desktop.address=unix:///var/run/docker-cli.sock\n Experimental: false\n Insecure Registries:\n  hubproxy.docker.internal:5555\n  ::1/128\n  127.0.0.0/8\n Registry Mirrors:\n  https://kexp6u4g.mirror.aliyuncs.com/\n  https://docker.1ms.run/\n Live Restore Enabled: false\n Firewall Backend: iptables",
+      "stderr": "WARNING: Plugin \"/usr/local/lib/docker/cli-plugins/docker-sbom\" is not valid: failed to fetch metadata: fork/exec /usr/local/lib/docker/cli-plugins/docker-sbom: no such file or directory"
+    },
+    "docker_compose": {
+      "cmd": "docker compose version",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Docker Compose version v5.5.1",
+      "stderr": ""
+    },
+    "mysql_image": {
+      "cmd": "docker image inspect mysql:8.0",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "5ced250af571b8a335d09c84253fd5027b21dbca54a467b\",\n                \"sha256:b7ee228f4507526e6dac1e2b34ebc0a803d38735f9f0e8154934c2c9cc275919\",\n                \"sha256:1700d9acc2ce175bac397265a07b34cb231897f2a907255ef3decfb58092511c\",\n                \"sha256:e6e1a47306adeeff2686d1c5e3a677e8432495b3de5a8dc7a732d29fadea6059\",\n                \"sha256:16d50f7c95c0f19a1b00722decd4bd42dbd3462066a7ac666903ba642164a821\",\n                \"sha256:1bc63e2ed476381a326f74411ed09fcce6b9ec053e7906d95d7cb53d6fd4c794\",\n                \"sha256:04024da0550125ac09240a62a6ee005a8e27b418dae88a85001bddde6526003b\",\n                \"sha256:cdb99ca7755b4e597db7d8153ec9324a8c6db3cf3972b51f9e05964590919bd4\"\n            ]\n        },\n        \"Metadata\": {\n            \"LastTagTime\": \"2026-06-01T04:48:56.320179125Z\"\n        },\n        \"Descriptor\": {\n            \"mediaType\": \"application/vnd.oci.image.index.v1+json\",\n            \"digest\": \"sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b\",\n            \"size\": 2605\n        },\n        \"Identity\": {\n            \"Pull\": [\n                {\n                    \"Repository\": \"docker.io/library/mysql\"\n                }\n            ]\n        }\n    }\n]",
+      "stderr": ""
+    },
+    "mongo_image": {
+      "cmd": "docker image inspect mongo:7",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "b6bcb91a7efdfcae6838fff359efe951858227436486c34\",\n                \"sha256:32bf7dfb09ab8f823bc6745fcb1a926ddeb5bdfc583f9d47b1d346b6890331dc\",\n                \"sha256:593ad8ad15b23f03a2eea97a102325797f274e871d3d676662fe4c21db7dbb85\",\n                \"sha256:ec606ec42dc899a6bd3646de579efa9edfa209e69c8665191e884457f5a7b7d1\",\n                \"sha256:6d8e70e49131d2e440357e59c3e3b7f7e257d8a298b8f166e11e76f483668d3f\",\n                \"sha256:a5e4860bb89026df1572cbcdc3526ac2b8e1ced3c6ff43e28d81ef87a9526121\",\n                \"sha256:200f92c2abc1a6984e95f78cdf341b7b7f98a9c3f54aa8f8151d898357be0a19\",\n                \"sha256:aada4ccbe3b1709fefb04c71eaf8df767eef9bca1c920110f2b4fdfc179f32ea\"\n            ]\n        },\n        \"Metadata\": {\n            \"LastTagTime\": \"2026-09-18T15:50:08.741198262Z\"\n        },\n        \"Descriptor\": {\n            \"mediaType\": \"application/vnd.oci.image.index.v1+json\",\n            \"digest\": \"sha256:9854f7139445d766a9523571d6f047530c45547460ffcf8259eb2bf4264632ca\",\n            \"size\": 3250\n        },\n        \"Identity\": {\n            \"Pull\": [\n                {\n                    \"Repository\": \"docker.io/library/mongo\"\n                }\n            ]\n        }\n    }\n]",
+      "stderr": ""
+    },
+    "node_version": {
+      "cmd": "node -v",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "v24.14.0",
+      "stderr": ""
+    },
+    "npm_version": {
+      "cmd": "npm -v",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "11.9.0",
+      "stderr": ""
+    },
+    "redis_cli": {
+      "cmd": "which redis-cli",
+      "ok": true,
+      "path": "/usr/bin/redis-cli"
+    },
+    "redis_ping": {
+      "cmd": "redis-cli ping",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "PONG",
+      "stderr": ""
+    },
+    "gitignore_env": {
+      "cmd": "read .gitignore",
+      "ok": true
+    },
+    "env_file": {
+      "cmd": "test -f .env",
+      "ok": true,
+      "note": ".env is local and ignored by git"
+    }
+  }
+}

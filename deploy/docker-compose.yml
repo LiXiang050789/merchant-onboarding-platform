@@ -1,0 +1,35 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: merchant-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: merchant_root
+      MYSQL_DATABASE: merchant
+      MYSQL_USER: merchant
+      MYSQL_PASSWORD: merchant_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - merchant_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-umerchant", "-pmerchant_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    container_name: merchant-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - merchant_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  merchant_mysql_data:
+  merchant_mongo_data:

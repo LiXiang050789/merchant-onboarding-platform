@@ -1,0 +1,70 @@
+{
+  "seed": 20260918,
+  "total": 100000,
+  "city_counts": {
+    "beijing": 25000,
+    "shanghai": 30000,
+    "hangzhou": 15000,
+    "shenzhen": 20000,
+    "chengdu": 10000
+  },
+  "status_counts": {
+    "published": 85000,
+    "processing": 4000,
+    "batched": 4000,
+    "rejected": 3000,
+    "draft": 2000,
+    "failed": 2000
+  },
+  "form_type_counts": {
+    "property": 25380,
+    "merchant_info": 24683,
+    "product": 24947,
+    "report": 24990
+  },
+  "industry_counts": {
+    "hotel": 19843,
+    "education": 19743,
+    "retail": 20016,
+    "service": 20160,
+    "restaurant": 20238
+  },
+  "center_counts": {
+    "beijing:0": 5058,
+    "beijing:1": 5056,
+    "beijing:2": 4913,
+    "beijing:3": 4947,
+    "beijing:4": 5026,
+    "chengdu:0": 1994,
+    "chengdu:1": 2006,
+    "chengdu:2": 2010,
+    "chengdu:3": 1965,
+    "chengdu:4": 2025,
+    "hangzhou:0": 3021,
+    "hangzhou:1": 3012,
+    "hangzhou:2": 2927,
+    "hangzhou:3": 3022,
+    "hangzhou:4": 3018,
+    "shanghai:0": 5962,
+    "shanghai:1": 6051,
+    "shanghai:2": 6009,
+    "shanghai:3": 5992,
+    "shanghai:4": 5986,
+    "shenzhen:0": 4036,
+    "shenzhen:1": 3957,
+    "shenzhen:2": 3982,
+    "shenzhen:3": 4112,
+    "shenzhen:4": 3913
+  },
+  "anomaly_counts": {
+    "invalid_coordinates": 500,
+    "missing_required": 1000,
+    "duplicate_idempotency_key": 1000,
+    "illegal_status": 200
+  },
+  "duplicate_idempotency_key_unique_count": 99000,
+  "files": {
+    "csv": "artifacts/data/forms_seed.csv",
+    "summary": "artifacts/data/seed_summary.json"
+  }
+}
