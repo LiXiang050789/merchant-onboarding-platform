@@ -10,7 +10,7 @@
 
 | Phase | 状态 | DoD | 证据 | Commit | 遗留 |
 |---|---|---|---|---|---|
-| P0 | DoD 通过，待提交 | `make env-check` pass；`make seed N=100000` pass | `artifacts/env/check.json`; `artifacts/data/seed_summary.json`; `artifacts/data/forms_seed.csv` | 待提交 | 无 |
+| P0 | 已完成 | `make env-check` pass；`make seed N=100000` pass | `artifacts/env/check.json`; `artifacts/data/seed_summary.json`; `artifacts/data/forms_seed.csv` | `6d2751d` | 无 |
 | P1 | 未开始 | - | - | - | - |
 | P2 | 未开始 | - | - | - | - |
 | P3 | 未开始 | - | - | - | - |
