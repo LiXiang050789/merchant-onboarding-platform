@@ -8,13 +8,22 @@
     "shenzhen": 20000,
     "chengdu": 10000
   },
-  "status_counts": {
+  "base_status_counts": {
     "published": 85000,
     "processing": 4000,
     "batched": 4000,
     "rejected": 3000,
     "draft": 2000,
     "failed": 2000
+  },
+  "actual_status_counts": {
+    "published": 84828,
+    "processing": 3994,
+    "batched": 3989,
+    "rejected": 2993,
+    "draft": 1997,
+    "failed": 1999,
+    "unknown": 200
   },
   "form_type_counts": {
     "property": 25380,

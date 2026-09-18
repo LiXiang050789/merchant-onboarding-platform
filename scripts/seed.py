@@ -106,7 +106,7 @@ def build_rows(n: int) -> tuple[list[dict], dict]:
     for i in range(n):
         form_type = str(form_types[i])
         required_value = "" if i in missing_required_idx else f"{form_type}_{i:06d}"
-        status = "submitted" if i in illegal_status_idx else str(statuses[i])
+        status = "unknown" if i in illegal_status_idx else str(statuses[i])
         created_at = base_time + timedelta(seconds=int(created_offsets[i]))
         tenant_num = (i % 20) + 1
         row = {
@@ -130,7 +130,8 @@ def build_rows(n: int) -> tuple[list[dict], dict]:
         "seed": SEED,
         "total": n,
         "city_counts": dict(Counter(cities.tolist())),
-        "status_counts": dict(Counter(statuses.tolist())),
+        "base_status_counts": dict(Counter(statuses.tolist())),
+        "actual_status_counts": dict(Counter(row["status"] for row in rows)),
         "form_type_counts": dict(Counter(form_types.tolist())),
         "industry_counts": dict(Counter(industries.tolist())),
         "center_counts": dict(sorted(center_counter.items())),
