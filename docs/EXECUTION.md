@@ -55,3 +55,32 @@
 - 次要：并发同键 create 竞态（IntegrityError→500）可留作已知限制或加兜底；`config.py` JWT_SECRET 带默认值兜底，README 注明演示必须配置 `.env`。
 - mongo 容器尚未创建（仅 mysql 在跑）；P6 前执行 `docker compose -f deploy/docker-compose.yml up -d` 补起。
 - 给 P3 的输入提示：seed 四类异常样本（unknown 200 / 越界 500 / 缺必填 1000 / 重复键 1000）在导入与事件生成时需显式分类处理，直接喂三口径统计。
+
+### P2 抽查（2026-09-19）— 有条件通过：DoD 达标，但 R1 核心基准对比不成立，需修复
+
+独立复核（可复现性 ✓）：
+- DoD 复跑 `benchmark_aggregation.py --n 100000 --seed 20260918` → 7 行；p50 波动 <6%，features/payload/correctness 完全一致（确定性脚本 ✓）。
+- 全量测试 13 passed；`p1.xml` = 13/0/0；P1 遗留三项确认关闭（refresh 类型校验、触发者权限含 region 校验、operator 区域过滤），均有测试。
+- 网格参数与 §4.4 一致（zoom 映射 / 容量 50 / 半径 3000 / 等距圆柱排序 + Haversine 终判）；n=99304 构成可解释（500 越界 + 200 unknown − 4 重叠）。
+- payload 工作负载站得住：1.566MB / 25351 features → 3.3KB / 34 features（≈471×）——"数据不下发"证据有效。
+
+【必须修复】核心对比不成立（R1 证据链，面试官读脚本即穿帮）：
+1. render_aggregation 的 `full_scan` 与 `grid` **跑的是同一个函数**（`grid_aggregate`），仅 filter 不同（grid 多一个 `status=published`）——不存在"全扫描 vs 网格分桶"对比；两行数字几乎相同（37.1 vs 37.6ms），无法支撑"网格分桶=渲染主路径"。
+   修法：三者必须算法上真正不同：
+   - full_scan：全量点 mask + 聚合（无索引）
+   - grid：**按 zoom 预建网格索引**（点→cell 分桶缓存一次），查询 = 取 bbox 命中的格子 → 聚合
+   - cKDTree：预建树 `query_ball_point` 取候选
+   三者同一组 filter；正确性断言 cluster_id 集合**与计数**一致（centroid 容差内）。
+2. cKDTree 计时不公平：`kd_mask` 构建在 timed 之外，而 full_scan/grid 的 `filter_mask` 在 timed 之内 → 25ms 有水分。修法：所有算法的候选/过滤构建一律计入计时。
+3. 聚合器本身未优化：`grid_aggregate` 内 per-cell Python 循环（`inverse == idx`，O(cells×n)）是单查询 37ms 的主要成本——这正是"优化聚合效率"该拿下的点。修法：`np.bincount` + `np.add.at` 向量化分组。
+   验收：grid 应显著快于 full_scan（数量级改善）；若实测达不到需在 docs/02 诚实解释，**禁止给 grid 喂更少数据制造优势**。
+4. batch_build 的 `greedy_batches_grid` 名为 grid 实为全距离暴力（对全部未分配点算距离，O(n²)），与 §4.4"网格候选+距离排序"不符。修法：实现真·网格候选版并如实命名，基准改三方对比（暴力 / 网格候选 / KDTree 候选）。
+   批次正确性口径改为**不变量断言**：全部点恰被分配一次、每批 ≤ 容量、成员距 seed ≤ 半径（Haversine 复算）；另报告批次数作为质量指标（三种算法不必逐位相同——贪心对候选集敏感，写进文档是加分项）。
+   顺带：内层逐点标量 Haversine 调用改一次性向量化（可写进文档作为优化点）。
+5. `peak_memory_mb` 三行同值（进程级 `ru_maxrss`，非算法级）→ 误导。修法：tracemalloc 逐算法测量，或改名 `process_peak_mb` 并注明口径。
+6. `explain.txt` 证据太薄：rows=1（dev 库近空表）+ FORCE INDEX 掩盖优化器选择。修法：P3 导入 10w 后重跑（不加 FORCE，附 IGNORE INDEX 对照），docs/02 说明 FORCE 动机（低基数统计下优化器可能误判）。
+7. 补 `backend/tests/test_aggregation.py`：合批不变量单测（容量/半径/唯一分配/不跨城市）+ 聚合结果与暴力基线一致性——这是"你怎么证明批次合法"的面试证据。
+8. docs/02 补充口径：批次半径语义 = 成员距 **seed** ≤3000m（非两两、非质心）；n=99304 的构成；batch 工作负载 2000 样本的生产解释（按城市按日的批次工作集量级）。
+9. payload 工作负载的 `p50_ms=0.001` 是手写占位——要么实测 JSON 序列化耗时（1.5MB vs 3KB 本身有意义），要么置 null。§6 禁止手写数字，不留把柄。
+
+建议：下一个会话开头先做本修复（1–3 必做，4–9 顺手），再进 P3；修复后 docs/02 结论段按新数据重写。
