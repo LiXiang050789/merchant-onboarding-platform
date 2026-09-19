@@ -1,0 +1,6 @@
+EXPLAIN forms filter query
+
+{"id": 1, "select_type": "SIMPLE", "table": "forms", "partitions": null, "type": "index", "possible_keys": "ix_forms_tenant_status_type_city_lng_lat", "key": "ix_forms_tenant_status_type_city_lng_lat", "key_len": "246", "ref": null, "rows": 1, "filtered": 100.0, "Extra": "Using where; Using index"}
+
+expected_index=ix_forms_tenant_status_type_city_lng_lat
+table=forms

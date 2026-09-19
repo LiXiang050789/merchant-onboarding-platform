@@ -1,0 +1,86 @@
+[
+  {
+    "workload": "render_aggregation",
+    "algorithm": "full_scan",
+    "n": 99304,
+    "p50_ms": 37.144,
+    "p95_ms": 60.009,
+    "total_ms": 195.759,
+    "payload_bytes": 25149,
+    "features_count": 259,
+    "peak_memory_mb": 224.67,
+    "correctness_passed": true
+  },
+  {
+    "workload": "render_aggregation",
+    "algorithm": "grid",
+    "n": 99304,
+    "p50_ms": 37.556,
+    "p95_ms": 56.484,
+    "total_ms": 199.451,
+    "payload_bytes": 24837,
+    "features_count": 257,
+    "peak_memory_mb": 224.67,
+    "correctness_passed": true
+  },
+  {
+    "workload": "render_aggregation",
+    "algorithm": "cKDTree",
+    "n": 99304,
+    "p50_ms": 25.458,
+    "p95_ms": 39.433,
+    "total_ms": 130.492,
+    "payload_bytes": 24837,
+    "features_count": 257,
+    "peak_memory_mb": 224.67,
+    "correctness_passed": true
+  },
+  {
+    "workload": "batch_build",
+    "algorithm": "grid_greedy",
+    "n": 2000,
+    "p50_ms": 199.181,
+    "p95_ms": 199.181,
+    "total_ms": 199.181,
+    "payload_bytes": 0,
+    "features_count": 58,
+    "peak_memory_mb": 224.67,
+    "correctness_passed": true
+  },
+  {
+    "workload": "batch_build",
+    "algorithm": "cKDTree_greedy",
+    "n": 2000,
+    "p50_ms": 57.206,
+    "p95_ms": 57.206,
+    "total_ms": 57.206,
+    "payload_bytes": 0,
+    "features_count": 58,
+    "peak_memory_mb": 224.67,
+    "correctness_passed": true
+  },
+  {
+    "workload": "payload",
+    "algorithm": "raw_points",
+    "n": 99304,
+    "p50_ms": 0.001,
+    "p95_ms": 0.001,
+    "total_ms": 0.001,
+    "payload_bytes": 1566023,
+    "features_count": 25351,
+    "peak_memory_mb": 224.67,
+    "correctness_passed": true
+  },
+  {
+    "workload": "payload",
+    "algorithm": "clustered",
+    "n": 99304,
+    "p50_ms": 0.001,
+    "p95_ms": 0.001,
+    "total_ms": 0.001,
+    "payload_bytes": 3324,
+    "features_count": 34,
+    "peak_memory_mb": 224.67,
+    "correctness_passed": true
+  }
+]
