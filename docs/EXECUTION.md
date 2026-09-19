@@ -85,3 +85,34 @@
 9. payload 工作负载的 `p50_ms=0.001` 是手写占位——要么实测 JSON 序列化耗时（1.5MB vs 3KB 本身有意义），要么置 null。§6 禁止手写数字，不留把柄。
 
 建议：下一个会话开头先做本修复（1–3 必做，4–9 顺手），再进 P3；修复后 docs/02 结论段按新数据重写。
+
+### P2 修复抽查（2026-09-19）— PASS（9 项逐项核销）
+
+核销（对照上文 9 项）：
+1 ✓ 三算法已真独立：full_scan（全量 mask+向量化聚合）/ grid（`GridIndex` 预建索引，仅 O(候选)）/ cKDTree（`KDTreeIndex`）；三者同 filter；正确性断言升级为 cluster_id→(count, centroid) 全量签名一致。
+2 ✓ 计时已公平：三个 lambda 都含各自的候选/过滤构建（kd_mask 不再预计算在外）。
+3 ✓ 聚合器向量化：`aggregate_cells` 用 bincount + 加权和，per-cell Python 循环只剩"组 dict"的 O(格数)。
+4 ✓ 批次三方对比 + 如实命名（`greedy_batches_bruteforce` / `greedy_batches_grid` 真网格候选 ±2 格 / `greedy_batches_kdtree`）；新增 `validate_batches` 不变量校验（唯一分配 / ≤容量 / 距 seed ≤半径 Haversine）；内层 Haversine 已向量化。
+5 ✓ 内存改 tracemalloc 逐算法测量（各行数值已分化、可信）。
+6 ✓（部分）EXPLAIN 增加 optimizer_choice vs FORCE INDEX 对照 + 空表免责说明；10w 量级版按 docs/02 承诺留给导入数据后补（见 P3 备注 1）。
+7 ✓ `test_aggregation.py` 存在（三实现聚合一致性 + 批次不变量）；覆盖面比要求薄一点（bruteforce/kdtree 的不变量未直接测），可接受。
+8 ✓ docs/02 补了口径段：n=99304 构成、批次半径=距 seed 语义、小样本上网格候选可能更慢的诚实说明。
+9 ✓ payload 负载改为真实 JSON 序列化计时（1.56MB/626ms vs 3.3KB/35.6ms），features 由数据推导而非手写。
+
+修复后数据（我为核对公平性复跑过，可复现）：render 全扫 33.6ms / grid 28.1ms / cKDTree 54.7ms；batch 2000 条：暴力 61.8ms / 网格候选 117.6ms / cKDTree 66.8ms；payload 626ms→35.6ms（471×）。
+
+【必做·文档】docs/02 算法对比表与实测矛盾：表中 cKDTree 写"查询候选更快"，实测它最慢（54.7ms，因候选 mask 需 O(n) 重建）；grid 28.1 vs 全扫 33.6 的 16% 差距也未解读。补一段"实测解读"：城市级视野候选率高→索引收益有限；grid 是端到端 O(候选) 且零依赖；主收益在 payload 471× 与 Redis 缓存；网格索引优势场景是小 bbox/高 zoom。
+
+可选增强（不阻塞）：① 批次规模探针（暴力 O(n²) 在单城 2.5 万量级的实测/外推数字——"为什么不做全距离暴力"的答辩弹药）；② `np.unique(axis=0)` 换一维复合整数键（潜在 ~2×，也是好谈资）。
+
+### P3 抽查（2026-09-19）— PASS
+
+- DoD 复跑：全套 18 passed；`p3.xml` = 3/0/0；OpenAPI 已含 `/api/v1/stats/success-rate`。
+- 口径对齐 §4.5（逐条核实）：按 `received_at` 归集；10 分钟迟到容忍有**边界用例**（k_late 计入、k_late_drop 丢弃）；`(tenant_id, idempotency_key)` 去重取窗口内首次 attempt；三口径分子 = 去重分母 ∩ 对应事件集合（无 attempt 的 success 事件 k5 被正确排除）；跨租户隔离有效。
+- 缓存：key `success_rate:v1:{tenant}:{from}..{to}:all`、TTL 30s、Redis 故障 fail-open 回退实时计算（有 try 保护）；roundtrip + cache_hit 测试通过。
+- 测试设计质量高：造数覆盖重试去重 / 失败后重试成功 / 校验失败 / 窗口外旧事件 / 迟到边界；断言与"由事件表重算的期望"对拍并留有绝对数锚点（端到端分子=2，我已手算复核）。
+
+备注（转 P4）：
+1. **`load_seed.py` 必须归入 P4 开头**（否则 P4 管线无数据可消费、P5 地图/统计页全为 0、10w 版 EXPLAIN 无法补）。要求：导入 99.3k 有效表单到 MySQL；按 §4.6 口径生成事件历史（published 表单 → business_published 等，使三口径数值有意义）；四类异常样本显式分类（越界/缺必填/unknown → validation_failed 路径；重复幂等键 → 去重证据）；产出 evidence（各计数 + 三口径实测值）。导入后**立即补跑 10w 版 EXPLAIN**（docs/02 已承诺）并更新 explain.txt。
+2. stats 接口 filters 未实现（§4.2 冻结含 filters）：二选一——P4+ 补实现（可经 form_id 关联 forms 维度），或在 docs/03 显式写明当前范围与扩展路径；不留模糊。
+3. 次要：Redis 每次调用新建连接（可改共享连接池）；缓存测试 key 在多次 pytest 运行间残留（建议 fixture 清理，当前不影响断言）；批次"不跨城市"由调用方保证——P4 的批次服务必须按 city 分组，且补对应测试。
