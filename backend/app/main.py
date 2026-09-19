@@ -17,8 +17,9 @@ from .db import get_session
 from .dependencies import current_user
 from .models import FormStatus, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
-from .schemas import FormCreate, FormListResponse, FormOut, LoginRequest, RefreshRequest, StatusPatch, TokenResponse
+from .schemas import FormCreate, FormListResponse, FormOut, LoginRequest, RefreshRequest, StatusPatch, SuccessRateResponse, TokenResponse
 from .security import create_access_token, create_refresh_token, decode_token, verify_password
+from .stats import compute_success_rate, default_window
 from .state_machine import can_transition
 
 
@@ -222,3 +223,21 @@ def actor_can_transition(actor: User, city_code: str, previous: FormStatus, targ
             (FormStatus.failed, FormStatus.processing),
         }
     return False
+
+
+@app.get("/api/v1/stats/success-rate", response_model=SuccessRateResponse)
+async def success_rate(
+    from_time: datetime | None = Query(None, alias="from"),
+    to_time: datetime | None = Query(None, alias="to"),
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    if from_time and to_time:
+        start, end = from_time.replace(tzinfo=None), to_time.replace(tzinfo=None)
+    else:
+        start, end, _ = default_window()
+    if start >= end:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail={"code": "invalid_window"})
+    payload = await compute_success_rate(session, actor.tenant_id, start=start, end=end)
+    payload.pop("cache_hit", None)
+    return payload

@@ -352,6 +352,75 @@
           }
         }
       }
+    },
+    "/api/v1/stats/success-rate": {
+      "get": {
+        "summary": "Success Rate",
+        "operationId": "success_rate_api_v1_stats_success_rate_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessRateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -600,6 +669,59 @@
           "target_status"
         ],
         "title": "StatusPatch"
+      },
+      "SuccessRateMetric": {
+        "properties": {
+          "numerator": {
+            "type": "integer",
+            "title": "Numerator"
+          },
+          "denominator": {
+            "type": "integer",
+            "title": "Denominator"
+          },
+          "rate": {
+            "type": "number",
+            "title": "Rate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "numerator",
+          "denominator",
+          "rate"
+        ],
+        "title": "SuccessRateMetric"
+      },
+      "SuccessRateResponse": {
+        "properties": {
+          "window": {
+            "type": "string",
+            "title": "Window"
+          },
+          "submit_success_rate": {
+            "$ref": "#/components/schemas/SuccessRateMetric"
+          },
+          "db_success_rate": {
+            "$ref": "#/components/schemas/SuccessRateMetric"
+          },
+          "end_to_end_success_rate": {
+            "$ref": "#/components/schemas/SuccessRateMetric"
+          },
+          "deduped_attempts": {
+            "type": "integer",
+            "title": "Deduped Attempts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "window",
+          "submit_success_rate",
+          "db_success_rate",
+          "end_to_end_success_rate",
+          "deduped_attempts"
+        ],
+        "title": "SuccessRateResponse"
       },
       "TokenResponse": {
         "properties": {

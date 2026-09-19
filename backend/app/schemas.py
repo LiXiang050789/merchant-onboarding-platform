@@ -91,6 +91,20 @@ class StatusPatch(BaseModel):
     target_status: FormStatus
 
 
+class SuccessRateMetric(BaseModel):
+    numerator: int
+    denominator: int
+    rate: float
+
+
+class SuccessRateResponse(BaseModel):
+    window: str
+    submit_success_rate: SuccessRateMetric
+    db_success_rate: SuccessRateMetric
+    end_to_end_success_rate: SuccessRateMetric
+    deduped_attempts: int
+
+
 class ErrorResponse(BaseModel):
     code: str
     message: str
