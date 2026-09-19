@@ -169,3 +169,24 @@
 - `realtime.py` 是**进程内内存实现**（deque + 订阅者），非 §4.1 冻结的 Redis PubSub `ws:events:{tenant}`——单进程 demo 可用；二选一：文档注明"单进程实现，Redis PubSub 为多实例扩展路径"，或实现 PubSub。
 - docs 页当前为静态占位（P6 接入真 CRUD 后更新）。
 - 登录页凭据硬编码在 auth-store 默认值——README 写明演示用途与生产清理提示。
+
+### P5 修复 + P6 前半抽查（2026-09-19）— PASS（视觉 / DB / 测试三线验证）
+
+**P5 复核（4 项全部关闭）**：
+1. 地图修复 ✓：globals.css 改 `.map-canvas .maplibregl-map` 提特异性；**重拍 map.png 视觉确认 13+ 个簇气泡已渲染**、MapLibre attribution 在位。E2E 新增断言：容器 clientHeight>300、首个 marker 可见、marker 数==features 数（初载与筛选后各一次）——"地图没画出来也能过"的盲区已堵上。
+2. `filter_refresh_ms` 真实测量 ✓（832ms，waitForResponse + features 刷新闭环）；`golden_path_ms` 单列 ✓。
+3. P4 遗留 4 项 ✓（DB 直查）：validated 工作集 1500（跨 20 租户×5 城市×4 类型，load_summary 记录分布明细）；事件时间轴已平移（09-05 09:54 ~ 09-19 09:53，anchor 记录 shift_seconds=381277）；批次按 `(tenant_id, city_code)` 分组（batch_pipeline.py:91）；demo 账号 admin/operator-shanghai 建成、凭据入 load_summary，登录页默认改 admin（UI 可直接驱动批次）。
+4. `PLAYWRIGHT_BASE_URL` 参数化 ✓；stats E2E 断言改为数值>0 ✓（能抓住"窗口全 0"类问题）。
+
+**P6 文档域抽查（已完成部分）**：
+- `test_docs.py` 4 条与 §3.8/§4.2 对齐：CRUD+租户隔离（404 不泄露）、If-Match 乐观锁（**Mongo 原子 CAS**：find_one_and_update 带 current_version 条件，被占先返回 409 version_conflict——优于读后写）、软删（status=deleted、列表/详情不可见、落库证据）、回滚（v1→v3、历史 [1,2,3] 完整、记录 rollback_from_version，不覆盖历史）。
+- 检索：jieba 预分词 tokens 数组 + multikey 索引 + `$all`，中文检索按 00c 设计落地；索引与 §4.1 一致。
+- OpenAPI 端点与 §4.2 一致（POST/GET `/docs`、GET/PATCH/DELETE `/docs/{id}`、POST rollback）；前端 `/docs` 接真 API（E2E 经 UI 建文档）✓；docs/04 成文 ✓。
+- 账本卫生恢复：P6 行如实标注"进行中"与剩余项 ✓。
+
+**遗留（不阻断，转 P7 或后续）**：
+1. **perf.json 的 FCP=6160ms / golden_path=41901ms 属 dev 模式冷启动数字**（含 Next 路由编译），放进性能报告会被追问。修法：P7 以生产构建（build + `next start`）重测一遍并标注测量环境。
+2. `docs_store.update/rollback`：先 `$inc` 版本号、后插 version 记录——插入失败会留下"版本号跳变但历史缺失"的不一致（create 有补偿，update/rollback 无）。可补补偿或注明已知限制。
+3. 检索 `$all` 为 AND 语义（精确优先）——docs/04 可补一句召回取舍。
+
+**剩余 P6 加分项（按 v3 砍单顺序）**：Spark 同构 → RAG（限时）→ 报表预测（可选）。之后 P7：01/05/09/10 文档、README、演示脚本、quiz、`audit_requirements.py`、覆盖矩阵补齐 file:line。
