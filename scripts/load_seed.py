@@ -7,7 +7,7 @@ import csv
 import json
 import sys
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from sqlalchemy import delete, func, insert, select
@@ -37,10 +37,27 @@ from backend.app.security import hash_password  # noqa: E402
 
 
 VALID_STATUSES = {"draft", "submitted", "validating", "validated", "rejected", "batched", "processing", "published", "failed"}
+DEMO_BATCH_WORKSET_SIZE = 1500
 
 
 def parse_time(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).replace(tzinfo=None)
+
+
+def shift_seed_timeline(rows: list[dict], anchor_end: datetime) -> dict:
+    created_values = [parse_time(row["created_at"]) for row in rows]
+    original_min = min(created_values)
+    original_max = max(created_values)
+    shift = anchor_end - original_max
+    for row, created_at in zip(rows, created_values):
+        row["created_at"] = (created_at + shift).isoformat()
+    return {
+        "original_min": original_min.isoformat(),
+        "original_max": original_max.isoformat(),
+        "shifted_min": (original_min + shift).isoformat(),
+        "shifted_max": anchor_end.isoformat(),
+        "shift_seconds": int(shift.total_seconds()),
+    }
 
 
 def chunked(rows: list[dict], size: int):
@@ -155,6 +172,7 @@ async def bulk_insert(conn, model, rows: list[dict], chunk_size: int = 2000) -> 
 async def main_async(args) -> int:
     csv_path = ROOT / args.csv
     rows = list(csv.DictReader(csv_path.open(newline="", encoding="utf-8")))
+    timeline = shift_seed_timeline(rows, datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0))
     tenants = sorted({row["tenant_id"] for row in rows})
     tenant_rows = [{"id": tenant_id, "name": tenant_id.replace("_", " ").title(), "status": TenantStatus.active.value} for tenant_id in tenants]
     user_rows = [
@@ -168,11 +186,32 @@ async def main_async(args) -> int:
         }
         for idx, tenant_id in enumerate(tenants)
     ]
+    user_rows.extend(
+        [
+            {
+                "id": "demo_admin",
+                "tenant_id": "tenant_01",
+                "email": "admin@example.com",
+                "password_hash": hash_password("seed-pass", salt="seed-admin"),
+                "role": UserRole.admin.value,
+                "region_code": None,
+            },
+            {
+                "id": "demo_operator_shanghai",
+                "tenant_id": "tenant_01",
+                "email": "operator-shanghai@example.com",
+                "password_hash": hash_password("seed-pass", salt="seed-operator-shanghai"),
+                "role": UserRole.operator.value,
+                "region_code": "shanghai",
+            },
+        ]
+    )
 
     seen_keys: set[str] = set()
     reason_counts: Counter[str] = Counter()
     form_rows: list[dict] = []
     event_rows: list[dict] = []
+    validated_workset: Counter[str] = Counter()
     for row in rows:
         reason = classify(row, seen_keys)
         if reason:
@@ -180,12 +219,16 @@ async def main_async(args) -> int:
             event_rows.extend(events_for_row(row, inserted=False, reason=reason))
             continue
         created_at = parse_time(row["created_at"])
+        status = row["status"]
+        if status == "draft" and sum(validated_workset.values()) < DEMO_BATCH_WORKSET_SIZE:
+            status = "validated"
+            validated_workset[f"{row['tenant_id']}:{row['city_code']}:{row['form_type']}"] += 1
         form_rows.append(
             {
                 "id": row["id"],
                 "tenant_id": row["tenant_id"],
                 "form_type": row["form_type"],
-                "status": row["status"],
+                "status": status,
                 "idempotency_key": row["idempotency_key"],
                 "city_code": row["city_code"],
                 "district_code": row["district_code"],
@@ -221,7 +264,15 @@ async def main_async(args) -> int:
         "submission_events": total_events,
         "skipped_rows": sum(reason_counts.values()),
         "skip_reasons": dict(reason_counts),
+        "validated_workset_rows": sum(validated_workset.values()),
+        "validated_workset_distribution": dict(sorted(validated_workset.items())),
+        "time_anchor": timeline,
         "tenants": len(tenants),
+        "demo_accounts": {
+            "merchant": "tenant_01@example.com / seed-pass",
+            "admin": "admin@example.com / seed-pass",
+            "operator_shanghai": "operator-shanghai@example.com / seed-pass",
+        },
         "note": "duplicate_idempotency_key is classified globally in the synthetic seed to make retry/dedup evidence explicit.",
     }
     out = ROOT / args.out

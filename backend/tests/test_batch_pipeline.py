@@ -30,7 +30,13 @@ REQUIRED_PAYLOAD = {
 }
 
 
-def make_form(idx: int, form_type: FormType, city: str = "shanghai", payload_extra: dict | None = None) -> Form:
+def make_form(
+    idx: int,
+    form_type: FormType,
+    city: str = "shanghai",
+    payload_extra: dict | None = None,
+    tenant_id: str = "tenant_a",
+) -> Form:
     lng_lat = {
         "shanghai": (121.4737 + idx * 0.0001, 31.2304 + idx * 0.0001),
         "beijing": (116.4074 + idx * 0.0001, 39.9042 + idx * 0.0001),
@@ -41,7 +47,7 @@ def make_form(idx: int, form_type: FormType, city: str = "shanghai", payload_ext
     now = datetime(2026, 9, 19, 8, idx, 0)
     return Form(
         id=f"form_batch_{idx:03d}",
-        tenant_id="tenant_a",
+        tenant_id=tenant_id,
         form_type=form_type,
         status=FormStatus.validated,
         idempotency_key=f"batch_idem_{idx:03d}",
@@ -87,6 +93,27 @@ async def test_build_batches_groups_by_city_and_marks_forms_batched(client, sess
     assert len(batch_items) == 3
     forms = (await session.execute(select(Form))).scalars().all()
     assert {item.status for item in forms} == {FormStatus.batched}
+
+
+async def test_admin_build_batches_does_not_mix_tenants(client, session):
+    session.add_all(
+        [
+            make_form(4, FormType.merchant_info, "shanghai", tenant_id="tenant_a"),
+            make_form(5, FormType.property, "shanghai", tenant_id="tenant_b"),
+        ]
+    )
+    await session.commit()
+
+    response = await client.post(
+        "/api/v1/batches/build",
+        json={"city": "shanghai", "capacity": 50, "radius_m": 3000},
+        headers=await admin_headers(client),
+    )
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["total_forms"] == 2
+    assert {item["tenant_id"] for item in body["batches"]} == {"tenant_a", "tenant_b"}
 
 
 async def test_run_batch_publishes_four_type_pipeline_and_is_idempotent(client, session):

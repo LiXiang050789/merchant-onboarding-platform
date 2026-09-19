@@ -86,13 +86,13 @@ async def build_batches(
         stmt = stmt.where(Form.form_type == form_type)
     result = await session.execute(stmt.order_by(Form.city_code, Form.id))
     forms = list(result.scalars())
-    by_city: dict[str, list[Form]] = {}
+    by_scope: dict[tuple[str, str], list[Form]] = {}
     for form in forms:
-        by_city.setdefault(form.city_code, []).append(form)
+        by_scope.setdefault((form.tenant_id, form.city_code), []).append(form)
 
     created: list[Batch] = []
     now = datetime.now(UTC).replace(tzinfo=None)
-    for city_code, city_forms in by_city.items():
+    for (tenant_id, city_code), city_forms in by_scope.items():
         points = forms_to_points(city_forms)
         batches = greedy_batches_grid(points, capacity=capacity, radius_m=radius_m)
         for members in batches:
@@ -101,7 +101,7 @@ async def build_batches(
             distances = haversine_meters(points.lng[seed], points.lat[seed], points.lng[member_array], points.lat[member_array])
             batch = Batch(
                 id=f"batch_{uuid4().hex[:19]}",
-                tenant_id=city_forms[0].tenant_id,
+                tenant_id=tenant_id,
                 city_code=city_code,
                 status=BatchStatus.created,
                 center_lng=float(np.mean(points.lng[member_array])),

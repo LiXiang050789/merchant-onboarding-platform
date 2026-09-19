@@ -15,7 +15,7 @@ type AuthState = {
 };
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  email: "tenant_01@example.com",
+  email: "admin@example.com",
   password: "seed-pass",
   status: "anonymous",
   error: null,

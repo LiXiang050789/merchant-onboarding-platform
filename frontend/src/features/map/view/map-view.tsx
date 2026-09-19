@@ -53,6 +53,7 @@ export function MapView() {
           </select>
           <select className="field" value={status} onChange={(event) => setStatus(event.target.value)} aria-label="状态">
             <option value="published">published</option>
+            <option value="validated">validated</option>
             <option value="batched">batched</option>
             <option value="processing">processing</option>
             <option value="failed">failed</option>
