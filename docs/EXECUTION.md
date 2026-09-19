@@ -14,7 +14,7 @@
 |---|---|---|---|---|---|
 | P0 | 已完成 | `make env-check` pass；`make seed N=100000` pass | `artifacts/env/check.json`; `artifacts/data/seed_summary.json`; `artifacts/data/forms_seed.csv` | `6d2751d` | 无 |
 | P1 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_auth.py backend/tests/test_forms.py --junitxml=artifacts/test/p1.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p1.xml`; `artifacts/openapi.json`; `docs/08-需求覆盖矩阵.md` | `c47caf4` | P0 seed 遗留已修复：`4054f46`；README 后续注明 MySQL 3306 冲突 |
-| P2 | 进行中 | 待执行 | 待生成 | 待提交 | 先关闭 P1 抽查遗留 3 项 |
+| P2 | 已完成 | `backend/.venv/bin/python scripts/benchmark_aggregation.py --n 100000 --seed 20260918` pass | `artifacts/bench/aggregation.json`; `artifacts/bench/explain.txt`; `docs/02-地理聚合与性能优化.md` | `5cf8343` | P1 抽查遗留 3 项已关闭：`2f37022` |
 | P3 | 未开始 | - | - | - | - |
 | P4 | 未开始 | - | - | - | - |
 | P5 | 未开始 | - | - | - | - |
