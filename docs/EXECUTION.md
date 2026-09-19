@@ -4,6 +4,7 @@
 
 ## 会话记录
 
+- 2026-09-19，本次会话目标：P3 统计域（先确认 P2 抽查修复已提交；再实现 6 类事件三口径统计、Redis 窗口缓存、成功率 API、测试证据与覆盖矩阵）。
 - 2026-09-19，本次会话目标：P2 聚合域（先关闭 P1 抽查遗留：refresh、状态流转触发者、operator 区域测试；再实现网格渲染聚合、批次贪心聚合、基准脚本、EXPLAIN 与 `docs/02`）。
 - 2026-09-19，本次会话目标：P1 权限+表单域（RBAC/tenant 隔离、统一 forms 模型、4 类 schema、状态机、多维过滤器、埋点中间件、统一异常、审计事件、OpenAPI 导出与需求覆盖矩阵骨架）。
 - 2026-09-18 23:41，本次会话目标：P0 脚手架（compose、Makefile、环境体检、10w 合成数据生成器、P0 证据落盘与 commit）。
@@ -14,8 +15,8 @@
 |---|---|---|---|---|---|
 | P0 | 已完成 | `make env-check` pass；`make seed N=100000` pass | `artifacts/env/check.json`; `artifacts/data/seed_summary.json`; `artifacts/data/forms_seed.csv` | `6d2751d` | 无 |
 | P1 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_auth.py backend/tests/test_forms.py --junitxml=artifacts/test/p1.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p1.xml`; `artifacts/openapi.json`; `docs/08-需求覆盖矩阵.md` | `c47caf4` | P0 seed 遗留已修复：`4054f46`；README 后续注明 MySQL 3306 冲突 |
-| P2 | 已完成 | `backend/.venv/bin/python scripts/benchmark_aggregation.py --n 100000 --seed 20260918` pass | `artifacts/bench/aggregation.json`; `artifacts/bench/explain.txt`; `docs/02-地理聚合与性能优化.md` | `5cf8343` | P1 抽查遗留 3 项已关闭：`2f37022` |
-| P3 | 未开始 | - | - | - | - |
+| P2 | 已完成 | `backend/.venv/bin/python scripts/benchmark_aggregation.py --n 100000 --seed 20260918` pass | `artifacts/bench/aggregation.json`; `artifacts/bench/explain.txt`; `docs/02-地理聚合与性能优化.md` | `5cf8343` | P1 抽查遗留 3 项已关闭：`2f37022`；P2 抽查修复已关闭：`3c474c6` |
+| P3 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_success_rate.py --junitxml=artifacts/test/p3.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p3.xml`; `docs/03-提交成功率统计设计.md`; `artifacts/openapi.json`; `docs/08-需求覆盖矩阵.md` | `6ec34e5` | 无 |
 | P4 | 未开始 | - | - | - | - |
 | P5 | 未开始 | - | - | - | - |
 | P6 | 未开始 | - | - | - | - |
