@@ -5,19 +5,22 @@ import time
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from jwt import InvalidTokenError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .batch_pipeline import build_batches, get_batch_for_actor, list_batches, run_batch
+from .cluster_service import bbox_tuple, cluster_geojson
 from .config import settings
 from .db import get_session
 from .dependencies import current_user
 from .models import FormStatus, FormType, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
+from .realtime import event_to_dict, events_since, publish_event, subscribe, unsubscribe
 from .schemas import (
     BatchBuildRequest,
     BatchBuildResponse,
@@ -40,6 +43,14 @@ from .state_machine import can_transition
 
 logger = logging.getLogger("merchant.telemetry")
 app = FastAPI(title="Merchant Onboarding Platform", version="0.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:3000", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["ETag", "X-Cache", "X-Trace-Id"],
+)
 
 
 @app.middleware("http")
@@ -187,6 +198,8 @@ async def create_form(
             )
         )
     await session.commit()
+    if created:
+        await publish_event(form.tenant_id, "form.status_changed", {"form_id": form.id, "status": form.status.value})
     if not created:
         response.status_code = status.HTTP_200_OK
     return FormOut.model_validate(form, from_attributes=True)
@@ -226,6 +239,7 @@ async def patch_status(
         form.retry_count += 1
     await repo.audit(form, "status_changed", previous, payload.target_status)
     await session.commit()
+    await publish_event(form.tenant_id, "form.status_changed", {"form_id": form.id, "status": form.status.value})
     return FormOut.model_validate(form, from_attributes=True)
 
 
@@ -271,6 +285,41 @@ async def success_rate(
     return payload
 
 
+@app.get("/api/v1/clusters", response_model=None)
+async def clusters(
+    response: Response,
+    bbox: str,
+    zoom: int = Query(..., ge=1, le=20),
+    city: str | None = None,
+    status_filter: FormStatus | None = Query(None, alias="status"),
+    form_type: FormType | None = None,
+    industry: str | None = None,
+    if_none_match: str | None = Header(None, alias="If-None-Match"),
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    try:
+        parsed_bbox = bbox_tuple(bbox)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail={"code": "invalid_bbox", "message": str(exc)})
+    payload, etag, cache_hit = await cluster_geojson(
+        session,
+        actor,
+        bbox=parsed_bbox,
+        zoom=zoom,
+        city=city,
+        status=status_filter,
+        form_type=form_type,
+        industry=industry,
+    )
+    if if_none_match == etag:
+        return Response(status_code=status.HTTP_304_NOT_MODIFIED, headers={"ETag": etag, "Cache-Control": "no-cache"})
+    response.headers["ETag"] = etag
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Cache"] = "HIT" if cache_hit else "MISS"
+    return payload
+
+
 @app.post("/api/v1/batches/build", response_model=BatchBuildResponse)
 async def build_batch_endpoint(
     payload: BatchBuildRequest,
@@ -288,6 +337,8 @@ async def build_batch_endpoint(
         radius_m=payload.radius_m,
     )
     await session.commit()
+    for batch in batches:
+        await publish_event(batch.tenant_id, "batch.status_changed", {"batch_id": batch.id, "status": batch.status.value})
     return BatchBuildResponse(
         batches=[BatchOut.model_validate(item, from_attributes=True) for item in batches],
         total_forms=total_forms,
@@ -323,6 +374,7 @@ async def run_batch_endpoint(
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
     summary = await run_batch(session, batch)
     await session.commit()
+    await publish_event(batch.tenant_id, "batch.status_changed", {"batch_id": batch.id, "status": summary.status.value})
     return BatchRunResponse(
         batch_id=summary.batch_id,
         status=summary.status,
@@ -331,3 +383,34 @@ async def run_batch_endpoint(
         failed=summary.failed,
         checkpoint_stages=summary.checkpoint_stages,
     )
+
+
+@app.get("/api/v1/events")
+async def poll_events(
+    since: int = Query(0, ge=0),
+    actor: User = Depends(current_user),
+) -> dict:
+    return {"events": events_since(actor.tenant_id, since)}
+
+
+@app.websocket("/api/v1/ws")
+async def websocket_endpoint(websocket: WebSocket, token: str) -> None:
+    try:
+        claims = decode_token(token)
+    except InvalidTokenError:
+        await websocket.close(code=4401)
+        return
+    tenant_id = claims.get("tenant_id")
+    if not tenant_id:
+        await websocket.close(code=4401)
+        return
+    await websocket.accept()
+    queue = await subscribe(tenant_id)
+    try:
+        while True:
+            event = await queue.get()
+            await websocket.send_json(event_to_dict(event))
+    except WebSocketDisconnect:
+        pass
+    finally:
+        unsubscribe(tenant_id, queue)
