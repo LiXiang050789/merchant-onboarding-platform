@@ -64,6 +64,18 @@ class PointSet:
             lat=self.lat[mask],
         )
 
+    def subset_indices(self, indices: np.ndarray) -> "PointSet":
+        return PointSet(
+            ids=self.ids[indices],
+            tenant_ids=self.tenant_ids[indices],
+            form_types=self.form_types[indices],
+            statuses=self.statuses[indices],
+            city_codes=self.city_codes[indices],
+            industries=self.industries[indices],
+            lng=self.lng[indices],
+            lat=self.lat[indices],
+        )
+
 
 def grid_size_for_zoom(zoom: int) -> float:
     for max_zoom, size in GRID_SIZES:
@@ -82,19 +94,84 @@ def grid_aggregate(points: PointSet, zoom: int, mask: np.ndarray | None = None) 
     cell_x = np.floor(lng / size).astype(np.int64)
     cell_y = np.floor(lat / size).astype(np.int64)
     cells = np.stack([cell_x, cell_y], axis=1)
+    return aggregate_cells(zoom, lng, lat, cells)
+
+
+def aggregate_cells(zoom: int, lng: np.ndarray, lat: np.ndarray, cells: np.ndarray) -> list[dict]:
     unique, inverse = np.unique(cells, axis=0, return_inverse=True)
+    counts = np.bincount(inverse)
+    lng_sum = np.bincount(inverse, weights=lng)
+    lat_sum = np.bincount(inverse, weights=lat)
     clusters: list[dict] = []
     for idx, (x_cell, y_cell) in enumerate(unique):
-        cluster_mask = inverse == idx
-        count = int(cluster_mask.sum())
+        count = int(counts[idx])
         clusters.append(
             {
                 "cluster_id": f"z{zoom}:{int(x_cell)}:{int(y_cell)}",
                 "count": count,
-                "centroid": [float(lng[cluster_mask].mean()), float(lat[cluster_mask].mean())],
+                "centroid": [float(lng_sum[idx] / count), float(lat_sum[idx] / count)],
             }
         )
     return clusters
+
+
+class GridIndex:
+    def __init__(self, points: PointSet, zoom: int):
+        self.points = points
+        self.zoom = zoom
+        self.size = grid_size_for_zoom(zoom)
+        self.cell_x = np.floor(points.lng / self.size).astype(np.int64)
+        self.cell_y = np.floor(points.lat / self.size).astype(np.int64)
+        self.cells = np.stack([self.cell_x, self.cell_y], axis=1)
+        self.index: dict[tuple[int, int], list[int]] = {}
+        for idx, key in enumerate(zip(self.cell_x, self.cell_y)):
+            self.index.setdefault((int(key[0]), int(key[1])), []).append(idx)
+
+    def bbox_candidates(self, bbox: tuple[float, float, float, float]) -> np.ndarray:
+        west, south, east, north = bbox
+        min_x = math.floor(west / self.size)
+        max_x = math.floor(east / self.size)
+        min_y = math.floor(south / self.size)
+        max_y = math.floor(north / self.size)
+        indices: list[int] = []
+        for x_cell in range(min_x, max_x + 1):
+            for y_cell in range(min_y, max_y + 1):
+                indices.extend(self.index.get((x_cell, y_cell), []))
+        if not indices:
+            return np.array([], dtype=np.int64)
+        return np.array(indices, dtype=np.int64)
+
+    def aggregate(
+        self,
+        *,
+        bbox: tuple[float, float, float, float],
+        city: str | None = None,
+        status: str | None = None,
+        form_type: str | None = None,
+        industry: str | None = None,
+    ) -> list[dict]:
+        candidates = self.bbox_candidates(bbox)
+        if len(candidates) == 0:
+            return []
+        west, south, east, north = bbox
+        mask = (
+            (self.points.lng[candidates] >= west)
+            & (self.points.lng[candidates] <= east)
+            & (self.points.lat[candidates] >= south)
+            & (self.points.lat[candidates] <= north)
+        )
+        if city:
+            mask &= self.points.city_codes[candidates] == city
+        if status:
+            mask &= self.points.statuses[candidates] == status
+        if form_type:
+            mask &= self.points.form_types[candidates] == form_type
+        if industry:
+            mask &= self.points.industries[candidates] == industry
+        if not mask.any():
+            return []
+        selected = candidates[mask]
+        return aggregate_cells(self.zoom, self.points.lng[selected], self.points.lat[selected], self.cells[selected])
 
 
 class KDTreeIndex:
@@ -116,6 +193,24 @@ class KDTreeIndex:
         mask[candidate_idx[keep]] = True
         return mask
 
+    def aggregate(
+        self,
+        *,
+        bbox: tuple[float, float, float, float],
+        zoom: int,
+        city: str | None = None,
+        status: str | None = None,
+        form_type: str | None = None,
+        industry: str | None = None,
+    ) -> list[dict]:
+        mask = self.bbox_candidates(bbox) & self.points.filter_mask(
+            city=city,
+            status=status,
+            form_type=form_type,
+            industry=industry,
+        )
+        return grid_aggregate(self.points, zoom, mask)
+
 
 def equirectangular_meters(lng1: float, lat1: float, lng2: np.ndarray, lat2: np.ndarray) -> np.ndarray:
     avg_lat = np.radians((lat1 + lat2) / 2)
@@ -136,6 +231,42 @@ def haversine_meters(lng1: float, lat1: float, lng2: np.ndarray, lat2: np.ndarra
 
 
 def greedy_batches_grid(points: PointSet, *, capacity: int = 50, radius_m: int = 3000) -> list[list[int]]:
+    cell_size = radius_m / 110_540
+    cell_x = np.floor(points.lng / cell_size).astype(np.int64)
+    cell_y = np.floor(points.lat / cell_size).astype(np.int64)
+    index: dict[tuple[int, int], set[int]] = {}
+    for idx, key in enumerate(zip(cell_x, cell_y)):
+        index.setdefault((int(key[0]), int(key[1])), set()).add(idx)
+    unassigned = set(range(len(points.lng)))
+    batches: list[list[int]] = []
+    while unassigned:
+        seed = min(unassigned)
+        unassigned.remove(seed)
+        candidate_set: set[int] = set()
+        for x_cell in range(int(cell_x[seed]) - 2, int(cell_x[seed]) + 3):
+            for y_cell in range(int(cell_y[seed]) - 2, int(cell_y[seed]) + 3):
+                candidate_set.update(index.get((x_cell, y_cell), set()))
+        candidates = np.array(sorted(candidate_set & unassigned), dtype=np.int64)
+        if len(candidates) == 0:
+            batches.append([seed])
+            continue
+        near = equirectangular_meters(points.lng[seed], points.lat[seed], points.lng[candidates], points.lat[candidates])
+        ordered = candidates[np.argsort(near)]
+        selected = [seed]
+        final_distances = haversine_meters(points.lng[seed], points.lat[seed], points.lng[ordered], points.lat[ordered])
+        for idx, final_distance in zip(ordered, final_distances):
+            if len(selected) >= capacity:
+                break
+            if idx not in unassigned:
+                continue
+            if final_distance <= radius_m:
+                selected.append(int(idx))
+                unassigned.remove(int(idx))
+        batches.append(selected)
+    return batches
+
+
+def greedy_batches_bruteforce(points: PointSet, *, capacity: int = 50, radius_m: int = 3000) -> list[list[int]]:
     unassigned = set(range(len(points.lng)))
     batches: list[list[int]] = []
     while unassigned:
@@ -144,16 +275,14 @@ def greedy_batches_grid(points: PointSet, *, capacity: int = 50, radius_m: int =
         candidates = np.array(sorted(unassigned), dtype=np.int64)
         if len(candidates) == 0:
             batches.append([seed])
-            break
-        near = equirectangular_meters(points.lng[seed], points.lat[seed], points.lng[candidates], points.lat[candidates])
-        ordered = candidates[np.argsort(near)]
+            continue
+        distances = equirectangular_meters(points.lng[seed], points.lat[seed], points.lng[candidates], points.lat[candidates])
+        ordered = candidates[np.argsort(distances)]
+        final_distances = haversine_meters(points.lng[seed], points.lat[seed], points.lng[ordered], points.lat[ordered])
         selected = [seed]
-        for idx in ordered:
+        for idx, final_distance in zip(ordered, final_distances):
             if len(selected) >= capacity:
                 break
-            if idx not in unassigned:
-                continue
-            final_distance = haversine_meters(points.lng[seed], points.lat[seed], np.array([points.lng[idx]]), np.array([points.lat[idx]]))[0]
             if final_distance <= radius_m:
                 selected.append(int(idx))
                 unassigned.remove(int(idx))
@@ -176,10 +305,11 @@ def greedy_batches_kdtree(points: PointSet, *, capacity: int = 50, radius_m: int
         candidate_array = np.array(candidates, dtype=np.int64)
         distances = equirectangular_meters(points.lng[seed], points.lat[seed], points.lng[candidate_array], points.lat[candidate_array])
         selected = [seed]
-        for idx in candidate_array[np.argsort(distances)]:
+        ordered = candidate_array[np.argsort(distances)]
+        final_distances = haversine_meters(points.lng[seed], points.lat[seed], points.lng[ordered], points.lat[ordered])
+        for idx, final_distance in zip(ordered, final_distances):
             if len(selected) >= capacity:
                 break
-            final_distance = haversine_meters(points.lng[seed], points.lat[seed], np.array([points.lng[idx]]), np.array([points.lat[idx]]))[0]
             if final_distance <= radius_m:
                 selected.append(int(idx))
                 unassigned.remove(int(idx))
@@ -189,3 +319,18 @@ def greedy_batches_kdtree(points: PointSet, *, capacity: int = 50, radius_m: int
 
 def clusters_payload_size(clusters: Iterable[dict]) -> int:
     return len(json.dumps(list(clusters), ensure_ascii=False).encode("utf-8"))
+
+
+def validate_batches(points: PointSet, batches: list[list[int]], *, capacity: int = 50, radius_m: int = 3000) -> bool:
+    assigned = [idx for batch in batches for idx in batch]
+    if sorted(assigned) != list(range(len(points.lng))):
+        return False
+    for batch in batches:
+        if not batch or len(batch) > capacity:
+            return False
+        seed = batch[0]
+        members = np.array(batch, dtype=np.int64)
+        distances = haversine_meters(points.lng[seed], points.lat[seed], points.lng[members], points.lat[members])
+        if bool(np.any(distances > radius_m + 1e-6)):
+            return False
+    return True
