@@ -27,6 +27,10 @@ class TokenResponse(BaseModel):
     expires_in: int
 
 
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
 class FormCreate(BaseModel):
     form_type: FormType
     city_code: str = Field(min_length=1, max_length=32)

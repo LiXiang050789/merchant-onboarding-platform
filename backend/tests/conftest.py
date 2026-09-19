@@ -73,6 +73,13 @@ async def seeded_session(session: AsyncSession) -> AsyncSession:
                 role=UserRole.operator,
                 region_code="shanghai",
             ),
+            User(
+                id="admin",
+                tenant_id="tenant_a",
+                email="admin@example.com",
+                password_hash=hash_password("pass-admin", salt="salt-admin"),
+                role=UserRole.admin,
+            ),
         ]
     )
     await session.commit()

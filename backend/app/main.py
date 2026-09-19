@@ -8,6 +8,7 @@ from uuid import uuid4
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from jwt import InvalidTokenError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,8 +17,8 @@ from .db import get_session
 from .dependencies import current_user
 from .models import FormStatus, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
-from .schemas import FormCreate, FormListResponse, FormOut, LoginRequest, StatusPatch, TokenResponse
-from .security import create_access_token, create_refresh_token, verify_password
+from .schemas import FormCreate, FormListResponse, FormOut, LoginRequest, RefreshRequest, StatusPatch, TokenResponse
+from .security import create_access_token, create_refresh_token, decode_token, verify_password
 from .state_machine import can_transition
 
 
@@ -106,6 +107,24 @@ async def login(payload: LoginRequest, session: AsyncSession = Depends(get_sessi
     )
 
 
+@app.post("/api/v1/auth/refresh", response_model=TokenResponse)
+async def refresh(payload: RefreshRequest, session: AsyncSession = Depends(get_session)) -> TokenResponse:
+    try:
+        claims = decode_token(payload.refresh_token)
+    except InvalidTokenError:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail={"code": "unauthorized"})
+    if claims.get("type") != "refresh":
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail={"code": "unauthorized"})
+    user = await session.scalar(select(User).where(User.id == claims["sub"]))
+    if user is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail={"code": "unauthorized"})
+    return TokenResponse(
+        access_token=create_access_token(user.id, user.tenant_id, user.role.value),
+        refresh_token=create_refresh_token(user.id, user.tenant_id, user.role.value),
+        expires_in=settings.access_token_minutes * 60,
+    )
+
+
 @app.get("/api/v1/forms", response_model=FormListResponse)
 async def list_forms(
     city: str | None = None,
@@ -181,6 +200,8 @@ async def patch_status(
     if form is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
     previous = form.status
+    if not actor_can_transition(actor, form.city_code, previous, payload.target_status):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail={"code": "forbidden"})
     if not can_transition(previous, payload.target_status, form.retry_count):
         raise HTTPException(status.HTTP_409_CONFLICT, detail={"code": "illegal_transition"})
     form.status = payload.target_status
@@ -190,3 +211,14 @@ async def patch_status(
     await repo.audit(form, "status_changed", previous, payload.target_status)
     await session.commit()
     return FormOut.model_validate(form, from_attributes=True)
+
+
+def actor_can_transition(actor: User, city_code: str, previous: FormStatus, target: FormStatus) -> bool:
+    if actor.role.value == "admin":
+        return True
+    if actor.role.value == "operator" and actor.region_code == city_code:
+        return (previous, target) in {
+            (FormStatus.validating, FormStatus.rejected),
+            (FormStatus.failed, FormStatus.processing),
+        }
+    return False

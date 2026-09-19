@@ -90,7 +90,7 @@ async def test_rejects_missing_type_specific_payload(client):
     assert response.json()["code"] == "validation_error"
 
 
-async def test_rejects_illegal_state_transition(client):
+async def test_merchant_cannot_drive_illegal_state_transition(client):
     created = await create_form(client)
     headers = await auth_headers(client, idem="unused")
 
@@ -100,11 +100,25 @@ async def test_rejects_illegal_state_transition(client):
         headers=headers,
     )
 
-    assert response.status_code == 409
-    assert response.json()["code"] == "illegal_transition"
+    assert response.status_code == 403
+    assert response.json()["code"] == "forbidden"
 
 
 async def test_allows_legal_state_transition(client):
+    created = await create_form(client)
+    token = await login(client, "admin@example.com", "pass-admin")
+
+    response = await client.patch(
+        f"/api/v1/forms/{created.json()['id']}/status",
+        json={"target_status": "validating"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "validating"
+
+
+async def test_merchant_cannot_drive_legal_state_transition(client):
     created = await create_form(client)
     headers = await auth_headers(client, idem="unused")
 
@@ -114,8 +128,21 @@ async def test_allows_legal_state_transition(client):
         headers=headers,
     )
 
+    assert response.status_code == 403
+    assert response.json()["code"] == "forbidden"
+
+
+async def test_operator_region_scope_lists_only_own_city(client):
+    await create_form(client, idem="idem-sh", city_code="shanghai", industry="restaurant")
+    await create_form(client, idem="idem-bj", city_code="beijing", industry="retail")
+    token = await login(client, "op@example.com", "pass-op")
+
+    response = await client.get("/api/v1/forms", headers={"Authorization": f"Bearer {token}"})
+
     assert response.status_code == 200
-    assert response.json()["status"] == "validating"
+    body = response.json()
+    assert body["total"] == 1
+    assert body["items"][0]["city_code"] == "shanghai"
 
 
 async def test_filter_combination_respects_tenant_scope(client):
