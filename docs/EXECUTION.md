@@ -4,6 +4,7 @@
 
 ## 会话记录
 
+- 2026-09-19，本次会话目标：P5 前端（先补 clusters/WS/events 后端契约；再实现 Next.js 15 MVVM 五页面、TanStack Query/ETag/轮询降级、Playwright E2E 与性能证据）。
 - 2026-09-19，本次会话目标：P4 批处理（先补 P3 抽查遗留的 10w seed 导入与 EXPLAIN 证据；再实现批次构建/运行、4 类管线、幂等/checkpoint/DLQ、测试与 `docs/06`）。
 - 2026-09-19，本次会话目标：P3 统计域（先确认 P2 抽查修复已提交；再实现 6 类事件三口径统计、Redis 窗口缓存、成功率 API、测试证据与覆盖矩阵）。
 - 2026-09-19，本次会话目标：P2 聚合域（先关闭 P1 抽查遗留：refresh、状态流转触发者、operator 区域测试；再实现网格渲染聚合、批次贪心聚合、基准脚本、EXPLAIN 与 `docs/02`）。
@@ -19,7 +20,7 @@
 | P2 | 已完成 | `backend/.venv/bin/python scripts/benchmark_aggregation.py --n 100000 --seed 20260918` pass | `artifacts/bench/aggregation.json`; `artifacts/bench/explain.txt`; `docs/02-地理聚合与性能优化.md` | `5cf8343` | P1 抽查遗留 3 项已关闭：`2f37022`；P2 抽查修复已关闭：`3c474c6` |
 | P3 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_success_rate.py --junitxml=artifacts/test/p3.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p3.xml`; `docs/03-提交成功率统计设计.md`; `artifacts/openapi.json`; `docs/08-需求覆盖矩阵.md` | `6ec34e5` | 无 |
 | P4 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p4.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/load_seed.py --reset` pass | `artifacts/test/p4.xml`; `artifacts/test/backend_all.xml`; `artifacts/data/load_summary.json`; `docs/06-批处理流程设计.md` | `eb0b825` | P3 抽查遗留已关闭：seed 导入 + 10w EXPLAIN `41e14a7`；stats filters 已补入 `eb0b825` |
-| P5 | 未开始 | - | - | - | - |
+| P5 | 已完成 | `cd frontend && npm run build` pass；`cd frontend && npm run test:e2e` pass；`backend/.venv/bin/pytest backend/tests/test_frontend_contract.py --junitxml=artifacts/test/p5_backend.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass | `artifacts/playwright/map.png`; `artifacts/frontend/perf.json`; `artifacts/test/p5_backend.xml`; `artifacts/test/backend_all.xml`; `docs/07-前端性能与缓存报告.md` | `8bdb7a7` | 无 |
 | P6 | 未开始 | - | - | - | - |
 | P7 | 未开始 | - | - | - | - |
 
