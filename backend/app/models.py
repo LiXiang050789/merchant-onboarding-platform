@@ -48,6 +48,13 @@ class SubmissionEventType(StrEnum):
     business_published = "business_published"
 
 
+class BatchStatus(StrEnum):
+    created = "created"
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
+
+
 class Tenant(Base):
     __tablename__ = "tenants"
 
@@ -124,3 +131,49 @@ class SubmissionEvent(Base):
     occurred_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     received_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     meta: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+
+
+class Batch(Base):
+    __tablename__ = "batches"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(26), index=True, nullable=False)
+    city_code: Mapped[str] = mapped_column(String(32), nullable=False)
+    status: Mapped[BatchStatus] = mapped_column(Enum(BatchStatus), nullable=False)
+    center_lng: Mapped[float] = mapped_column(nullable=False)
+    center_lat: Mapped[float] = mapped_column(nullable=False)
+    capacity: Mapped[int] = mapped_column(nullable=False)
+    item_count: Mapped[int] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+class BatchItem(Base):
+    __tablename__ = "batch_items"
+
+    batch_id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    form_id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    distance_m: Mapped[int] = mapped_column(nullable=False)
+
+
+class BatchCheckpoint(Base):
+    __tablename__ = "batch_checkpoints"
+
+    batch_id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    stage: Mapped[str] = mapped_column(String(64), primary_key=True)
+    last_form_id: Mapped[str | None] = mapped_column(String(26), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+class DLQItem(Base):
+    __tablename__ = "dlq_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    tenant_id: Mapped[str] = mapped_column(String(26), nullable=False)
+    form_id: Mapped[str] = mapped_column(String(26), nullable=False)
+    stage: Mapped[str] = mapped_column(String(64), nullable=False)
+    error_code: Mapped[str] = mapped_column(String(64), nullable=False)
+    error_message: Mapped[str] = mapped_column(String(255), nullable=False)
+    retry_count: Mapped[int] = mapped_column(nullable=False, default=0)
+    next_retry_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)

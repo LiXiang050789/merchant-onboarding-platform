@@ -214,7 +214,7 @@ async def write_explain(path: Path) -> None:
             lines.append("")
         lines.append("")
         lines.append(f"expected_index=ix_forms_tenant_status_type_city_lng_lat")
-        lines.append("note=dev table may be nearly empty, so optimizer_choice can differ; forced_expected_index proves the frozen index is usable.")
+        lines.append("note=after scripts/load_seed.py, optimizer_choice should hit the frozen composite index on 10w-scale dev data; forced_expected_index is kept as a control.")
         lines.append(f"table={Form.__tablename__}")
         path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     await engine.dispose()

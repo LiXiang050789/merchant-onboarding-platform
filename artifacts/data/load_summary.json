@@ -1,0 +1,15 @@
+{
+  "source": "artifacts/data/forms_seed.csv",
+  "input_rows": 100000,
+  "inserted_forms": 97354,
+  "submission_events": 383040,
+  "skipped_rows": 2646,
+  "skip_reasons": {
+    "missing_required": 994,
+    "illegal_status": 196,
+    "invalid_coordinates": 500,
+    "duplicate_idempotency_key": 956
+  },
+  "tenants": 20,
+  "note": "duplicate_idempotency_key is classified globally in the synthetic seed to make retry/dedup evidence explicit."
+}
