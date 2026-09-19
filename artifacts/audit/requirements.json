@@ -1,0 +1,245 @@
+{
+  "status": "pass",
+  "requirements": {
+    "R0": {
+      "requirement": "权限和数据要素准确性",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "backend/tests/test_auth.py",
+          "pattern": "test_login_issues_access_and_refresh_tokens",
+          "line": 8,
+          "ok": true
+        },
+        {
+          "path": "backend/tests/test_forms.py",
+          "pattern": "test_tenant_scope_hides_other_tenant_form",
+          "line": 60,
+          "ok": true
+        },
+        {
+          "path": "backend/tests/test_forms.py",
+          "pattern": "test_operator_region_scope_lists_only_own_city",
+          "line": 135,
+          "ok": true
+        }
+      ]
+    },
+    "R1": {
+      "requirement": "10w+ 地理聚合与查询/渲染优化",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "scripts/benchmark_aggregation.py",
+          "pattern": "render_workload",
+          "line": 99,
+          "ok": true
+        },
+        {
+          "path": "artifacts/bench/aggregation.json",
+          "pattern": "correctness_passed",
+          "line": 12,
+          "ok": true
+        },
+        {
+          "path": "docs/02-地理聚合与性能优化.md",
+          "pattern": "payload",
+          "line": 39,
+          "ok": true
+        }
+      ]
+    },
+    "R2": {
+      "requirement": "前端缓存与网络请求",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "backend/app/cluster_service.py",
+          "pattern": "etag_for",
+          "line": 30,
+          "ok": true
+        },
+        {
+          "path": "frontend/src/features/map/view-model/use-map-view-model.ts",
+          "pattern": "staleTime",
+          "line": 19,
+          "ok": true
+        },
+        {
+          "path": "frontend/tests/e2e/golden.spec.ts",
+          "pattern": "toHaveCount",
+          "line": 24,
+          "ok": true
+        }
+      ]
+    },
+    "R3": {
+      "requirement": "成功率统计代码",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "backend/app/stats.py",
+          "pattern": "compute_success_rate",
+          "line": 98,
+          "ok": true
+        },
+        {
+          "path": "backend/tests/test_success_rate.py",
+          "pattern": "dedupes_retries_late_events",
+          "line": 120,
+          "ok": true
+        },
+        {
+          "path": "docs/03-提交成功率统计设计.md",
+          "pattern": "三种口径",
+          "line": 18,
+          "ok": true
+        }
+      ]
+    },
+    "R4": {
+      "requirement": "知识文档 CRUD 逻辑代码",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "backend/app/docs_store.py",
+          "pattern": "class DocsRepository",
+          "line": 41,
+          "ok": true
+        },
+        {
+          "path": "backend/tests/test_docs.py",
+          "pattern": "test_doc_rollback_creates_new_version_from_history",
+          "line": 97,
+          "ok": true
+        },
+        {
+          "path": "artifacts/test/p6_docs.xml",
+          "pattern": "test_doc_soft_delete_is_invisible",
+          "line": 1,
+          "ok": true
+        }
+      ]
+    },
+    "R5": {
+      "requirement": "跨端适配方案",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "docs/05-跨端适配方案.md",
+          "pattern": "移动端",
+          "line": 11,
+          "ok": true
+        },
+        {
+          "path": "docs/05-跨端适配方案.md",
+          "pattern": "小程序",
+          "line": 20,
+          "ok": true
+        },
+        {
+          "path": "docs/05-跨端适配方案.md",
+          "pattern": "PWA",
+          "line": 38,
+          "ok": true
+        }
+      ]
+    },
+    "R6": {
+      "requirement": "四类表单流程、多维过滤器、埋点、异常处理",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "backend/app/schemas.py",
+          "pattern": "REQUIRED_BY_TYPE",
+          "line": 11,
+          "ok": true
+        },
+        {
+          "path": "backend/app/main.py",
+          "pattern": "trace_and_telemetry",
+          "line": 64,
+          "ok": true
+        },
+        {
+          "path": "backend/tests/test_forms.py",
+          "pattern": "test_filter_combination_respects_tenant_scope",
+          "line": 148,
+          "ok": true
+        }
+      ]
+    },
+    "R7": {
+      "requirement": "批处理流程构建",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "backend/app/batch_pipeline.py",
+          "pattern": "run_batch",
+          "line": 202,
+          "ok": true
+        },
+        {
+          "path": "backend/tests/test_batch_pipeline.py",
+          "pattern": "test_run_batch_writes_dlq_and_retry_can_resume",
+          "line": 155,
+          "ok": true
+        },
+        {
+          "path": "docs/06-批处理流程设计.md",
+          "pattern": "checkpoint",
+          "line": 39,
+          "ok": true
+        }
+      ]
+    },
+    "R8": {
+      "requirement": "WebSocket + RAG 技术栈点名",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "backend/app/main.py",
+          "pattern": "websocket_endpoint",
+          "line": 516,
+          "ok": true
+        },
+        {
+          "path": "scripts/rag_demo.py",
+          "pattern": "call_deepseek",
+          "line": 82,
+          "ok": true
+        },
+        {
+          "path": "artifacts/rag/rag_demo.json",
+          "pattern": "retrieval_only",
+          "line": 3,
+          "ok": true
+        }
+      ]
+    },
+    "JD": {
+      "requirement": "数据分析、轻 ML、会 JS 优先",
+      "ok": true,
+      "evidence": [
+        {
+          "path": "scripts/forecast_reports.py",
+          "pattern": "linear_trend",
+          "line": 74,
+          "ok": true
+        },
+        {
+          "path": "scripts/compare_spark_python.py",
+          "pattern": "spark_compare",
+          "line": 61,
+          "ok": true
+        },
+        {
+          "path": "frontend/src/features/map/view/map-view.tsx",
+          "pattern": "MapView",
+          "line": 7,
+          "ok": true
+        }
+      ]
+    }
+  }
+}
