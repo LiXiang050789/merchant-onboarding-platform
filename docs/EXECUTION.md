@@ -137,3 +137,34 @@
 4. **demo 账号缺失**：load_seed 只建 merchant；build/run 需要 admin/operator → 演示无法驱动批次。修法：补 admin + operator(region_code=shanghai)，README 演示动线写明（本机演示限定）。
 5. 文档小漂移：docs/06 写"后端全集 21 条"实际 22；`force_dlq_stage` 故障注入钩子未说明（补一句，面试被问时有话答）；管线失败为**整批 fail-fast + 重跑续传**语义建议明写。
 6. 次要：stats 带 filters 时 INNER JOIN 会排除 form_id 为空的跳过行事件（无 filters 时包含）——口径差异在 docs/03 一句带过。
+
+### P5 抽查（2026-09-19）— PASS（我已现场修复 dev server；另有 1 项地图阻断 + 3 项必修，P4 遗留 4 项确认未吸收）
+
+独立复核与现场验证：
+- 后端契约：`test_frontend_contract.py` 覆盖 clusters ETag/304 与 events 轮询 ✓；`cluster_service` 的 GeoJSON 结构、Redis key（`clusters:v1:{tenant}:{bbox_hash}:{zoom}:{filter_token}`，TTL 60s）与 §4.7 一致（ETag 额外纳入 row_count，属增强）；后端全集 24 passed。
+- MVVM 目录结构落地（`features/*/{model,view-model,view}`）；view 只渲染、view-model 管状态、model 管 API ✓。
+- **真实浏览器验证**（Playwright 直连运行中的 :3000，非仅看证据文件）：登录 → /map → 27 个 markers 挂载、无 pageerror、无 4xx ✓（健康环境下数据链路与地图初始化是通的）。
+
+【我已现场修复】:3000 前端 dev server 资源全 404：
+- 根因：`next build`（P5 DoD 之一）与运行中的 `next dev` 共用 `.next` 目录——build 覆盖产物后，dev server 仍在按 dev 清单发 HTML，`/_next/static/*` 全部 404 → 页面 JS 完全不加载（登录按钮点了无反应）。E2E 截图是服务器健康时拍的。
+- 处置：已重启 dev server 并验证恢复（登录 → 地图 27 markers → HTTP 200，零报错）。
+- 要求：README/演示脚本写明"build 与 dev 不同时跑同一 `.next`；演示前先重启 dev"（或演示统一用 `next start` 打 prod 包，二选一写死）。
+
+【必须修·P5 阻断】**地图从未显示：容器高度塌陷为 0**：
+- 实测计算样式：`.map-canvas` 620px ✓，但 `.maplibregl-map` **computed position=relative、height=0px** → canvas 与 27 个 marker 全被 `overflow:hidden` 裁掉（marker 实测定位在容器外 y≈600-700）→ 截图地图区永远空白（这就是 map.png 空白的原因，与 headless/WebGL 无关）。
+- 根因：组件内 `import "maplibre-gl/dist/maplibre-gl.css"` 构建后**晚于 globals.css 加载**，其 `.maplibregl-map{position:relative}` 与 globals 的 `.maplibregl-map{position:absolute;inset:0}` 同特异性、先者被覆盖。
+- 修法：globals.css 提特异性 → `.map-canvas .maplibregl-map{position:absolute;inset:0}`；修复后**重拍 map.png**。
+- 连带修 E2E（现 golden path 只断言 canvas 可见 + features>0，**测不出地图没画出来**）：加 `container clientHeight > 300` 断言 + 首个 `.maplibregl-marker` 可见 + marker 数 == features 数，再截图。
+
+【必须修】`filter_refresh_ms` 语义错误：现值为整个 golden path 墙钟（19.2s），名不符实。修法：真实计时一次筛选刷新（切换城市/状态 → features 更新），或改名 `golden_path_ms` 并另测 filter。
+
+【必须修·P4 遗留未吸收】P4 抽查 4 项必做**全部未做**（DB 实测：无 validated 工作集、事件仍是 09-01~09-15、无 admin/operator 账号；load_seed 未改），且 P5 行"遗留：无"与事实不符。请 P6 会话开头务必先做：
+1. validated 工作集（否则批次页演示空跑）
+2. 事件时间轴平移到导入时刻（否则统计页默认 24h 全 0——现状已可见：E2E 的 stats 断言只查文案不含数值正数）
+3. 批次按 `(tenant_id, city_code)` 分组
+4. 补 admin/operator demo 账号 + README 演示凭据（登录页默认 `tenant_01@example.com/seed-pass` 是 merchant，驱动批次需 admin/operator）
+
+其它备注（不阻塞）：
+- `realtime.py` 是**进程内内存实现**（deque + 订阅者），非 §4.1 冻结的 Redis PubSub `ws:events:{tenant}`——单进程 demo 可用；二选一：文档注明"单进程实现，Redis PubSub 为多实例扩展路径"，或实现 PubSub。
+- docs 页当前为静态占位（P6 接入真 CRUD 后更新）。
+- 登录页凭据硬编码在 auth-store 默认值——README 写明演示用途与生产清理提示。
