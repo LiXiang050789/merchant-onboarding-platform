@@ -215,3 +215,11 @@
 - 4 已完成：`.env` loader 已实现，`scripts/rag_demo.py` 真实调用 DeepSeek，`artifacts/rag/rag_demo.json` 为 `mode=deepseek`。
 
 备注：未亲跑 `scripts/demo.sh`（它会 `--reset` 演示库并改动 load_summary 时间锚）——脚本逻辑已审阅（compose → load_seed → smoke → 加分项脚本 → 启动提示），建议用户首次演示前自跑热身。
+
+### RAG 升级抽查（2026-09-19）— PASS
+
+- 独立复核：`artifacts/rag/rag_demo.json` = `mode: deepseek`，真实生成回答（含引用编号 [1][3]），耗时 3156ms，citations 3 条；`config.py` 的 `.env` loader 实现正确（根目录定位、跳过注释/空行、`setdefault` 不覆盖已有环境变量）；`rag_demo.py` 已加异常降级与脱敏错误；README / docs 04/08/09 / quiz 口径已同步；审计脚本更新后复跑通过（commit `20bb109`）。
+- **安全核查（重点）**：入库文件全量扫描无 key 特征（`sk-` 仅命中 npm registry URL 误报）；git 全历史无 key 模式（计数 0）；`.env` 未入库；证据 JSON 无 key ✓。
+- 备注（非阻塞小瑕疵，不急）：
+  1. `.env.example` 的 `MONGO_DSN` 与 `config.py` 实际读取的 `MONGO_URL`/`MONGO_DB` 变量名不一致（当前靠默认值工作，改 .env.example 命名或 config 兼容即可）。
+  2. `load_seed --reset` 不清理 Mongo 集合：E2E/演示创建的文档会累积（本次 RAG 证据的引用 [3] 就是 E2E 建的带时间戳文档）。演示前如需干净可手动清 `knowledge_docs` / `knowledge_doc_versions`。
