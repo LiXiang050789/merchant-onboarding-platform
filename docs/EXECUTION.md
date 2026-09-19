@@ -4,6 +4,7 @@
 
 ## 会话记录
 
+- 2026-09-19，本次会话目标：P6 加分项（按用户指定顺序：Spark 同构 → RAG → 报表预测），随后进入 P7 收尾（架构文档、跨端方案、面试问答手册、README、演示脚本、quiz、完整性审计）。
 - 2026-09-19，本次会话目标：P6 扩展层（先按抽查要求依次清掉 P4 遗留 4 项、地图 CSS + E2E 断言、指标修正；再实现文档域 CRUD/版本/软删/jieba 检索）。
 - 2026-09-19，本次会话目标：P5 前端（先补 clusters/WS/events 后端契约；再实现 Next.js 15 MVVM 五页面、TanStack Query/ETag/轮询降级、Playwright E2E 与性能证据）。
 - 2026-09-19，本次会话目标：P4 批处理（先补 P3 抽查遗留的 10w seed 导入与 EXPLAIN 证据；再实现批次构建/运行、4 类管线、幂等/checkpoint/DLQ、测试与 `docs/06`）。
@@ -22,7 +23,7 @@
 | P3 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_success_rate.py --junitxml=artifacts/test/p3.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p3.xml`; `docs/03-提交成功率统计设计.md`; `artifacts/openapi.json`; `docs/08-需求覆盖矩阵.md` | `6ec34e5` | 无 |
 | P4 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p4.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/load_seed.py --reset` pass | `artifacts/test/p4.xml`; `artifacts/test/backend_all.xml`; `artifacts/data/load_summary.json`; `docs/06-批处理流程设计.md` | `eb0b825` | P3 抽查遗留已关闭：seed 导入 + 10w EXPLAIN `41e14a7`；stats filters 已补入 `eb0b825` |
 | P5 | 已完成 | `cd frontend && npm run build` pass；`cd frontend && npm run test:e2e` pass；`backend/.venv/bin/pytest backend/tests/test_frontend_contract.py --junitxml=artifacts/test/p5_backend.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass | `artifacts/playwright/map.png`; `artifacts/frontend/perf.json`; `artifacts/test/p5_backend.xml`; `artifacts/test/backend_all.xml`; `docs/07-前端性能与缓存报告.md` | `8bdb7a7` | 无 |
-| P6 | 进行中（文档域 CRUD 已完成） | `backend/.venv/bin/pytest backend/tests/test_docs.py --junitxml=artifacts/test/p6_docs.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 npm run test:e2e` pass | `artifacts/test/p6_docs.xml`; `artifacts/test/backend_all.xml`; `artifacts/openapi.json`; `artifacts/frontend/perf.json`; `artifacts/playwright/map.png`; `docs/04-知识文档存储与RAG设计.md` | 本次 P6 文档域提交 | Spark 同构、RAG 真实问答、报表预测未做；按 v3 砍单顺序可后续推进 |
+| P6 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_docs.py --junitxml=artifacts/test/p6_docs.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 npm run test:e2e` pass；`scripts/compare_spark_python.py` pass；`scripts/rag_demo.py` pass；`scripts/forecast_reports.py` pass | `artifacts/test/p6_docs.xml`; `artifacts/test/backend_all.xml`; `artifacts/openapi.json`; `artifacts/frontend/perf.json`; `artifacts/playwright/map.png`; `artifacts/bench/spark_compare.json`; `artifacts/rag/rag_demo.json`; `artifacts/bench/report_forecast.json`; `docs/04-知识文档存储与RAG设计.md` | 待提交 P6 加分项 | RAG 当前因无 `DEEPSEEK_API_KEY` 降级为 retrieval-only，已在证据中标注 |
 | P7 | 未开始 | - | - | - | - |
 
 ## Blocker

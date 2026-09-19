@@ -1,0 +1,23 @@
+{
+  "question": "商户入驻审核时必须校验哪些数据？",
+  "mode": "retrieval_only",
+  "answer": "问题：商户入驻审核时必须校验哪些数据？\n回答：\n1. 证照、地址、经营类目需一致。（引用：入驻审核规则 v1）\n2. 商户房源需要提供房源名称、详细地址和城市坐标。房源批处理前必须处于 validated 状态。（引用：房源资料口径 v1）",
+  "citations": [
+    {
+      "doc_id": "doc_26c6c7f355794c8b8c79a18e",
+      "title": "入驻审核规则",
+      "version": 1,
+      "score": 2,
+      "excerpt": "证照、地址、经营类目需一致。"
+    },
+    {
+      "doc_id": "doc_dfa40428894d467eb46f1ff5",
+      "title": "房源资料口径",
+      "version": 1,
+      "score": 2,
+      "excerpt": "商户房源需要提供房源名称、详细地址和城市坐标。房源批处理前必须处于 validated 状态。"
+    }
+  ],
+  "elapsed_ms": 1389.966,
+  "note": "DEEPSEEK_API_KEY was not present, so the run used retrieval-only mode."
+}

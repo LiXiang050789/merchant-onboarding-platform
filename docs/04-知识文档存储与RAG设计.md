@@ -2,7 +2,13 @@
 
 ## 已实现范围
 
-P6 当前完成知识文档主线：MongoDB 真库 CRUD、乐观锁版本、软删除、历史版本回滚、jieba 预分词检索，以及前端 `/docs` 页接入真实 API。RAG、Spark 同构与报表预测仍按 v3 砍单顺序作为后续加分项。
+P6 当前完成知识文档主线：MongoDB 真库 CRUD、乐观锁版本、软删除、历史版本回滚、jieba 预分词检索，以及前端 `/docs` 页接入真实 API。
+
+加分项也已补齐：
+
+- Spark 同构：`scripts/compare_spark_python.py` 对同一份 10w CSV 做 Python 与 PySpark 对拍。
+- RAG：`scripts/rag_demo.py` 基于 Mongo + jieba tokens 做检索增强问答；当前环境无 `DEEPSEEK_API_KEY`，证据为 retrieval-only。
+- 报表预测：`scripts/forecast_reports.py` 对 `report` 类型表单做城市级 7 天趋势预测。
 
 ## Mongo 集合
 
@@ -57,6 +63,30 @@ P6 当前完成知识文档主线：MongoDB 真库 CRUD、乐观锁版本、软�
 - 软删不可见
 - 回滚生成新版本
 
-## RAG 预留
+## Spark 同构
 
-RAG 不与 CRUD 主线绑定。后续可复用 `tokens` 检索得到候选文档片段，再调用 DeepSeek 生成带引用回答。若 DeepSeek key 或网络不可用，保留检索-only 并在交付文档中标注。
+`scripts/compare_spark_python.py` 复用 `artifacts/data/forms_seed.csv`，按 `load_seed.py` 的导入口径对拍：
+
+- 坐标、状态、必填字段校验
+- 幂等键去重
+- 城市、表单类型、状态、城市×类型维度计数
+
+证据：`artifacts/bench/spark_compare.json`。结果显示 `correctness_passed=true`，Spark 3.5.0 与 Python 结果一致；100k 本地 CSV 下 Python 更快，原因是 Spark JVM 启动与 shuffle 成本占主导。答辩口径：Spark 是规模化路径，不是这个数据量的性能炫技。
+
+## RAG
+
+`scripts/rag_demo.py` 会确保 demo 知识文档存在，使用 jieba tokens 做候选召回，并输出带引用回答：
+
+- 有 `DEEPSEEK_API_KEY`：调用 DeepSeek 生成带引用回答。
+- 无 key：降级为 retrieval-only，仍输出引用片段与模式说明。
+
+当前证据：`artifacts/rag/rag_demo.json`，`mode=retrieval_only`。这符合"key 不入库、无 key 不伪造真实调用"的交付原则。
+
+## 报表预测
+
+`scripts/forecast_reports.py` 读取 10w 合成表单，过滤有效记录与重复幂等键后，对 `form_type=report` 的城市级每日提交量建模：
+
+- 模型：`0.5 * linear_trend + 0.5 * trailing_7day_mean`
+- 输出：未来 7 天预测、holdout MAE/MAPE
+
+证据：`artifacts/bench/report_forecast.json`。这是轻量、可解释的趋势基线，用于回应 JD 中"一点点机器学习/数据分析"；不用于真实业务决策。

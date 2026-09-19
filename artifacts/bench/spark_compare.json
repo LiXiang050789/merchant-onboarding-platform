@@ -1,0 +1,121 @@
+{
+  "source": "artifacts/data/forms_seed.csv",
+  "correctness_passed": true,
+  "mismatches": {},
+  "python": {
+    "engine": "python",
+    "rows": 100000,
+    "valid_rows": 97354,
+    "skip_reasons": {
+      "duplicate_idempotency_key": 956,
+      "illegal_status": 196,
+      "invalid_coordinates": 500,
+      "missing_required": 994
+    },
+    "dimensions": {
+      "city_counts": {
+        "beijing": 24318,
+        "chengdu": 9740,
+        "hangzhou": 14616,
+        "shanghai": 29211,
+        "shenzhen": 19469
+      },
+      "form_type_counts": {
+        "merchant_info": 24028,
+        "product": 24288,
+        "property": 24701,
+        "report": 24337
+      },
+      "status_counts": {
+        "batched": 3901,
+        "draft": 1951,
+        "failed": 1954,
+        "processing": 3894,
+        "published": 82738,
+        "rejected": 2916
+      },
+      "city_form_type_counts": {
+        "beijing|merchant_info": 5886,
+        "beijing|product": 6157,
+        "beijing|property": 6210,
+        "beijing|report": 6065,
+        "chengdu|merchant_info": 2449,
+        "chengdu|product": 2404,
+        "chengdu|property": 2529,
+        "chengdu|report": 2358,
+        "hangzhou|merchant_info": 3682,
+        "hangzhou|product": 3641,
+        "hangzhou|property": 3670,
+        "hangzhou|report": 3623,
+        "shanghai|merchant_info": 7267,
+        "shanghai|product": 7156,
+        "shanghai|property": 7346,
+        "shanghai|report": 7442,
+        "shenzhen|merchant_info": 4744,
+        "shenzhen|product": 4930,
+        "shenzhen|property": 4946,
+        "shenzhen|report": 4849
+      }
+    },
+    "elapsed_ms": 2198.747
+  },
+  "spark": {
+    "engine": "spark",
+    "rows": 100000,
+    "valid_rows": 97354,
+    "skip_reasons": {
+      "duplicate_idempotency_key": 956,
+      "illegal_status": 196,
+      "invalid_coordinates": 500,
+      "missing_required": 994
+    },
+    "dimensions": {
+      "city_counts": {
+        "beijing": 24318,
+        "chengdu": 9740,
+        "hangzhou": 14616,
+        "shanghai": 29211,
+        "shenzhen": 19469
+      },
+      "form_type_counts": {
+        "merchant_info": 24028,
+        "product": 24288,
+        "property": 24701,
+        "report": 24337
+      },
+      "status_counts": {
+        "batched": 3901,
+        "draft": 1951,
+        "failed": 1954,
+        "processing": 3894,
+        "published": 82738,
+        "rejected": 2916
+      },
+      "city_form_type_counts": {
+        "beijing|merchant_info": 5886,
+        "beijing|product": 6157,
+        "beijing|property": 6210,
+        "beijing|report": 6065,
+        "chengdu|merchant_info": 2449,
+        "chengdu|product": 2404,
+        "chengdu|property": 2529,
+        "chengdu|report": 2358,
+        "hangzhou|merchant_info": 3682,
+        "hangzhou|product": 3641,
+        "hangzhou|property": 3670,
+        "hangzhou|report": 3623,
+        "shanghai|merchant_info": 7267,
+        "shanghai|product": 7156,
+        "shanghai|property": 7346,
+        "shanghai|report": 7442,
+        "shenzhen|merchant_info": 4744,
+        "shenzhen|product": 4930,
+        "shenzhen|property": 4946,
+        "shenzhen|report": 4849
+      }
+    },
+    "elapsed_ms": 31842.678,
+    "spark_version": "3.5.0"
+  },
+  "note": "Spark is validated as a scale-out equivalent path; for 100k local CSV, Python is expected to be faster because Spark startup dominates."
+}

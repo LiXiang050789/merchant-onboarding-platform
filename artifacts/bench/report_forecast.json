@@ -1,0 +1,213 @@
+{
+  "source": "artifacts/data/forms_seed.csv",
+  "target": "daily report-form submissions by city",
+  "horizon_days": 7,
+  "cities": {
+    "beijing": {
+      "history_days": 14,
+      "history_total_reports": 6065,
+      "last_observed_date": "2026-09-14",
+      "model": "0.5 * linear_trend + 0.5 * trailing_7day_mean",
+      "backtest": {
+        "holdout_days": 2,
+        "mae": 24.715,
+        "mape_percent": 5.538
+      },
+      "forecast": [
+        {
+          "date": "2026-09-15",
+          "predicted_reports": 427.88
+        },
+        {
+          "date": "2026-09-16",
+          "predicted_reports": 427.46
+        },
+        {
+          "date": "2026-09-17",
+          "predicted_reports": 427.03
+        },
+        {
+          "date": "2026-09-18",
+          "predicted_reports": 426.61
+        },
+        {
+          "date": "2026-09-19",
+          "predicted_reports": 426.19
+        },
+        {
+          "date": "2026-09-20",
+          "predicted_reports": 425.76
+        },
+        {
+          "date": "2026-09-21",
+          "predicted_reports": 425.34
+        }
+      ]
+    },
+    "chengdu": {
+      "history_days": 14,
+      "history_total_reports": 2358,
+      "last_observed_date": "2026-09-14",
+      "model": "0.5 * linear_trend + 0.5 * trailing_7day_mean",
+      "backtest": {
+        "holdout_days": 2,
+        "mae": 3.74,
+        "mape_percent": 2.281
+      },
+      "forecast": [
+        {
+          "date": "2026-09-15",
+          "predicted_reports": 163.26
+        },
+        {
+          "date": "2026-09-16",
+          "predicted_reports": 162.74
+        },
+        {
+          "date": "2026-09-17",
+          "predicted_reports": 162.22
+        },
+        {
+          "date": "2026-09-18",
+          "predicted_reports": 161.7
+        },
+        {
+          "date": "2026-09-19",
+          "predicted_reports": 161.19
+        },
+        {
+          "date": "2026-09-20",
+          "predicted_reports": 160.67
+        },
+        {
+          "date": "2026-09-21",
+          "predicted_reports": 160.15
+        }
+      ]
+    },
+    "hangzhou": {
+      "history_days": 14,
+      "history_total_reports": 3623,
+      "last_observed_date": "2026-09-14",
+      "model": "0.5 * linear_trend + 0.5 * trailing_7day_mean",
+      "backtest": {
+        "holdout_days": 2,
+        "mae": 20.425,
+        "mape_percent": 7.736
+      },
+      "forecast": [
+        {
+          "date": "2026-09-15",
+          "predicted_reports": 246.5
+        },
+        {
+          "date": "2026-09-16",
+          "predicted_reports": 245.36
+        },
+        {
+          "date": "2026-09-17",
+          "predicted_reports": 244.21
+        },
+        {
+          "date": "2026-09-18",
+          "predicted_reports": 243.06
+        },
+        {
+          "date": "2026-09-19",
+          "predicted_reports": 241.91
+        },
+        {
+          "date": "2026-09-20",
+          "predicted_reports": 240.76
+        },
+        {
+          "date": "2026-09-21",
+          "predicted_reports": 239.61
+        }
+      ]
+    },
+    "shanghai": {
+      "history_days": 14,
+      "history_total_reports": 7442,
+      "last_observed_date": "2026-09-14",
+      "model": "0.5 * linear_trend + 0.5 * trailing_7day_mean",
+      "backtest": {
+        "holdout_days": 2,
+        "mae": 12.995,
+        "mape_percent": 2.381
+      },
+      "forecast": [
+        {
+          "date": "2026-09-15",
+          "predicted_reports": 527.58
+        },
+        {
+          "date": "2026-09-16",
+          "predicted_reports": 527.35
+        },
+        {
+          "date": "2026-09-17",
+          "predicted_reports": 527.11
+        },
+        {
+          "date": "2026-09-18",
+          "predicted_reports": 526.88
+        },
+        {
+          "date": "2026-09-19",
+          "predicted_reports": 526.64
+        },
+        {
+          "date": "2026-09-20",
+          "predicted_reports": 526.41
+        },
+        {
+          "date": "2026-09-21",
+          "predicted_reports": 526.17
+        }
+      ]
+    },
+    "shenzhen": {
+      "history_days": 14,
+      "history_total_reports": 4849,
+      "last_observed_date": "2026-09-14",
+      "model": "0.5 * linear_trend + 0.5 * trailing_7day_mean",
+      "backtest": {
+        "holdout_days": 2,
+        "mae": 17.94,
+        "mape_percent": 4.809
+      },
+      "forecast": [
+        {
+          "date": "2026-09-15",
+          "predicted_reports": 358.29
+        },
+        {
+          "date": "2026-09-16",
+          "predicted_reports": 359.41
+        },
+        {
+          "date": "2026-09-17",
+          "predicted_reports": 360.53
+        },
+        {
+          "date": "2026-09-18",
+          "predicted_reports": 361.66
+        },
+        {
+          "date": "2026-09-19",
+          "predicted_reports": 362.78
+        },
+        {
+          "date": "2026-09-20",
+          "predicted_reports": 363.9
+        },
+        {
+          "date": "2026-09-21",
+          "predicted_reports": 365.02
+        }
+      ]
+    }
+  },
+  "note": "This is a lightweight, explainable trend baseline for the JD's 'a little ML' signal; it is not used for business decisions."
+}
