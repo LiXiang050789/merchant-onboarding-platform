@@ -117,3 +117,22 @@
 1. **`load_seed.py` 必须归入 P4 开头**（否则 P4 管线无数据可消费、P5 地图/统计页全为 0、10w 版 EXPLAIN 无法补）。要求：导入 99.3k 有效表单到 MySQL；按 §4.6 口径生成事件历史（published 表单 → business_published 等，使三口径数值有意义）；四类异常样本显式分类（越界/缺必填/unknown → validation_failed 路径；重复幂等键 → 去重证据）；产出 evidence（各计数 + 三口径实测值）。导入后**立即补跑 10w 版 EXPLAIN**（docs/02 已承诺）并更新 explain.txt。
 2. stats 接口 filters 未实现（§4.2 冻结含 filters）：二选一——P4+ 补实现（可经 form_id 关联 forms 维度），或在 docs/03 显式写明当前范围与扩展路径；不留模糊。
 3. 次要：Redis 每次调用新建连接（可改共享连接池）；缓存测试 key 在多次 pytest 运行间残留（建议 fixture 清理，当前不影响断言）；批次"不跨城市"由调用方保证——P4 的批次服务必须按 city 分组，且补对应测试。
+
+### P4 抽查（2026-09-19）— PASS（2 项演示阻断 + 2 项小修，转 P5 会话开头）
+
+独立复核：
+- DoD 复跑 `pytest backend/tests -q` → **22 passed**；`p4.xml` 3/0/0；`backend_all.xml` 22/0/0。
+- load_seed 直查 MySQL（不信 summary）：97354 表单 / 383040 事件；状态分布 published 82738、batched 3901、processing 3894、rejected 2916、failed 1954、draft 1951；事件类型齐全（attempt 100000、api_success=db_insert=97354、published=82738、api_failed 2948、validation_failed 2646）。跳过分类逐行单因、计数自洽（500+196+994+956=2646，含交叉重叠）。三口径在覆盖窗口内数值合理（约 98% / 98% / 84%）。
+- **10w 级 EXPLAIN 兑现**：优化器自然选中冻结复合索引（type=range、key=ix_forms_tenant_status_type_city_lng_lat、rows=288、Using index），FORCE 组保留作对照 ✓。
+- 批次域：四张表与 §4.1 对齐；build 只消费 validated + tenant/region 作用域 + 按城市分组 + 复用 P2 网格贪心 + 写 batch_items(含距离)；run 幂等（completed 直接返回、不重复写 business_published，有事件数断言）、published 跳过、retry_count<3、DLQ 2^n 退避、逐 stage checkpoint；四类管线映射符合 §4.3。测试覆盖不跨城/四类管线/幂等/DLQ 修复后续跑。
+- stats filters 落地（join forms 施加 city/status/form_type/industry，filter_hash 进缓存 key，符合 §4.1 key 规范）✓。
+
+【演示阻断·必做（P5 会话开头先做）】
+1. **库里 0 条 `validated` 表单**：build 只消费 validated，导入后的分布里没有 → 批次演示空跑。修法：load_seed 增加显式"待批处理工作集"（如把约 1500 条 draft 均匀转 validated，跨城市/跨类型），load_summary 记录；**不改冻结 CSV**。
+2. **事件时间线过旧**：received_at 全在 2026-09-01~09-15，而 §4.2 冻结默认窗口"近 24h" → 统计看板默认查询全 0。修法：load_seed 把时间轴整体平移到"导入时刻为末点"（保持相对分布），load_summary 记录 anchor；README 说明。（benchmark 用 CSV，不受影响。）
+
+【小修·必做（同批处理）】
+3. **跨租户合批**：admin 全局构建只按 city 分组、batch.tenant_id 取首条表单租户 → 产生跨租户批次，其他租户在列表看不到自己的表单所在批次。修法：按 `(tenant_id, city_code)` 分组。
+4. **demo 账号缺失**：load_seed 只建 merchant；build/run 需要 admin/operator → 演示无法驱动批次。修法：补 admin + operator(region_code=shanghai)，README 演示动线写明（本机演示限定）。
+5. 文档小漂移：docs/06 写"后端全集 21 条"实际 22；`force_dlq_stage` 故障注入钩子未说明（补一句，面试被问时有话答）；管线失败为**整批 fail-fast + 重跑续传**语义建议明写。
+6. 次要：stats 带 filters 时 INNER JOIN 会排除 form_id 为空的跳过行事件（无 filters 时包含）——口径差异在 docs/03 一句带过。
