@@ -13,6 +13,8 @@ class Settings:
         "mysql+asyncmy://merchant:merchant_pass@127.0.0.1:3306/merchant",
     )
     redis_url: str = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")
+    mongo_url: str = os.getenv("MONGO_URL", "mongodb://127.0.0.1:27017")
+    mongo_db: str = os.getenv("MONGO_DB", "merchant_docs")
     access_token_minutes: int = 30
     refresh_token_days: int = 7
 

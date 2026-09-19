@@ -57,6 +57,9 @@ test("golden path covers MVVM pages and frontend cache surface", async ({page}) 
 
   await page.goto("/docs");
   await expect(page.getByText("知识文档")).toBeVisible();
+  await page.getByTestId("doc-title").fill("入驻审核规则");
+  await page.getByTestId("doc-content").fill("证照、地址、经营类目需一致。");
+  await page.getByTitle("创建文档").click();
   await expect(page.getByText("入驻审核规则")).toBeVisible();
 
   const perf = {

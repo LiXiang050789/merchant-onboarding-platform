@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
+import asyncio
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -18,6 +19,7 @@ from .cluster_service import bbox_tuple, cluster_geojson
 from .config import settings
 from .db import get_session
 from .dependencies import current_user
+from .docs_store import DocNotFoundError, DocsRepository, DocVersionConflictError, get_docs_repo
 from .models import FormStatus, FormType, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
 from .realtime import event_to_dict, events_since, publish_event, subscribe, unsubscribe
@@ -27,6 +29,11 @@ from .schemas import (
     BatchListResponse,
     BatchOut,
     BatchRunResponse,
+    DocCreate,
+    DocListResponse,
+    DocOut,
+    DocRollbackRequest,
+    DocUpdate,
     FormCreate,
     FormListResponse,
     FormOut,
@@ -254,6 +261,118 @@ def actor_can_transition(actor: User, city_code: str, previous: FormStatus, targ
     return False
 
 
+def parse_doc_version(value: str) -> int:
+    normalized = value.strip().strip('"')
+    if normalized.startswith("W/"):
+        normalized = normalized[2:].strip().strip('"')
+    try:
+        version = int(normalized)
+    except ValueError:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail={"code": "invalid_if_match"})
+    if version < 1:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail={"code": "invalid_if_match"})
+    return version
+
+
+def doc_http_error(exc: Exception) -> HTTPException:
+    if isinstance(exc, DocNotFoundError):
+        return HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
+    if isinstance(exc, DocVersionConflictError):
+        return HTTPException(status.HTTP_409_CONFLICT, detail={"code": "version_conflict"})
+    return HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail={"code": "internal_error"})
+
+
+@app.post("/api/v1/docs", response_model=DocOut, status_code=status.HTTP_201_CREATED)
+async def create_doc(
+    payload: DocCreate,
+    actor: User = Depends(current_user),
+    repo: DocsRepository = Depends(get_docs_repo),
+) -> DocOut:
+    try:
+        doc = repo.create(tenant_id=actor.tenant_id, user_id=actor.id, title=payload.title, content=payload.content)
+    except (DocNotFoundError, DocVersionConflictError) as exc:
+        raise doc_http_error(exc)
+    await publish_event(actor.tenant_id, "doc.updated", {"doc_id": doc["id"], "version": doc["current_version"]})
+    return DocOut.model_validate(doc)
+
+
+@app.get("/api/v1/docs", response_model=DocListResponse)
+async def list_docs(
+    q: str | None = None,
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    actor: User = Depends(current_user),
+    repo: DocsRepository = Depends(get_docs_repo),
+) -> DocListResponse:
+    result = repo.list(tenant_id=actor.tenant_id, query=q, page=page, size=size)
+    return DocListResponse(items=[DocOut.model_validate(item) for item in result.items], total=result.total, page=page, size=size)
+
+
+@app.get("/api/v1/docs/{doc_id}", response_model=DocOut)
+async def get_doc(
+    doc_id: str,
+    actor: User = Depends(current_user),
+    repo: DocsRepository = Depends(get_docs_repo),
+) -> DocOut:
+    try:
+        return DocOut.model_validate(repo.get(tenant_id=actor.tenant_id, doc_id=doc_id))
+    except DocNotFoundError as exc:
+        raise doc_http_error(exc)
+
+
+@app.patch("/api/v1/docs/{doc_id}", response_model=DocOut)
+async def update_doc(
+    doc_id: str,
+    payload: DocUpdate,
+    if_match: str = Header(..., alias="If-Match"),
+    actor: User = Depends(current_user),
+    repo: DocsRepository = Depends(get_docs_repo),
+) -> DocOut:
+    expected_version = parse_doc_version(if_match)
+    try:
+        doc = repo.update(
+            tenant_id=actor.tenant_id,
+            user_id=actor.id,
+            doc_id=doc_id,
+            expected_version=expected_version,
+            title=payload.title,
+            content=payload.content,
+        )
+    except (DocNotFoundError, DocVersionConflictError) as exc:
+        raise doc_http_error(exc)
+    await publish_event(actor.tenant_id, "doc.updated", {"doc_id": doc["id"], "version": doc["current_version"]})
+    return DocOut.model_validate(doc)
+
+
+@app.delete("/api/v1/docs/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_doc(
+    doc_id: str,
+    actor: User = Depends(current_user),
+    repo: DocsRepository = Depends(get_docs_repo),
+) -> Response:
+    try:
+        repo.delete(tenant_id=actor.tenant_id, doc_id=doc_id)
+    except DocNotFoundError as exc:
+        raise doc_http_error(exc)
+    await publish_event(actor.tenant_id, "doc.deleted", {"doc_id": doc_id})
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.post("/api/v1/docs/{doc_id}/rollback", response_model=DocOut)
+async def rollback_doc(
+    doc_id: str,
+    payload: DocRollbackRequest,
+    actor: User = Depends(current_user),
+    repo: DocsRepository = Depends(get_docs_repo),
+) -> DocOut:
+    try:
+        doc = repo.rollback(tenant_id=actor.tenant_id, user_id=actor.id, doc_id=doc_id, version_no=payload.version_no)
+    except DocNotFoundError as exc:
+        raise doc_http_error(exc)
+    await publish_event(actor.tenant_id, "doc.updated", {"doc_id": doc["id"], "version": doc["current_version"]})
+    return DocOut.model_validate(doc)
+
+
 @app.get("/api/v1/stats/success-rate", response_model=SuccessRateResponse)
 async def success_rate(
     from_time: datetime | None = Query(None, alias="from"),
@@ -410,7 +529,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str) -> None:
         while True:
             event = await queue.get()
             await websocket.send_json(event_to_dict(event))
-    except WebSocketDisconnect:
+    except (WebSocketDisconnect, asyncio.CancelledError):
         pass
     finally:
         unsubscribe(tenant_id, queue)

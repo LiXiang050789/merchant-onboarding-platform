@@ -1,23 +1,48 @@
 "use client";
 
 import {useState} from "react";
-import {initialDocs, KnowledgeDoc} from "@/features/docs/model/doc-api";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {createDoc, deleteDoc, fetchDocs, KnowledgeDoc, updateDoc} from "@/features/docs/model/doc-api";
 
 export function useDocsViewModel() {
-  const [docs, setDocs] = useState<KnowledgeDoc[]>(initialDocs);
+  const queryClient = useQueryClient();
+  const query = useQuery({queryKey: ["docs"], queryFn: fetchDocs, staleTime: 30_000});
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const createMutation = useMutation({
+    mutationFn: () => createDoc(title, content),
+    onSuccess: () => {
+      setTitle("");
+      setContent("");
+      queryClient.invalidateQueries({queryKey: ["docs"]});
+    }
+  });
+  const updateMutation = useMutation({
+    mutationFn: (doc: KnowledgeDoc) => updateDoc(doc),
+    onSuccess: () => queryClient.invalidateQueries({queryKey: ["docs"]})
+  });
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteDoc(id),
+    onSuccess: () => queryClient.invalidateQueries({queryKey: ["docs"]})
+  });
   const create = () => {
     if (!title.trim()) return;
-    setDocs((items) => [{id: `doc-local-${items.length + 1}`, title, content, version: 1, status: "active"}, ...items]);
-    setTitle("");
-    setContent("");
+    createMutation.mutate();
   };
-  const update = (id: string) => {
-    setDocs((items) => items.map((item) => (item.id === id ? {...item, version: item.version + 1, content: `${item.content}\n已更新`} : item)));
+  const update = (doc: KnowledgeDoc) => updateMutation.mutate(doc);
+  const remove = (id: string) => deleteMutation.mutate(id);
+  const error = query.error ?? createMutation.error ?? updateMutation.error ?? deleteMutation.error;
+  return {
+    docs: query.data?.items ?? [],
+    total: query.data?.total ?? 0,
+    title,
+    content,
+    setTitle,
+    setContent,
+    create,
+    update,
+    remove,
+    isLoading: query.isLoading,
+    error: error ? String(error) : null
   };
-  const remove = (id: string) => {
-    setDocs((items) => items.map((item) => (item.id === id ? {...item, status: "deleted"} : item)));
-  };
-  return {docs, title, content, setTitle, setContent, create, update, remove};
 }

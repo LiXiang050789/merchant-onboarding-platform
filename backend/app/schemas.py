@@ -146,6 +146,41 @@ class BatchRunResponse(BaseModel):
     checkpoint_stages: list[str]
 
 
+class DocCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=160)
+    content: str = Field(min_length=1)
+
+
+class DocUpdate(BaseModel):
+    title: str = Field(min_length=1, max_length=160)
+    content: str = Field(min_length=1)
+
+
+class DocRollbackRequest(BaseModel):
+    version_no: int = Field(ge=1)
+
+
+class DocOut(BaseModel):
+    id: str
+    tenant_id: str
+    title: str
+    content: str
+    current_version: int
+    etag: str
+    status: str
+    tokens: list[str]
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class DocListResponse(BaseModel):
+    items: list[DocOut]
+    total: int
+    page: int
+    size: int
+
+
 class ErrorResponse(BaseModel):
     code: str
     message: str
