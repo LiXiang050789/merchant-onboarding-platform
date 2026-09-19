@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .config import settings
-from .models import SubmissionEvent, SubmissionEventType
+from .models import Form, FormStatus, FormType, SubmissionEvent, SubmissionEventType
 
 LATE_ARRIVAL_TOLERANCE = timedelta(minutes=10)
 
@@ -27,24 +27,69 @@ def default_window() -> tuple[datetime, datetime, str]:
     return start, end, "24h"
 
 
-def cache_key(tenant_id: str, start: datetime, end: datetime) -> str:
-    return f"success_rate:v1:{tenant_id}:{start.isoformat()}..{end.isoformat()}:all"
+def filter_hash(*, city: str | None, status: FormStatus | None, form_type: FormType | None, industry: str | None) -> str:
+    if not any([city, status, form_type, industry]):
+        return "all"
+    parts = {
+        "city": city or "",
+        "status": status.value if status else "",
+        "form_type": form_type.value if form_type else "",
+        "industry": industry or "",
+    }
+    return "|".join(f"{key}={value}" for key, value in sorted(parts.items())) or "all"
 
 
-async def get_cached_success_rate(tenant_id: str, start: datetime, end: datetime) -> dict | None:
+def cache_key(
+    tenant_id: str,
+    start: datetime,
+    end: datetime,
+    *,
+    city: str | None,
+    status: FormStatus | None,
+    form_type: FormType | None,
+    industry: str | None,
+) -> str:
+    filters = filter_hash(city=city, status=status, form_type=form_type, industry=industry)
+    return f"success_rate:v1:{tenant_id}:{start.isoformat()}..{end.isoformat()}:{filters}"
+
+
+async def get_cached_success_rate(
+    tenant_id: str,
+    start: datetime,
+    end: datetime,
+    *,
+    city: str | None,
+    status: FormStatus | None,
+    form_type: FormType | None,
+    industry: str | None,
+) -> dict | None:
     try:
         redis = from_url(settings.redis_url, decode_responses=True)
-        value = await redis.get(cache_key(tenant_id, start, end))
+        value = await redis.get(cache_key(tenant_id, start, end, city=city, status=status, form_type=form_type, industry=industry))
         await redis.aclose()
         return json.loads(value) if value else None
     except Exception:
         return None
 
 
-async def set_cached_success_rate(tenant_id: str, start: datetime, end: datetime, payload: dict) -> None:
+async def set_cached_success_rate(
+    tenant_id: str,
+    start: datetime,
+    end: datetime,
+    payload: dict,
+    *,
+    city: str | None,
+    status: FormStatus | None,
+    form_type: FormType | None,
+    industry: str | None,
+) -> None:
     try:
         redis = from_url(settings.redis_url, decode_responses=True)
-        await redis.set(cache_key(tenant_id, start, end), json.dumps(payload, ensure_ascii=False), ex=30)
+        await redis.set(
+            cache_key(tenant_id, start, end, city=city, status=status, form_type=form_type, industry=industry),
+            json.dumps(payload, ensure_ascii=False),
+            ex=30,
+        )
         await redis.aclose()
     except Exception:
         return
@@ -57,20 +102,41 @@ async def compute_success_rate(
     start: datetime,
     end: datetime,
     use_cache: bool = True,
+    city: str | None = None,
+    status: FormStatus | None = None,
+    form_type: FormType | None = None,
+    industry: str | None = None,
 ) -> dict:
     if use_cache:
-        cached = await get_cached_success_rate(tenant_id, start, end)
+        cached = await get_cached_success_rate(
+            tenant_id,
+            start,
+            end,
+            city=city,
+            status=status,
+            form_type=form_type,
+            industry=industry,
+        )
         if cached:
             cached["cache_hit"] = True
             return cached
 
-    result = await session.execute(
-        select(SubmissionEvent).where(
-            SubmissionEvent.tenant_id == tenant_id,
-            SubmissionEvent.received_at >= start,
-            SubmissionEvent.received_at <= end + LATE_ARRIVAL_TOLERANCE,
-        )
+    stmt = select(SubmissionEvent).where(
+        SubmissionEvent.tenant_id == tenant_id,
+        SubmissionEvent.received_at >= start,
+        SubmissionEvent.received_at <= end + LATE_ARRIVAL_TOLERANCE,
     )
+    if city or status or form_type or industry:
+        stmt = stmt.join(Form, Form.id == SubmissionEvent.form_id)
+        if city:
+            stmt = stmt.where(Form.city_code == city)
+        if status:
+            stmt = stmt.where(Form.status == status)
+        if form_type:
+            stmt = stmt.where(Form.form_type == form_type)
+        if industry:
+            stmt = stmt.where(Form.industry == industry)
+    result = await session.execute(stmt)
     events = list(result.scalars())
     attempts: dict[str, SubmissionEvent] = {}
     by_type: dict[SubmissionEventType, set[str]] = {event_type: set() for event_type in SubmissionEventType}
@@ -97,5 +163,14 @@ async def compute_success_rate(
         "cache_hit": False,
     }
     if use_cache:
-        await set_cached_success_rate(tenant_id, start, end, payload)
+        await set_cached_success_rate(
+            tenant_id,
+            start,
+            end,
+            payload,
+            city=city,
+            status=status,
+            form_type=form_type,
+            industry=industry,
+        )
     return payload

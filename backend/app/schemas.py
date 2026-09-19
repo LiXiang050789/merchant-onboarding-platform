@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from .models import FormStatus, FormType
+from .models import BatchStatus, FormStatus, FormType
 
 
 REQUIRED_BY_TYPE = {
@@ -103,6 +103,47 @@ class SuccessRateResponse(BaseModel):
     db_success_rate: SuccessRateMetric
     end_to_end_success_rate: SuccessRateMetric
     deduped_attempts: int
+
+
+class BatchBuildRequest(BaseModel):
+    city: str | None = None
+    form_type: FormType | None = None
+    capacity: int = Field(default=50, ge=1, le=200)
+    radius_m: int = Field(default=3000, ge=100, le=20000)
+
+
+class BatchOut(BaseModel):
+    id: str
+    tenant_id: str
+    city_code: str
+    status: BatchStatus
+    center_lng: float
+    center_lat: float
+    capacity: int
+    item_count: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class BatchBuildResponse(BaseModel):
+    batches: list[BatchOut]
+    total_forms: int
+
+
+class BatchListResponse(BaseModel):
+    items: list[BatchOut]
+    total: int
+    page: int
+    size: int
+
+
+class BatchRunResponse(BaseModel):
+    batch_id: str
+    status: BatchStatus
+    processed: int
+    published: int
+    failed: int
+    checkpoint_stages: list[str]
 
 
 class ErrorResponse(BaseModel):

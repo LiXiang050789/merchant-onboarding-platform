@@ -12,12 +12,27 @@ from jwt import InvalidTokenError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .batch_pipeline import build_batches, get_batch_for_actor, list_batches, run_batch
 from .config import settings
 from .db import get_session
 from .dependencies import current_user
-from .models import FormStatus, SubmissionEvent, SubmissionEventType, User
+from .models import FormStatus, FormType, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
-from .schemas import FormCreate, FormListResponse, FormOut, LoginRequest, RefreshRequest, StatusPatch, SuccessRateResponse, TokenResponse
+from .schemas import (
+    BatchBuildRequest,
+    BatchBuildResponse,
+    BatchListResponse,
+    BatchOut,
+    BatchRunResponse,
+    FormCreate,
+    FormListResponse,
+    FormOut,
+    LoginRequest,
+    RefreshRequest,
+    StatusPatch,
+    SuccessRateResponse,
+    TokenResponse,
+)
 from .security import create_access_token, create_refresh_token, decode_token, verify_password
 from .stats import compute_success_rate, default_window
 from .state_machine import can_transition
@@ -229,6 +244,10 @@ def actor_can_transition(actor: User, city_code: str, previous: FormStatus, targ
 async def success_rate(
     from_time: datetime | None = Query(None, alias="from"),
     to_time: datetime | None = Query(None, alias="to"),
+    city: str | None = None,
+    status_filter: FormStatus | None = Query(None, alias="status"),
+    form_type: FormType | None = None,
+    industry: str | None = None,
     actor: User = Depends(current_user),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
@@ -238,6 +257,77 @@ async def success_rate(
         start, end, _ = default_window()
     if start >= end:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail={"code": "invalid_window"})
-    payload = await compute_success_rate(session, actor.tenant_id, start=start, end=end)
+    payload = await compute_success_rate(
+        session,
+        actor.tenant_id,
+        start=start,
+        end=end,
+        city=city,
+        status=status_filter,
+        form_type=form_type,
+        industry=industry,
+    )
     payload.pop("cache_hit", None)
     return payload
+
+
+@app.post("/api/v1/batches/build", response_model=BatchBuildResponse)
+async def build_batch_endpoint(
+    payload: BatchBuildRequest,
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> BatchBuildResponse:
+    if actor.role.value == "merchant":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail={"code": "forbidden"})
+    batches, total_forms = await build_batches(
+        session,
+        actor,
+        city=payload.city,
+        form_type=payload.form_type,
+        capacity=payload.capacity,
+        radius_m=payload.radius_m,
+    )
+    await session.commit()
+    return BatchBuildResponse(
+        batches=[BatchOut.model_validate(item, from_attributes=True) for item in batches],
+        total_forms=total_forms,
+    )
+
+
+@app.get("/api/v1/batches", response_model=BatchListResponse)
+async def list_batch_endpoint(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> BatchListResponse:
+    batches, total = await list_batches(session, actor, page=page, size=size)
+    return BatchListResponse(
+        items=[BatchOut.model_validate(item, from_attributes=True) for item in batches],
+        total=total,
+        page=page,
+        size=size,
+    )
+
+
+@app.post("/api/v1/batches/{batch_id}/run", response_model=BatchRunResponse)
+async def run_batch_endpoint(
+    batch_id: str,
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> BatchRunResponse:
+    if actor.role.value == "merchant":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail={"code": "forbidden"})
+    batch = await get_batch_for_actor(session, actor, batch_id)
+    if batch is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
+    summary = await run_batch(session, batch)
+    await session.commit()
+    return BatchRunResponse(
+        batch_id=summary.batch_id,
+        status=summary.status,
+        processed=summary.processed,
+        published=summary.published,
+        failed=summary.failed,
+        checkpoint_stages=summary.checkpoint_stages,
+    )
