@@ -79,7 +79,7 @@ bash scripts/demo.sh
 
 ## 已知说明
 
-- RAG 脚本在没有 `DEEPSEEK_API_KEY` 时会降级为 retrieval-only，并在 JSON 证据中标注。
+- RAG 证据已通过 `.env` 中的 `DEEPSEEK_API_KEY` 完成真实 DeepSeek 生成；脚本仍保留无 key/调用失败时的 retrieval-only 降级，并在 JSON 证据中标注。
 - 100k 本地 CSV 下 Spark 慢于 Python，原因是 JVM 启动和 shuffle 成本；本项目用 Spark 证明规模化同构路径。
 - 合成数据仅用于演示和性能/正确性证据，不代表真实商户数据。
 - 本项目使用 AI 作为结对工程助手，协作边界见 `docs/10-AI协作声明.md`。

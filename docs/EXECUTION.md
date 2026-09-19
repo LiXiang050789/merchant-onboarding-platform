@@ -4,6 +4,7 @@
 
 ## 会话记录
 
+- 2026-09-19，本次会话目标：RAG 从 retrieval-only 升级为 DeepSeek 真实生成；补 `.env` 加载、错误降级、证据与文档同步。
 - 2026-09-19，本次会话目标：P6 加分项（按用户指定顺序：Spark 同构 → RAG → 报表预测），随后进入 P7 收尾（架构文档、跨端方案、面试问答手册、README、演示脚本、quiz、完整性审计）。
 - 2026-09-19，本次会话目标：P6 扩展层（先按抽查要求依次清掉 P4 遗留 4 项、地图 CSS + E2E 断言、指标修正；再实现文档域 CRUD/版本/软删/jieba 检索）。
 - 2026-09-19，本次会话目标：P5 前端（先补 clusters/WS/events 后端契约；再实现 Next.js 15 MVVM 五页面、TanStack Query/ETag/轮询降级、Playwright E2E 与性能证据）。
@@ -23,7 +24,7 @@
 | P3 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_success_rate.py --junitxml=artifacts/test/p3.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p3.xml`; `docs/03-提交成功率统计设计.md`; `artifacts/openapi.json`; `docs/08-需求覆盖矩阵.md` | `6ec34e5` | 无 |
 | P4 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p4.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/load_seed.py --reset` pass | `artifacts/test/p4.xml`; `artifacts/test/backend_all.xml`; `artifacts/data/load_summary.json`; `docs/06-批处理流程设计.md` | `eb0b825` | P3 抽查遗留已关闭：seed 导入 + 10w EXPLAIN `41e14a7`；stats filters 已补入 `eb0b825` |
 | P5 | 已完成 | `cd frontend && npm run build` pass；`cd frontend && npm run test:e2e` pass；`backend/.venv/bin/pytest backend/tests/test_frontend_contract.py --junitxml=artifacts/test/p5_backend.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass | `artifacts/playwright/map.png`; `artifacts/frontend/perf.json`; `artifacts/test/p5_backend.xml`; `artifacts/test/backend_all.xml`; `docs/07-前端性能与缓存报告.md` | `8bdb7a7` | 无 |
-| P6 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_docs.py --junitxml=artifacts/test/p6_docs.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 npm run test:e2e` pass；`scripts/compare_spark_python.py` pass；`scripts/rag_demo.py` pass；`scripts/forecast_reports.py` pass | `artifacts/test/p6_docs.xml`; `artifacts/test/backend_all.xml`; `artifacts/openapi.json`; `artifacts/frontend/perf.json`; `artifacts/playwright/map.png`; `artifacts/bench/spark_compare.json`; `artifacts/rag/rag_demo.json`; `artifacts/bench/report_forecast.json`; `docs/04-知识文档存储与RAG设计.md` | 待提交 P6 加分项 | RAG 当前因无 `DEEPSEEK_API_KEY` 降级为 retrieval-only，已在证据中标注 |
+| P6 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_docs.py --junitxml=artifacts/test/p6_docs.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 npm run test:e2e` pass；`scripts/compare_spark_python.py` pass；`scripts/rag_demo.py` pass；`scripts/forecast_reports.py` pass | `artifacts/test/p6_docs.xml`; `artifacts/test/backend_all.xml`; `artifacts/openapi.json`; `artifacts/frontend/perf.json`; `artifacts/playwright/map.png`; `artifacts/bench/spark_compare.json`; `artifacts/rag/rag_demo.json`; `artifacts/bench/report_forecast.json`; `docs/04-知识文档存储与RAG设计.md` | 本次 RAG 升级提交 | RAG 已升级为 `mode=deepseek` 真实生成；无 key/调用失败时保留 retrieval-only 降级 |
 | P7 | 已完成 | `backend/.venv/bin/python scripts/audit_requirements.py` pass | `artifacts/audit/requirements.json`; `docs/01-系统架构设计.md`; `docs/05-跨端适配方案.md`; `docs/09-面试问答手册.md`; `docs/10-AI协作声明.md`; `docs/quiz.md`; `README.md`; `scripts/demo.sh` | 待提交 P7 收尾 | 无 |
 
 ## Blocker
@@ -206,5 +207,11 @@
 2. **docs/10 声明"PAT 已由用户 revoke"** → 需与实际一致：真去 revoke（GitHub → Settings → Developer settings → Personal access tokens）或改措辞；交付文档不能有不实陈述。
 3. **perf.json / docs/07 未按上轮要求处理**：仍为 dev 冷启动数字（FCP 6160ms、golden_path 41901ms），docs/07 亦未更新新增指标口径。二选一：① 生产构建重测（`npm run build && npm run start` + `PLAYWRIGHT_BASE_URL` 指向 prod 端口）后更新；② 在 docs/07 明写测量环境=dev 冷启动（含 Next 路由编译）并附面试口径。
 4. **（可选升级）RAG 真实调用**：环境中 `export DEEPSEEK_API_KEY=...`（脚本用 os.getenv 读取，不自动加载 .env）后重跑 `scripts/rag_demo.py` → 证据升级为真实生成链路。
+
+后续处理状态（2026-09-19）：
+- 1 已完成：docs/08 R5 指向 `docs/05-跨端适配方案.md`。
+- 2 已完成：用户确认 PAT 已在 GitHub revoke，docs/10 改为不冒充账号操作的事实表述。
+- 3 已完成：生产构建 `next start` 重测，`artifacts/frontend/perf.json` 已更新为 FCP 260ms / golden path 4834ms。
+- 4 已完成：`.env` loader 已实现，`scripts/rag_demo.py` 真实调用 DeepSeek，`artifacts/rag/rag_demo.json` 为 `mode=deepseek`。
 
 备注：未亲跑 `scripts/demo.sh`（它会 `--reset` 演示库并改动 load_summary 时间锚）——脚本逻辑已审阅（compose → load_seed → smoke → 加分项脚本 → 启动提示），建议用户首次演示前自跑热身。

@@ -7,7 +7,7 @@ P6 当前完成知识文档主线：MongoDB 真库 CRUD、乐观锁版本、软�
 加分项也已补齐：
 
 - Spark 同构：`scripts/compare_spark_python.py` 对同一份 10w CSV 做 Python 与 PySpark 对拍。
-- RAG：`scripts/rag_demo.py` 基于 Mongo + jieba tokens 做检索增强问答；当前环境无 `DEEPSEEK_API_KEY`，证据为 retrieval-only。
+- RAG：`scripts/rag_demo.py` 基于 Mongo + jieba tokens 做检索增强问答；当前证据已通过 DeepSeek 真实生成。
 - 报表预测：`scripts/forecast_reports.py` 对 `report` 类型表单做城市级 7 天趋势预测。
 
 ## Mongo 集合
@@ -78,9 +78,9 @@ P6 当前完成知识文档主线：MongoDB 真库 CRUD、乐观锁版本、软�
 `scripts/rag_demo.py` 会确保 demo 知识文档存在，使用 jieba tokens 做候选召回，并输出带引用回答：
 
 - 有 `DEEPSEEK_API_KEY`：调用 DeepSeek 生成带引用回答。
-- 无 key：降级为 retrieval-only，仍输出引用片段与模式说明。
+- 无 key、网络失败、401/额度不足或超时：降级为 retrieval-only，仍输出引用片段与脱敏错误说明。
 
-当前证据：`artifacts/rag/rag_demo.json`，`mode=retrieval_only`。这符合"key 不入库、无 key 不伪造真实调用"的交付原则。
+当前证据：`artifacts/rag/rag_demo.json`，`mode=deepseek`，包含真实生成回答、引用与耗时。key 只从 `.env` 加载，不入库、不写证据；降级能力仍保留。
 
 ## 报表预测
 

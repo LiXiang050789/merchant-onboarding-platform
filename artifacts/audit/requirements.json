@@ -206,12 +206,12 @@
         {
           "path": "scripts/rag_demo.py",
           "pattern": "call_deepseek",
-          "line": 82,
+          "line": 92,
           "ok": true
         },
         {
           "path": "artifacts/rag/rag_demo.json",
-          "pattern": "retrieval_only",
+          "pattern": "\"mode\": \"deepseek\"",
           "line": 3,
           "ok": true
         }

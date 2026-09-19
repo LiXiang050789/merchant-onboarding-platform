@@ -78,7 +78,7 @@ REQUIREMENTS = {
         "evidence": [
             ("backend/app/main.py", "websocket_endpoint"),
             ("scripts/rag_demo.py", "call_deepseek"),
-            ("artifacts/rag/rag_demo.json", "retrieval_only"),
+            ("artifacts/rag/rag_demo.json", "\"mode\": \"deepseek\""),
         ],
     },
     "JD": {

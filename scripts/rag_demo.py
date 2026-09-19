@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -79,10 +80,19 @@ def extractive_answer(question: str, citations: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def call_deepseek(question: str, citations: list[dict]) -> str | None:
+def safe_error_message(exc: Exception, api_key: str | None) -> str:
+    message = str(exc)
+    if api_key:
+        message = message.replace(api_key, "[REDACTED]")
+        if len(api_key) >= 8:
+            message = message.replace(api_key[:4], "[REDACTED]").replace(api_key[-4:], "[REDACTED]")
+    return message[:200]
+
+
+def call_deepseek(question: str, citations: list[dict]) -> tuple[str | None, dict | None]:
     api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        return None
+        return None, None
     context = "\n\n".join(f"[{idx}] {item['title']} v{item['version']}: {item['excerpt']}" for idx, item in enumerate(citations, start=1))
     payload = {
         "model": os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
@@ -98,9 +108,12 @@ def call_deepseek(question: str, citations: list[dict]) -> str | None:
         headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        data = json.loads(response.read().decode("utf-8"))
-    return data["choices"][0]["message"]["content"]
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            data = json.loads(response.read().decode("utf-8"))
+        return data["choices"][0]["message"]["content"], None
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, KeyError, json.JSONDecodeError) as exc:
+        return None, {"type": type(exc).__name__, "message": safe_error_message(exc, api_key)}
 
 
 def main() -> int:
@@ -116,7 +129,7 @@ def main() -> int:
     repo = DocsRepository.from_settings()
     ensure_demo_docs(repo, args.tenant_id, args.user_id)
     citations = retrieve(repo, args.tenant_id, args.question, args.limit)
-    llm_answer = call_deepseek(args.question, citations)
+    llm_answer, llm_error = call_deepseek(args.question, citations)
     mode = "deepseek" if llm_answer else "retrieval_only"
     payload = {
         "question": args.question,
@@ -124,8 +137,10 @@ def main() -> int:
         "answer": llm_answer or extractive_answer(args.question, citations),
         "citations": citations,
         "elapsed_ms": round((time.perf_counter() - started) * 1000, 3),
-        "note": "DEEPSEEK_API_KEY was not present, so the run used retrieval-only mode." if mode == "retrieval_only" else "DeepSeek response generated from retrieved citations.",
+        "note": "DeepSeek unavailable; retrieval-only fallback was used." if mode == "retrieval_only" else "DeepSeek response generated from retrieved citations.",
     }
+    if llm_error:
+        payload["llm_error"] = llm_error
     out_path = ROOT / args.out
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
