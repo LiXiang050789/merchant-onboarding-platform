@@ -35,3 +35,22 @@
 遗留 2 项（转 P1 吸收，不阻塞）：
 1. `illegal_status` 注入值为 `"submitted"`——它是合法枚举值（draft→submitted 属正常流转），命名为"非法状态"名不副实。P1 做导入/校验时二选一：改成枚举外值（如 `"unknown"`，可真正测校验拒绝）或改名澄清语义（如 `in_flight_status`）。另：`seed_summary.json.status_counts` 在异常注入**前**统计（summary published=85000 vs CSV 实际 84828，差额恰为之后被覆盖的 200 条），需在生成器或文档注明口径。
 2. 本机装有 MySQL 8.0.45（当前未启动）；若意外启动将占用 3306，与 compose 端口冲突。README 启动说明中注明。
+
+### P1 抽查（2026-09-19）— PASS（2 项契约缺口 + 1 项测试缺口，建议 P2 会话开头先关闭）
+
+独立复核：
+- DoD 复跑：`backend/.venv/bin/pytest backend/tests/test_auth.py backend/tests/test_forms.py` → **10 passed**（真 MySQL 非 mock）；`artifacts/test/p1.xml` 解析 = tests 10 / failures 0 / errors 0。
+- 契约对齐（§4.1/§4.2/§4.3 已实现部分）：6 张表字段/约束/索引与 §4.1 一致（含 `uq_forms_tenant_idempotency` 与复合索引）；错误信封 `{code,message,detail,trace_id}` 与错误码一致；JWT=HS256、access 30min / refresh 7d 一致；状态机流转图与 §4.3 完全一致（含 failed 重试 `retry_count<3`）。
+- 隔离与埋点：tenant 作用域在 repository 层统一注入（admin 全局 / operator 叠加 region 过滤）；埋点中间件字段符合 §4.10，且日志异常不影响业务（独立 try）。跨租户访问返回 404 不泄露存在性（有测试）。
+- P0 遗留 #1 已修复（`4054f46`）：注入值改为枚举外 `unknown`，summary 记录 base/actual 双口径（84828+7 分类+200 unknown，自洽）。
+
+遗留（建议 P2 开工先关闭，均为小改动，避免后续 Phase 叠加错误假设）：
+1. **`/api/v1/auth/refresh` 未实现**（§4.2 冻结契约遗漏）。补：refresh token 换新 access（校验 `type=refresh`）+ 测试（无效/过期/类型错 → 401）。
+2. **状态机"触发者"未强制**（§4.3 冻结列）。现状任意登录用户可驱动任意合法流转。应改为：merchant → 403；operator → 限 validating→rejected（及失败重试）；admin 放行（演示/测试用）；worker 走 P4 内部服务函数。测试 `test_allows_legal_state_transition` 目前由 merchant 触发 submitted→validating，需随规格改为 operator/admin，并新增 merchant→403 用例。
+3. **operator 区域过滤有实现无测试**：补 1 条（operator_shanghai 仅见 shanghai 的表单）。
+
+其它备注：
+- 已接受偏差（不改码，随 01/02 文档注明）：`forms.lng/lat` 实际为 float64（§4.1 文本写 decimal(10,7)）；城市尺度 float64 误差 ≪1m，远小于等距圆柱近似与 Haversine 的误差量级。
+- 次要：并发同键 create 竞态（IntegrityError→500）可留作已知限制或加兜底；`config.py` JWT_SECRET 带默认值兜底，README 注明演示必须配置 `.env`。
+- mongo 容器尚未创建（仅 mysql 在跑）；P6 前执行 `docker compose -f deploy/docker-compose.yml up -d` 补起。
+- 给 P3 的输入提示：seed 四类异常样本（unknown 200 / 越界 500 / 缺必填 1000 / 重复键 1000）在导入与事件生成时需显式分类处理，直接喂三口径统计。
