@@ -191,3 +191,20 @@
 3. 检索 `$all` 为 AND 语义（精确优先）——docs/04 可补一句召回取舍。
 
 **剩余 P6 加分项（按 v3 砍单顺序）**：Spark 同构 → RAG（限时）→ 报表预测（可选）。之后 P7：01/05/09/10 文档、README、演示脚本、quiz、`audit_requirements.py`、覆盖矩阵补齐 file:line。
+
+### P6 加分项 + P7 终验（2026-09-19）— 通过（4 项收尾待做，均为文档/证据级）
+
+独立复核：
+- DoD 亲跑：`pytest backend/tests -q` → **29 passed**；`audit_requirements.py` → `status: pass`，R0–R8+JD 每条含 path+pattern+line 证据、可复跑零 diff（确定性 ✓），且复跑后工作树干净。
+- Spark 同构：Python 与 Spark 的 city/form_type/status/city|form_type 维度计数**完全一致**（`mismatches: {}`、correctness_passed），耗时 2.2s vs 31.8s 并诚实注明规模化定位 ✓。
+- RAG：retrieval-only + 两条真实文档引用 + note 标注 ✓；已核实 `.env` 中确实无 `DEEPSEEK_API_KEY`（降级是事实，非偷懒）——升级路径见下。
+- 报表预测：14 天历史 + 7 天预测 + 回测 MAPE（2.3%–7.7%）+ "not used for business decisions" 免责 ✓；历史总量与 spark_compare 交叉一致（如 shanghai|report=7442）✓。
+- 交付面：README（含 .next 警告与 demo 账号表）、docs 01/05/09/10/quiz、demo.sh、覆盖矩阵、审计 JSON 齐全；requirements 含 websockets/jieba/pymongo/scipy ✓；面试手册 20 问含"P4 抽查发现后修复"类可追述证据链 ✓。
+
+【收尾 4 项（建议一轮小会话解决）】
+1. **docs/08 R5 行仍写"P7 文档 | 待补"**（docs/05 早已成文）→ 补证据路径。
+2. **docs/10 声明"PAT 已由用户 revoke"** → 需与实际一致：真去 revoke（GitHub → Settings → Developer settings → Personal access tokens）或改措辞；交付文档不能有不实陈述。
+3. **perf.json / docs/07 未按上轮要求处理**：仍为 dev 冷启动数字（FCP 6160ms、golden_path 41901ms），docs/07 亦未更新新增指标口径。二选一：① 生产构建重测（`npm run build && npm run start` + `PLAYWRIGHT_BASE_URL` 指向 prod 端口）后更新；② 在 docs/07 明写测量环境=dev 冷启动（含 Next 路由编译）并附面试口径。
+4. **（可选升级）RAG 真实调用**：环境中 `export DEEPSEEK_API_KEY=...`（脚本用 os.getenv 读取，不自动加载 .env）后重跑 `scripts/rag_demo.py` → 证据升级为真实生成链路。
+
+备注：未亲跑 `scripts/demo.sh`（它会 `--reset` 演示库并改动 load_summary 时间锚）——脚本逻辑已审阅（compose → load_seed → smoke → 加分项脚本 → 启动提示），建议用户首次演示前自跑热身。
