@@ -55,6 +55,26 @@ function isAuthPath(path: string): boolean {
   return path.startsWith("/api/v1/auth/");
 }
 
+const ERROR_MESSAGES: Record<string, string> = {
+  forbidden: "当前账号无此操作权限（需要管理员或对应区域运营）",
+  not_found: "目标资源不存在或无权访问",
+  illegal_transition: "当前状态不允许该流转",
+  version_conflict: "版本冲突：数据已被更新，请刷新后重试",
+  invalid_bbox: "视野范围参数不合法",
+  validation_error: "提交的数据未通过校验"
+};
+
+function describeError(status: number, body: string): string {
+  try {
+    const parsed = JSON.parse(body) as {code?: string; message?: string};
+    if (parsed.code && ERROR_MESSAGES[parsed.code]) return ERROR_MESSAGES[parsed.code];
+    if (parsed.message && parsed.message !== parsed.code) return parsed.message;
+  } catch {
+    // 非 JSON 响应，回退到原始文本
+  }
+  return body || `HTTP ${status}`;
+}
+
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Content-Type", headers.get("Content-Type") ?? "application/json");
@@ -71,7 +91,10 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   }
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `HTTP ${response.status}`);
+    if (isAuthPath(path) && response.status === 401) {
+      throw new Error("账号或密码错误");
+    }
+    throw new Error(describeError(response.status, detail));
   }
   return (await response.json()) as T;
 }
@@ -99,7 +122,7 @@ export async function apiFetchWithEtag<T>(
   }
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `HTTP ${response.status}`);
+    throw new Error(describeError(response.status, detail));
   }
   return {
     data: (await response.json()) as T,

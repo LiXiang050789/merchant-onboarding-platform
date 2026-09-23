@@ -5,6 +5,7 @@ import {useBatchesViewModel} from "@/features/batches/view-model/use-batches-vie
 
 export function BatchesView() {
   const {city, setCity, query, build, run} = useBatchesViewModel();
+  const error = build.error ?? run.error ?? query.error;
   return (
     <section className="panel" style={{padding: 16}}>
       <div className="toolbar">
@@ -17,6 +18,11 @@ export function BatchesView() {
           构建批次
         </button>
       </div>
+      {error ? (
+        <p role="alert" data-testid="batch-error" style={{color: "#b91c1c", marginTop: 10}}>
+          {error instanceof Error ? error.message : String(error)}
+        </p>
+      ) : null}
       <table className="table" style={{marginTop: 12}}>
         <thead>
           <tr>
