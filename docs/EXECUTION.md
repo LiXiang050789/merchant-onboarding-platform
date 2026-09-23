@@ -223,3 +223,13 @@
 - 备注（非阻塞小瑕疵，不急）：
   1. `.env.example` 的 `MONGO_DSN` 与 `config.py` 实际读取的 `MONGO_URL`/`MONGO_DB` 变量名不一致（当前靠默认值工作，改 .env.example 命名或 config 兼容即可）。
   2. `load_seed --reset` 不清理 Mongo 集合：E2E/演示创建的文档会累积（本次 RAG 证据的引用 [3] 就是 E2E 建的带时间戳文档）。演示前如需干净可手动清 `knowledge_docs` / `knowledge_doc_versions`。
+
+### 演示环境事件与前端 401 加固（2026-09-23）
+
+- 现象：目检时页面全空、控制台持续 `GET /api/v1/events 401`。
+- 根因：access token 有效期 30 分钟，浏览器里是旧登录的 token（过期）；前端**没有任何 401 处理**——token 存在即不跳登录，接口全部 401 后页面静默为空。后端 `/auth/refresh` 早已实现但前端从未使用。
+- 修复（frontend）：
+  - `shared/api/client.ts`：401 时先用 refresh token 自动续期并重试一次；续期失败才清 token 并跳 `/login`；`/api/v1/auth/*` 路径豁免（避免登录失败的 401 被误处理）。
+  - `shared/realtime/realtime.ts`：轮询 catch 住失败（消除未处理 rejection 的控制台刷屏），3 秒后照常重试。
+- 验证（真实浏览器三场景，Playwright）：① 正常登录 → /map 27 簇 ✓；② 损坏 access + 有效 refresh → 自动续期、数据照常加载、token 已轮换 ✓；③ 双 token 失效 → 清 token 跳 /login ✓；`tsc --noEmit` 通过。
+- 数字勘误：地图簇数以实测为准——**published 27 / validated 23 / 不带过滤 34**；`artifacts/frontend/perf.json` 里旧的 `initial_map_features: 34` 与 UI 默认不符，下次 E2E 重跑时自然刷新（勿据此背数）。
