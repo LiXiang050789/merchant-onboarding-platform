@@ -233,3 +233,11 @@
   - `shared/realtime/realtime.ts`：轮询 catch 住失败（消除未处理 rejection 的控制台刷屏），3 秒后照常重试。
 - 验证（真实浏览器三场景，Playwright）：① 正常登录 → /map 27 簇 ✓；② 损坏 access + 有效 refresh → 自动续期、数据照常加载、token 已轮换 ✓；③ 双 token 失效 → 清 token 跳 /login ✓；`tsc --noEmit` 通过。
 - 数字勘误：地图簇数以实测为准——**published 27 / validated 23 / 不带过滤 34**；`artifacts/frontend/perf.json` 里旧的 `initial_map_features: 34` 与 UI 默认不符，下次 E2E 重跑时自然刷新（勿据此背数）。
+
+### 目检事件 2：批次页 403 无提示（2026-09-23）
+
+- 现象：商户身份点"构建批次"无反应，控制台 403（`build.error` 无人渲染，React Query 静默吞掉）。
+- 修复（frontend）：`client.ts` 增加错误信息中文化（forbidden/not_found/illegal_transition/version_conflict 等映射；登录路径 401 → "账号或密码错误"）；`batches-view.tsx` 渲染 `build/run/query` 错误（`data-testid=batch-error`）。
+- 验证（真实浏览器）：① 商户构建 → 显示"当前账号无此操作权限（需要管理员或对应区域运营）" ✓；② admin 构建深圳 → 成功（total 178）✓；③ 错误密码 → "账号或密码错误" ✓；`tsc --noEmit` 通过。
+- 附带实测：`run` 接口对当前数据正常（1 批 2 条 → completed，2 个 stage checkpoint）。
+- 观察记录（非缺陷）：批次分布 178 批/291 条、avg 1.63（107 个单条批）——"距 seed ≤3000m"语义与商圈 σ≈2.2km 散布交互的正常结果，基准 58 批/2000 条同量级；对应话术已写入《代码理解》md §8。
