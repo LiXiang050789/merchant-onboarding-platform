@@ -19,7 +19,7 @@ export function BatchesView() {
         </button>
       </div>
       {error ? (
-        <p role="alert" data-testid="batch-error" style={{color: "#b91c1c", marginTop: 10}}>
+        <p role="alert" data-testid="batch-error" className="error">
           {error instanceof Error ? error.message : String(error)}
         </p>
       ) : null}

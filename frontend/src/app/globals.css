@@ -205,6 +205,11 @@ button:hover {
   color: var(--muted);
 }
 
+.error {
+  color: #b91c1c;
+  margin-top: 10px;
+}
+
 .map-layout {
   display: grid;
   grid-template-columns: 320px 1fr;

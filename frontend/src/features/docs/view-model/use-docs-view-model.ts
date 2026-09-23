@@ -9,6 +9,7 @@ export function useDocsViewModel() {
   const query = useQuery({queryKey: ["docs"], queryFn: fetchDocs, staleTime: 30_000});
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [hint, setHint] = useState<string | null>(null);
   const createMutation = useMutation({
     mutationFn: () => createDoc(title, content),
     onSuccess: () => {
@@ -26,19 +27,41 @@ export function useDocsViewModel() {
     onSuccess: () => queryClient.invalidateQueries({queryKey: ["docs"]})
   });
   const create = () => {
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      setHint("请先填写标题");
+      return;
+    }
+    if (!content.trim()) {
+      setHint("请先填写内容");
+      return;
+    }
+    setHint(null);
     createMutation.mutate();
   };
-  const update = (doc: KnowledgeDoc) => updateMutation.mutate(doc);
-  const remove = (id: string) => deleteMutation.mutate(id);
-  const error = query.error ?? createMutation.error ?? updateMutation.error ?? deleteMutation.error;
+  const update = (doc: KnowledgeDoc) => {
+    setHint(null);
+    updateMutation.mutate(doc);
+  };
+  const remove = (id: string) => {
+    setHint(null);
+    deleteMutation.mutate(id);
+  };
+  const changeTitle = (value: string) => {
+    setTitle(value);
+    setHint(null);
+  };
+  const changeContent = (value: string) => {
+    setContent(value);
+    setHint(null);
+  };
+  const error = hint ?? query.error ?? createMutation.error ?? updateMutation.error ?? deleteMutation.error;
   return {
     docs: query.data?.items ?? [],
     total: query.data?.total ?? 0,
     title,
     content,
-    setTitle,
-    setContent,
+    setTitle: changeTitle,
+    setContent: changeContent,
     create,
     update,
     remove,
