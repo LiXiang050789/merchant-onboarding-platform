@@ -44,6 +44,8 @@ export function startRealtime(queryClient: QueryClient): () => void {
           lastSeq = Math.max(lastSeq, item.seq);
           invalidate(queryClient, item.type);
         }
+      } catch {
+        // 401 由 client 层统一处理（续期或跳登录）；其余失败静默，3 秒后重试
       } finally {
         window.setTimeout(poll, 3000);
       }
