@@ -290,3 +290,13 @@
 - 处置：**用户 2026-10-01 批复口径 = admin 全局订阅**（普通租户隔离不放松）；修复已下发 `codex-p9修复prompt.md`（P9.1：realtime/端点改造 + 3 条新 pytest + 跨租户 E2E + 文档/账本），Claude 负责终核。
 - 已知限制（非缺陷）：worker 单实例前提，多实例生产需分布式锁或独立队列（已注 README/docs/06）。
 - 遗留（低优观察）：①`build` 接口对每个新批次各发一条 `batch.status_changed`（204 批→204 条，前端 invalidate 合并为约 13 次列表刷新，日志实证；功能正确、有冗余，v3 遗留，建议后续合并为单条聚合事件）；②worker 异常为静默吞（下一 tick 重试），建议补一行 `logger.exception`。
+
+### P9.1 admin 实时通道全局化修复（2026-10-01）— PASS
+
+- 缺陷：admin 的 REST 视角可操作全局批次，但 P9 WebSocket/轮询只订阅 token tenant，导致 admin 运行非 `tenant_01` 批次时收不到 `batch.progress` / `batch.status_changed`，页面要刷新才更新。
+- 用户批复口径：admin 实时通道改为全局订阅；普通租户账号行为不变，事件仍按租户隔离。
+- 后端修复：`realtime.GLOBAL_TOPIC="*"`；`publish_event` 同时推租户订阅者与全局订阅者；`events_since(None, since)` 返回全量事件；WS 与 `/events` 对 admin 使用全局作用域。
+- DoD：`backend/.venv/bin/pytest backend/tests/test_realtime_scope.py --junitxml=artifacts/test/p9_realtime_scope.xml` → 3 passed；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` → 44 passed；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 npx playwright test tests/e2e/realtime.spec.ts --project=chromium` → 2 passed。
+- E2E 证据：表单实时流转 `5911ms`；admin 运行非本租户批次 `batch_fd77996c5e324a7ca3d`，实时进度/终态耗时 `1005ms`。
+- 证据路径：`artifacts/test/p9_realtime_scope.xml`、`artifacts/test/backend_all.xml`、`artifacts/playwright/realtime_before.png`、`artifacts/playwright/realtime_after.png`、`artifacts/playwright/realtime_admin_batch.png`、`artifacts/data/load_summary.json`。
+- Commit：`77036fa`; `a17fdd4`。
