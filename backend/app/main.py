@@ -23,7 +23,7 @@ from .dependencies import current_user
 from .docs_store import DocNotFoundError, DocsRepository, DocVersionConflictError, get_docs_repo
 from .models import Batch, BatchItem, BatchStatus, Form, FormAuditEvent, FormStatus, FormType, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
-from .realtime import event_to_dict, events_since, publish_event, subscribe, unsubscribe
+from .realtime import GLOBAL_TOPIC, event_to_dict, events_since, publish_event, subscribe, unsubscribe
 from .schemas import (
     BatchBuildRequest,
     BatchBuildResponse,
@@ -657,7 +657,8 @@ async def poll_events(
     since: int = Query(0, ge=0),
     actor: User = Depends(current_user),
 ) -> dict:
-    return {"events": events_since(actor.tenant_id, since)}
+    tenant_scope = None if actor.role.value == "admin" else actor.tenant_id
+    return {"events": events_since(tenant_scope, since)}
 
 
 @app.websocket("/api/v1/ws")
@@ -671,8 +672,9 @@ async def websocket_endpoint(websocket: WebSocket, token: str) -> None:
     if not tenant_id:
         await websocket.close(code=4401)
         return
+    topic = GLOBAL_TOPIC if claims.get("role") == "admin" else tenant_id
     await websocket.accept()
-    queue = await subscribe(tenant_id)
+    queue = await subscribe(topic)
     try:
         while True:
             event = await queue.get()
@@ -680,4 +682,4 @@ async def websocket_endpoint(websocket: WebSocket, token: str) -> None:
     except (WebSocketDisconnect, asyncio.CancelledError):
         pass
     finally:
-        unsubscribe(tenant_id, queue)
+        unsubscribe(topic, queue)

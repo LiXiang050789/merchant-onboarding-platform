@@ -16,6 +16,8 @@ class RealtimeEvent:
     sent_at: str
 
 
+GLOBAL_TOPIC = "*"
+
 _events: deque[RealtimeEvent] = deque(maxlen=1000)
 _subscribers: dict[str, set[asyncio.Queue[RealtimeEvent]]] = {}
 _seq = 0
@@ -41,13 +43,14 @@ async def publish_event(tenant_id: str, event_type: str, payload: dict[str, Any]
         sent_at=datetime.now(UTC).isoformat(),
     )
     _events.append(event)
-    for queue in list(_subscribers.get(tenant_id, set())):
+    targets = set(_subscribers.get(tenant_id, set())) | set(_subscribers.get(GLOBAL_TOPIC, set()))
+    for queue in list(targets):
         await queue.put(event)
     return event
 
 
-def events_since(tenant_id: str, seq: int) -> list[dict[str, Any]]:
-    return [event_to_dict(event) for event in _events if event.tenant_id == tenant_id and event.seq > seq]
+def events_since(tenant_id: str | None, seq: int) -> list[dict[str, Any]]:
+    return [event_to_dict(event) for event in _events if (tenant_id is None or event.tenant_id == tenant_id) and event.seq > seq]
 
 
 async def subscribe(tenant_id: str) -> asyncio.Queue[RealtimeEvent]:
