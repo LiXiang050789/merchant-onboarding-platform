@@ -3,7 +3,7 @@
 import {useFormsViewModel} from "@/features/forms/view-model/use-forms-view-model";
 
 export function FormsView() {
-  const {city, setCity, status, setStatus, query, withdraw, currentUserId} = useFormsViewModel();
+  const {city, setCity, status, setStatus, query, withdraw, currentUserId, selectedFormId, setSelectedFormId, auditQuery} = useFormsViewModel();
   const canWithdraw = (item: {status: string; created_by: string}) =>
     item.created_by === currentUserId && ["draft", "submitted", "validating", "validated", "batched"].includes(item.status);
   const handleWithdraw = (formId: string) => {
@@ -22,6 +22,7 @@ export function FormsView() {
           <option value="chengdu">成都</option>
         </select>
         <select className="field" value={status} onChange={(event) => setStatus(event.target.value)} aria-label="状态">
+          <option value="all">全部</option>
           <option value="published">published</option>
           <option value="submitted">submitted</option>
           <option value="validating">validating</option>
@@ -40,11 +41,12 @@ export function FormsView() {
             <th>行业</th>
             <th>状态</th>
             <th>操作</th>
+            <th>时间线</th>
           </tr>
         </thead>
         <tbody>
           {query.data?.items.map((item) => (
-            <tr key={item.id}>
+            <tr key={item.id} data-testid={`form-row-${item.id}`}>
               <td>{item.id}</td>
               <td>{item.form_type}</td>
               <td>{item.city_code}</td>
@@ -57,10 +59,24 @@ export function FormsView() {
                   </button>
                 ) : null}
               </td>
+              <td>
+                <button className="secondary-button" type="button" onClick={() => setSelectedFormId(item.id)}>查看</button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {selectedFormId ? (
+        <div className="timeline" data-testid="form-timeline">
+          <div className="timeline-title">{selectedFormId}</div>
+          {auditQuery.data?.items.map((event) => (
+            <div className="timeline-item" key={event.id}>
+              <span>{event.from_status ?? "-"} → {event.to_status ?? "-"}</span>
+              <small>{event.event_type} · {event.actor_id}</small>
+            </div>
+          ))}
+        </div>
+      ) : null}
       {withdraw.error ? <p className="error" data-testid="withdraw-error">{withdraw.error instanceof Error ? withdraw.error.message : "撤回失败"}</p> : null}
       <p data-testid="forms-total">total: {query.data?.total ?? 0}</p>
     </section>

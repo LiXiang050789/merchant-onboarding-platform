@@ -17,6 +17,7 @@
 - `docs/03-提交成功率统计设计.md`：三口径成功率。
 - `docs/04-知识文档存储与RAG设计.md`：Mongo CRUD、RAG、Spark、预测。
 - `docs/05-跨端适配方案.md`：Web/移动/小程序/大屏/PWA。
+- `docs/06-批处理流程设计.md`：批次构建、异步运行、DLQ、实时进度。
 - `docs/10-AI协作声明.md`：AI 协作边界。
 
 ## 本地演示账号
@@ -48,11 +49,13 @@ cd frontend && npm run dev
 1. 用 `admin@example.com / seed-pass` 登录。
 2. `/map` 查看上海聚合 marker，切换状态为 `validated`。
 3. `/stats` 查看近 24h 成功率，确认 attempts 非 0。
-4. `/batches` 构建/运行批次，观察状态变化。
+4. `/batches` 构建/运行批次，观察 202 接收、实时进度与终态变化。
 5. `/docs` 创建知识文档、生成新版本、软删除。
 6. 查看证据文件：
    - `artifacts/frontend/perf.json`
    - `artifacts/test/backend_all.xml`
+   - `artifacts/test/p9.xml`
+   - `artifacts/playwright/realtime_before.png` / `artifacts/playwright/realtime_after.png`
    - `artifacts/test/p6_docs.xml`
    - `artifacts/bench/spark_compare.json`
    - `artifacts/rag/rag_demo.json`
@@ -80,5 +83,6 @@ bash scripts/demo.sh
 
 - RAG 证据已通过 `.env` 中的 `DEEPSEEK_API_KEY` 完成真实 DeepSeek 生成；脚本仍保留无 key/调用失败时的 retrieval-only 降级，并在 JSON 证据中标注。
 - 100k 本地 CSV 下 Spark 慢于 Python，原因是 JVM 启动和 shuffle 成本；本项目用 Spark 证明规模化同构路径。
+- P9 实时流转由 FastAPI lifespan worker 驱动；当前演示为单实例前提，多实例生产部署需给 worker 加分布式锁或迁移到独立任务队列。
 - 合成数据仅用于演示和性能/正确性证据，不代表真实商户数据。
 - 本项目使用 AI 作为结对工程助手，协作边界见 `docs/10-AI协作声明.md`。

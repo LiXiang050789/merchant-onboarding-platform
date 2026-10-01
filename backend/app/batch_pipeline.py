@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
@@ -199,7 +200,10 @@ async def write_dlq(session: AsyncSession, form: Form, stage: str, error_code: s
     )
 
 
-async def run_batch(session: AsyncSession, batch: Batch) -> RunSummary:
+ProgressCallback = Callable[[int, int, BatchStatus], Awaitable[None]]
+
+
+async def run_batch(session: AsyncSession, batch: Batch, progress_callback: ProgressCallback | None = None) -> RunSummary:
     if batch.status == BatchStatus.completed:
         checkpoints = await checkpoint_stages(session, batch.id)
         return RunSummary(batch.id, batch.status, 0, 0, 0, checkpoints)
@@ -214,6 +218,7 @@ async def run_batch(session: AsyncSession, batch: Batch) -> RunSummary:
         .order_by(Form.form_type, Form.id)
     )
     forms = list(result.scalars())
+    total = len(forms)
     processed = 0
     published = 0
     failed = 0
@@ -247,10 +252,14 @@ async def run_batch(session: AsyncSession, batch: Batch) -> RunSummary:
         await upsert_checkpoint(session, batch.id, stage, form.id)
         processed += 1
         published += 1
+        if progress_callback and (processed % 10 == 0 or processed == total):
+            await progress_callback(processed, total, batch.status)
 
     batch.status = BatchStatus.completed if failed == 0 else BatchStatus.failed
     batch.updated_at = now
     await session.flush()
+    if progress_callback:
+        await progress_callback(processed, total, batch.status)
     return RunSummary(batch.id, batch.status, processed, published, failed, await checkpoint_stages(session, batch.id))
 
 

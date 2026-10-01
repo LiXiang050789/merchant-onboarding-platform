@@ -2,12 +2,13 @@
 
 import {useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {fetchForms, withdrawForm} from "@/features/forms/model/form-api";
+import {fetchFormAudit, fetchForms, withdrawForm} from "@/features/forms/model/form-api";
 import {getCurrentUserId} from "@/shared/api/client";
 
 export function useFormsViewModel() {
   const [city, setCity] = useState("shanghai");
   const [status, setStatus] = useState("published");
+  const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const currentUserId = getCurrentUserId();
   const query = useQuery({
@@ -15,6 +16,12 @@ export function useFormsViewModel() {
     queryFn: () => fetchForms(city, status),
     staleTime: 30_000,
     gcTime: 300_000
+  });
+  const auditQuery = useQuery({
+    queryKey: ["form-audit", selectedFormId],
+    queryFn: () => fetchFormAudit(selectedFormId as string),
+    enabled: Boolean(selectedFormId),
+    staleTime: 10_000
   });
   const withdraw = useMutation({
     mutationFn: ({formId, reason}: {formId: string; reason: string | null}) => withdrawForm(formId, reason),
@@ -25,6 +32,6 @@ export function useFormsViewModel() {
       void queryClient.invalidateQueries({queryKey: ["batches"]});
     }
   });
-  return {city, setCity, status, setStatus, query, withdraw, currentUserId};
+  return {city, setCity, status, setStatus, query, withdraw, currentUserId, selectedFormId, setSelectedFormId, auditQuery};
 }
 

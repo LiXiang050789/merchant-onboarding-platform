@@ -4,6 +4,7 @@
 
 ## 会话记录
 
+- 2026-10-01，本次会话目标：P9 实时流转（自动状态 worker、批次异步进度、前端实时指示/时间线、不刷新 E2E 证据）。
 - 2026-10-01，本次会话目标：P8 撤回机制（模型/状态机/API/批次联动/统计口径、前端撤回动线、测试与证据）。
 - 2026-10-01，Claude 抽查 P8：实现层逐条核对 §10.1 + 独立复跑 9/38；发现并修复 run-on-canceled 边界（`80e03bd`）；验证记录见文末。
 - 2026-09-19，本次会话目标：RAG 从 retrieval-only 升级为 DeepSeek 真实生成；补 `.env` 加载、错误降级、证据与文档同步。
@@ -29,6 +30,7 @@
 | P6 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_docs.py --junitxml=artifacts/test/p6_docs.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 npm run test:e2e` pass；`scripts/compare_spark_python.py` pass；`scripts/rag_demo.py` pass；`scripts/forecast_reports.py` pass | `artifacts/test/p6_docs.xml`; `artifacts/test/backend_all.xml`; `artifacts/openapi.json`; `artifacts/frontend/perf.json`; `artifacts/playwright/map.png`; `artifacts/bench/spark_compare.json`; `artifacts/rag/rag_demo.json`; `artifacts/bench/report_forecast.json`; `docs/04-知识文档存储与RAG设计.md` | 本次 RAG 升级提交 | RAG 已升级为 `mode=deepseek` 真实生成；无 key/调用失败时保留 retrieval-only 降级 |
 | P7 | 已完成 | `backend/.venv/bin/python scripts/audit_requirements.py` pass | `artifacts/audit/requirements.json`; `docs/01-系统架构设计.md`; `docs/05-跨端适配方案.md`; `docs/09-面试问答手册.md`; `docs/10-AI协作声明.md`; `docs/quiz.md`; `README.md`; `scripts/demo.sh` | 待提交 P7 收尾 | 无 |
 | P8 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_withdraw.py --junitxml=artifacts/test/p8.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e -- withdraw.spec.ts` pass | `artifacts/test/p8.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/withdraw.png`; `artifacts/data/load_summary.json`; `docs/03-提交成功率统计设计.md`; `docs/06-批处理流程设计.md` | `66b46c7`; `40721cd`; `f5fb7df` | Claude 抽查 PASS（2026-10-01）；run-on-canceled 边界收紧修复：`80e03bd` |
+| P9 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_worker.py backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p9.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 npx playwright test tests/e2e/realtime.spec.ts --project=chromium` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p9.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/realtime_before.png`; `artifacts/playwright/realtime_after.png`; `artifacts/openapi.json`; `artifacts/data/load_summary.json`; `docs/02-地理聚合与性能优化.md`; `docs/06-批处理流程设计.md` | `f86a1c7` | 无 |
 
 ## Blocker
 
@@ -271,3 +273,12 @@
 - 抽查发现并修复（规格未覆盖的边缘行为）：对已空置 `canceled` 的批次调 `POST /api/v1/batches/{id}/run`，原实现会将其推进为 `completed`（0 条处理），与"空批 canceled"的终态语义矛盾。修复：run 端点前置 409 `{"code":"batch_canceled"}`（`main.py:579-580`），前端错误映射增中文文案（`client.ts:81`），回归测试走真实动线（撤回→空批 canceled→run 被拒→状态保持）。commit `80e03bd`。
 - 未为此微修重跑浏览器 E2E 的说明：修复只新增一个此前不存在的错误分支（canceled 批的运行路径），撤回动线（`withdraw.png` 证据路径）未受影响；P9 全量重跑 E2E 时自然覆盖。
 - 结论：P8 DoD 达标、实现与 §10.1 逐条一致 —— **PASS**。
+
+### P9 实时流转（2026-10-01）— PASS
+
+- 后端：新增 FastAPI lifespan 状态 worker，默认演示间隔 5s（`VALIDATE_WORKER_INTERVAL_SECONDS`），单轮处理 `submitted -> validating -> validated/rejected`，每步写 `form_audit_events` 并发布 `form.status_changed`；worker 首轮先等待一个周期，保证周期语义清晰。
+- 批处理：`POST /api/v1/batches/{id}/run` 改为 `202 Accepted`，后台运行管线并发布 `batch.progress` / `batch.status_changed`；测试改为先断言接收态，再轮询终态与 checkpoint/DLQ。
+- 前端：顶部实时连接指示（WS/轮询/断开）、表单详情时间线、批次进度条；WebSocket 断开后继续走 `/events?since=...` 轮询。
+- 独立验证：`backend/.venv/bin/pytest backend/tests/test_worker.py backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p9.xml` → 7 passed；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` → 41 passed；`cd frontend && npm run build` → pass；realtime E2E → 1 passed，状态传播 `4956ms`。
+- 证据：`artifacts/test/p9.xml`、`artifacts/test/backend_all.xml`、`artifacts/playwright/realtime_before.png`、`artifacts/playwright/realtime_after.png`、`artifacts/openapi.json`、`artifacts/data/load_summary.json`。
+- 说明：当前 worker 为单实例演示路径，多实例生产需加分布式锁或迁移到独立队列；本 Phase 不做 P10 仓库瘦身。

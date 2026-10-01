@@ -3,10 +3,11 @@ from __future__ import annotations
 import logging
 import time
 import asyncio
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect, status
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,7 +21,7 @@ from .config import settings
 from .db import get_session
 from .dependencies import current_user
 from .docs_store import DocNotFoundError, DocsRepository, DocVersionConflictError, get_docs_repo
-from .models import Batch, BatchItem, BatchStatus, Form, FormStatus, FormType, SubmissionEvent, SubmissionEventType, User
+from .models import Batch, BatchItem, BatchStatus, Form, FormAuditEvent, FormStatus, FormType, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
 from .realtime import event_to_dict, events_since, publish_event, subscribe, unsubscribe
 from .schemas import (
@@ -47,10 +48,22 @@ from .schemas import (
 from .security import create_access_token, create_refresh_token, decode_token, verify_password
 from .stats import compute_success_rate, default_window
 from .state_machine import can_transition
+from .status_worker import start_status_worker, stop_status_worker
 
 
 logger = logging.getLogger("merchant.telemetry")
-app = FastAPI(title="Merchant Onboarding Platform", version="0.1.0")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    worker_task = start_status_worker(settings.validate_worker_interval_seconds)
+    try:
+        yield
+    finally:
+        await stop_status_worker(worker_task)
+
+
+app = FastAPI(title="Merchant Onboarding Platform", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1:3000", "http://localhost:3000", "http://127.0.0.1:3001", "http://localhost:3001"],
@@ -223,6 +236,34 @@ async def get_form(
     if form is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
     return FormOut.model_validate(form, from_attributes=True)
+
+
+@app.get("/api/v1/forms/{form_id}/audit")
+async def list_form_audit(
+    form_id: str,
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    form = await FormRepository(session, actor).get(form_id)
+    if form is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
+    result = await session.execute(
+        select(FormAuditEvent)
+        .where(FormAuditEvent.tenant_id == form.tenant_id, FormAuditEvent.form_id == form.id)
+        .order_by(FormAuditEvent.created_at.asc(), FormAuditEvent.id.asc())
+    )
+    items = [
+        {
+            "id": item.id,
+            "event_type": item.event_type,
+            "from_status": item.from_status,
+            "to_status": item.to_status,
+            "actor_id": item.actor_id,
+            "created_at": item.created_at.isoformat(),
+        }
+        for item in result.scalars()
+    ]
+    return {"items": items}
 
 
 @app.patch("/api/v1/forms/{form_id}/status", response_model=FormOut)
@@ -565,9 +606,31 @@ async def list_batch_endpoint(
     )
 
 
-@app.post("/api/v1/batches/{batch_id}/run", response_model=BatchRunResponse)
+async def run_batch_background(session: AsyncSession, batch_id: str) -> None:
+    batch = await session.get(Batch, batch_id)
+    if batch is None or batch.status == BatchStatus.canceled:
+        return
+
+    async def progress(processed: int, total: int, current_status: BatchStatus) -> None:
+        await publish_event(
+            batch.tenant_id,
+            "batch.progress",
+            {"batch_id": batch.id, "processed": processed, "total": total, "status": current_status.value},
+        )
+
+    try:
+        summary = await run_batch(session, batch, progress_callback=progress)
+        await session.commit()
+        await publish_event(batch.tenant_id, "batch.status_changed", {"batch_id": batch.id, "status": summary.status.value})
+    except Exception:
+        await session.rollback()
+        logger.exception("batch_background_failed", extra={"batch_id": batch_id})
+
+
+@app.post("/api/v1/batches/{batch_id}/run", response_model=BatchRunResponse, status_code=status.HTTP_202_ACCEPTED)
 async def run_batch_endpoint(
     batch_id: str,
+    background_tasks: BackgroundTasks,
     actor: User = Depends(current_user),
     session: AsyncSession = Depends(get_session),
 ) -> BatchRunResponse:
@@ -578,17 +641,15 @@ async def run_batch_endpoint(
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
     if batch.status == BatchStatus.canceled:
         raise HTTPException(status.HTTP_409_CONFLICT, detail={"code": "batch_canceled"})
-    summary = await run_batch(session, batch)
+    if batch.status == BatchStatus.completed:
+        return BatchRunResponse(batch_id=batch.id, status=batch.status, processed=0, published=0, failed=0, checkpoint_stages=[])
+
+    batch.status = BatchStatus.processing
+    batch.updated_at = datetime.now(UTC).replace(tzinfo=None)
     await session.commit()
-    await publish_event(batch.tenant_id, "batch.status_changed", {"batch_id": batch.id, "status": summary.status.value})
-    return BatchRunResponse(
-        batch_id=summary.batch_id,
-        status=summary.status,
-        processed=summary.processed,
-        published=summary.published,
-        failed=summary.failed,
-        checkpoint_stages=summary.checkpoint_stages,
-    )
+    await publish_event(batch.tenant_id, "batch.status_changed", {"batch_id": batch.id, "status": batch.status.value})
+    background_tasks.add_task(run_batch_background, session, batch.id)
+    return BatchRunResponse(batch_id=batch.id, status=batch.status, processed=0, published=0, failed=0, checkpoint_stages=[])
 
 
 @app.get("/api/v1/events")

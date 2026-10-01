@@ -4,7 +4,7 @@ import {Play} from "lucide-react";
 import {useBatchesViewModel} from "@/features/batches/view-model/use-batches-view-model";
 
 export function BatchesView() {
-  const {city, setCity, query, build, run} = useBatchesViewModel();
+  const {city, setCity, query, build, run, progressByBatch} = useBatchesViewModel();
   const error = build.error ?? run.error ?? query.error;
   return (
     <section className="panel" style={{padding: 16}}>
@@ -30,6 +30,7 @@ export function BatchesView() {
             <th>城市</th>
             <th>数量</th>
             <th>状态</th>
+            <th>进度</th>
             <th>运行</th>
           </tr>
         </thead>
@@ -40,6 +41,14 @@ export function BatchesView() {
               <td>{item.city_code}</td>
               <td>{item.item_count}</td>
               <td><span className="status">{item.status}</span></td>
+              <td>
+                {progressByBatch[item.id] ? (
+                  <div className="progress-cell" data-testid={`batch-progress-${item.id}`}>
+                    <progress max={progressByBatch[item.id].total} value={progressByBatch[item.id].processed} />
+                    <span>{progressByBatch[item.id].processed}/{progressByBatch[item.id].total}</span>
+                  </div>
+                ) : <span className="muted">-</span>}
+              </td>
               <td>
                 <button className="icon-button" title="运行批次" onClick={() => run.mutate(item.id)}>
                   <Play size={16} />

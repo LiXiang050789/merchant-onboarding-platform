@@ -1,12 +1,12 @@
 "use client";
 
-import {ReactNode, useEffect} from "react";
+import {ReactNode, useEffect, useState} from "react";
 import Link from "next/link";
 import {usePathname, useRouter} from "next/navigation";
 import {BarChart3, Boxes, FileText, Map, ScrollText} from "lucide-react";
 import {useQueryClient} from "@tanstack/react-query";
 import {getAccessToken} from "@/shared/api/client";
-import {startRealtime} from "@/shared/realtime/realtime";
+import {RealtimeState, startRealtime} from "@/shared/realtime/realtime";
 
 const nav = [
   {href: "/map", label: "地图", icon: Map},
@@ -20,13 +20,14 @@ export function AppShell({children, title}: {children: ReactNode; title: string}
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [realtimeState, setRealtimeState] = useState<RealtimeState>("connecting");
 
   useEffect(() => {
     if (!getAccessToken()) {
       router.replace("/login");
       return;
     }
-    return startRealtime(queryClient);
+    return startRealtime(queryClient, setRealtimeState);
   }, [queryClient, router]);
 
   return (
@@ -48,6 +49,7 @@ export function AppShell({children, title}: {children: ReactNode; title: string}
       <main className="content">
         <div className="topbar">
           <div className="page-title">{title}</div>
+          <span className="connection-badge" data-state={realtimeState} data-testid="realtime-state">{realtimeState}</span>
         </div>
         {children}
       </main>

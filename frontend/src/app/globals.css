@@ -294,3 +294,82 @@ button:hover {
   background: #fff5f5;
   border-color: var(--danger);
 }
+
+.connection-badge {
+  min-width: 96px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: #fff;
+  font-size: 12px;
+}
+
+.connection-badge[data-state="ws"] {
+  color: var(--ok);
+  border-color: rgba(35, 123, 75, 0.35);
+  background: #f0fdf4;
+}
+
+.connection-badge[data-state="polling"] {
+  color: var(--warn);
+  border-color: rgba(183, 121, 31, 0.35);
+  background: #fffbeb;
+}
+
+.connection-badge[data-state="disconnected"] {
+  color: var(--danger);
+  border-color: rgba(180, 35, 24, 0.35);
+  background: #fff5f5;
+}
+
+.secondary-button {
+  height: 32px;
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+.timeline {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.timeline-title {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.timeline-item small,
+.muted {
+  color: var(--muted);
+}
+
+.progress-cell {
+  width: 150px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.progress-cell progress {
+  width: 100%;
+}

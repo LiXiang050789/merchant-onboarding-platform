@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from backend.app.models import (
     Batch,
@@ -28,6 +29,16 @@ REQUIRED_PAYLOAD = {
     FormType.product: {"product_name": "咖啡豆", "sku": "SKU-001"},
     FormType.report: {"report_name": "日报", "period": "2026-09"},
 }
+
+
+async def wait_for_batch_status(session, batch_id: str, expected: BatchStatus) -> Batch:
+    for _ in range(40):
+        await session.rollback()
+        batch = await session.get(Batch, batch_id)
+        if batch is not None and batch.status == expected:
+            return batch
+        await asyncio.sleep(0.05)
+    pytest.fail(f"batch {batch_id} did not reach {expected}")
 
 
 def make_form(
@@ -131,18 +142,20 @@ async def test_run_batch_publishes_four_type_pipeline_and_is_idempotent(client, 
     batch_id = build.json()["batches"][0]["id"]
 
     first = await client.post(f"/api/v1/batches/{batch_id}/run", headers=headers)
-    second = await client.post(f"/api/v1/batches/{batch_id}/run", headers=headers)
 
-    assert first.status_code == 200, first.text
-    assert first.json()["status"] == BatchStatus.completed.value
-    assert first.json()["published"] == 4
-    assert set(first.json()["checkpoint_stages"]) == {
+    assert first.status_code == 202, first.text
+    assert first.json()["status"] == BatchStatus.processing.value
+    await wait_for_batch_status(session, batch_id, BatchStatus.completed)
+    checkpoints = (await session.execute(select(BatchCheckpoint).where(BatchCheckpoint.batch_id == batch_id))).scalars().all()
+    assert {item.stage for item in checkpoints} == {
         "merchant_info_pipeline",
         "property_pipeline",
         "product_pipeline",
         "report_pipeline",
     }
-    assert second.status_code == 200
+
+    second = await client.post(f"/api/v1/batches/{batch_id}/run", headers=headers)
+    assert second.status_code == 202
     assert second.json()["status"] == BatchStatus.completed.value
     assert second.json()["processed"] == 0
 
@@ -162,9 +175,9 @@ async def test_run_batch_writes_dlq_and_retry_can_resume(client, session):
     batch_id = build.json()["batches"][0]["id"]
 
     failed = await client.post(f"/api/v1/batches/{batch_id}/run", headers=headers)
-    assert failed.status_code == 200, failed.text
-    assert failed.json()["status"] == BatchStatus.failed.value
-    assert failed.json()["failed"] == 1
+    assert failed.status_code == 202, failed.text
+    assert failed.json()["status"] == BatchStatus.processing.value
+    await wait_for_batch_status(session, batch_id, BatchStatus.failed)
 
     dlq = await session.scalar(select(DLQItem).where(DLQItem.form_id == bad.id))
     assert dlq is not None
@@ -172,15 +185,14 @@ async def test_run_batch_writes_dlq_and_retry_can_resume(client, session):
     checkpoint = await session.scalar(select(BatchCheckpoint).where(BatchCheckpoint.batch_id == batch_id))
     assert checkpoint is not None
 
-    bad.payload = dict(REQUIRED_PAYLOAD[FormType.product])
-    batch = await session.get(Batch, batch_id)
-    assert batch is not None
-    batch.status = BatchStatus.created
+    await session.execute(update(Form).where(Form.id == bad.id).values(payload=dict(REQUIRED_PAYLOAD[FormType.product])))
+    await session.execute(update(Batch).where(Batch.id == batch_id).values(status=BatchStatus.created))
     await session.commit()
 
     resumed = await client.post(f"/api/v1/batches/{batch_id}/run", headers=headers)
-    assert resumed.status_code == 200, resumed.text
-    assert resumed.json()["status"] == BatchStatus.completed.value
+    assert resumed.status_code == 202, resumed.text
+    assert resumed.json()["status"] == BatchStatus.processing.value
+    await wait_for_batch_status(session, batch_id, BatchStatus.completed)
 
     refreshed_bad = await session.get(Form, bad.id)
     assert refreshed_bad is not None
