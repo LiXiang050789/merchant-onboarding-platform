@@ -8,6 +8,7 @@
 - 2026-10-01，本次会话目标：P8 撤回机制（模型/状态机/API/批次联动/统计口径、前端撤回动线、测试与证据）。
 - 2026-10-01，Claude 抽查 P8：实现层逐条核对 §10.1 + 独立复跑 9/38；发现并修复 run-on-canceled 边界（`80e03bd`）；验证记录见文末。
 - 2026-10-01，Claude 抽查 P9：独立复跑 7/41、亲跑 realtime E2E（2919ms）、浏览器探针；发现 admin 跨租户实时缺口，用户批复全局订阅 → P9.1 下发 Codex（`codex-p9修复prompt.md`），验证记录见文末。
+- 2026-10-01，Claude 终核 P9.1：复跑 3/44、亲跑 E2E 2 passed（跨租户 tenant_13 批次 1026ms 进度条实况核过）——缺陷闭环。
 - 2026-09-19，本次会话目标：RAG 从 retrieval-only 升级为 DeepSeek 真实生成；补 `.env` 加载、错误降级、证据与文档同步。
 - 2026-09-19，本次会话目标：P6 加分项（按用户指定顺序：Spark 同构 → RAG → 报表预测），随后进入 P7 收尾（架构文档、跨端方案、面试问答手册、README、演示脚本、quiz、完整性审计）。
 - 2026-09-19，本次会话目标：P6 扩展层（先按抽查要求依次清掉 P4 遗留 4 项、地图 CSS + E2E 断言、指标修正；再实现文档域 CRUD/版本/软删/jieba 检索）。
@@ -31,7 +32,7 @@
 | P6 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_docs.py --junitxml=artifacts/test/p6_docs.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 npm run test:e2e` pass；`scripts/compare_spark_python.py` pass；`scripts/rag_demo.py` pass；`scripts/forecast_reports.py` pass | `artifacts/test/p6_docs.xml`; `artifacts/test/backend_all.xml`; `artifacts/openapi.json`; `artifacts/frontend/perf.json`; `artifacts/playwright/map.png`; `artifacts/bench/spark_compare.json`; `artifacts/rag/rag_demo.json`; `artifacts/bench/report_forecast.json`; `docs/04-知识文档存储与RAG设计.md` | 本次 RAG 升级提交 | RAG 已升级为 `mode=deepseek` 真实生成；无 key/调用失败时保留 retrieval-only 降级 |
 | P7 | 已完成 | `backend/.venv/bin/python scripts/audit_requirements.py` pass | `artifacts/audit/requirements.json`; `docs/01-系统架构设计.md`; `docs/05-跨端适配方案.md`; `docs/09-面试问答手册.md`; `docs/10-AI协作声明.md`; `docs/quiz.md`; `README.md`; `scripts/demo.sh` | 待提交 P7 收尾 | 无 |
 | P8 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_withdraw.py --junitxml=artifacts/test/p8.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e -- withdraw.spec.ts` pass | `artifacts/test/p8.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/withdraw.png`; `artifacts/data/load_summary.json`; `docs/03-提交成功率统计设计.md`; `docs/06-批处理流程设计.md` | `66b46c7`; `40721cd`; `f5fb7df` | Claude 抽查 PASS（2026-10-01）；run-on-canceled 边界收紧修复：`80e03bd` |
-| P9 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_worker.py backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p9.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 npx playwright test tests/e2e/realtime.spec.ts --project=chromium` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p9.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/realtime_before.png`; `artifacts/playwright/realtime_after.png`; `artifacts/openapi.json`; `artifacts/data/load_summary.json`; `docs/02-地理聚合与性能优化.md`; `docs/06-批处理流程设计.md` | `9618df3` | Claude 抽查主体 PASS（2026-10-01）；跨租户 admin 实时缺口 → 用户批复全局订阅修复（P9.1，`codex-p9修复prompt.md`，待 P9.1 核验后关闭） |
+| P9 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_worker.py backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p9.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 npx playwright test tests/e2e/realtime.spec.ts --project=chromium` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p9.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/realtime_before.png`; `artifacts/playwright/realtime_after.png`; `artifacts/openapi.json`; `artifacts/data/load_summary.json`; `docs/02-地理聚合与性能优化.md`; `docs/06-批处理流程设计.md` | `9618df3` | 抽查主体 PASS（2026-10-01）；跨租户 admin 实时缺口 → 用户批复全局订阅修复 P9.1，**已终核关闭**（`77036fa`; `a17fdd4`; `bc5ef00`） |
 
 ## Blocker
 
@@ -291,7 +292,7 @@
 - 已知限制（非缺陷）：worker 单实例前提，多实例生产需分布式锁或独立队列（已注 README/docs/06）。
 - 遗留（低优观察）：①`build` 接口对每个新批次各发一条 `batch.status_changed`（204 批→204 条，前端 invalidate 合并为约 13 次列表刷新，日志实证；功能正确、有冗余，v3 遗留，建议后续合并为单条聚合事件）；②worker 异常为静默吞（下一 tick 重试），建议补一行 `logger.exception`。
 
-### P9.1 admin 实时通道全局化修复（2026-10-01）— PASS
+### P9.1 admin 实时通道全局化修复（执行方记录，2026-10-01）
 
 - 缺陷：admin 的 REST 视角可操作全局批次，但 P9 WebSocket/轮询只订阅 token tenant，导致 admin 运行非 `tenant_01` 批次时收不到 `batch.progress` / `batch.status_changed`，页面要刷新才更新。
 - 用户批复口径：admin 实时通道改为全局订阅；普通租户账号行为不变，事件仍按租户隔离。
@@ -300,3 +301,11 @@
 - E2E 证据：表单实时流转 `5911ms`；admin 运行非本租户批次 `batch_fd77996c5e324a7ca3d`，实时进度/终态耗时 `1005ms`。
 - 证据路径：`artifacts/test/p9_realtime_scope.xml`、`artifacts/test/backend_all.xml`、`artifacts/playwright/realtime_before.png`、`artifacts/playwright/realtime_after.png`、`artifacts/playwright/realtime_admin_batch.png`、`artifacts/data/load_summary.json`。
 - Commit：`77036fa`; `a17fdd4`。
+
+### P9.1 终核（Claude，2026-10-01）— PASS
+
+- 实现逐行核：`realtime.py` 增 `GLOBAL_TOPIC="*"`；`publish_event` 同时推租户订阅者与全局订阅者（set 去重）；`events_since(None)` 全量返回且向后兼容（既有 `events_since("tenant_a", 0)` 调用不受影响）；`main.py` WS 按 `claims.role=="admin"` 选 topic（`unsubscribe` 用同 topic）、`/events` admin→None。普通租户路径与改前逐字节一致（由隔离反例测试实证）。
+- 测试矩阵核：`test_realtime_scope.py` 3 条真实有效——单元级（全局收 / 同租户收 / 异租户**不**收）+ admin 轮询可见 + 租户轮询不可见；fixture 清理 `_events`/`_subscribers` 防串扰。
+- 独立复跑：`test_realtime_scope.py` → 3 passed；全量 → **44 passed**（94.7s）。
+- 亲跑 E2E（三张截图由我方运行重生成）：`realtime.spec.ts` → **2 passed**——①表单实时流转 2905ms（双截图复核无刷新）；②admin 跨租户批次 `batch_ffe44ef965734c78851`（DB 实证 **tenant_13**）**1026ms** 内 `batch-progress` 2/2 渲染 + 状态 completed；截图 `realtime_admin_batch.png` 实况核过（进度列蓝色进度条 + completed + ws 指示）。该批次为本轮新构建的随机批次（与执行方运行的 id 不同），非预设路径。
+- 结论：缺陷闭环，P9 行遗留关闭。
