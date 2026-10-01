@@ -17,6 +17,23 @@ export function getAccessToken(): string | null {
   return window.localStorage.getItem("merchant_access_token");
 }
 
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const payload = token.split(".")[1];
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(window.atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "="))) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+export function getCurrentUserId(): string | null {
+  const token = getAccessToken();
+  if (!token) return null;
+  const payload = decodeJwtPayload(token);
+  return typeof payload?.sub === "string" ? payload.sub : null;
+}
+
 export function setTokens(tokens: TokenPair): void {
   window.localStorage.setItem("merchant_access_token", tokens.access_token);
   window.localStorage.setItem("merchant_refresh_token", tokens.refresh_token);
@@ -59,6 +76,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   forbidden: "当前账号无此操作权限（需要管理员或对应区域运营）",
   not_found: "目标资源不存在或无权访问",
   illegal_transition: "当前状态不允许该流转",
+  not_withdrawable: "当前状态不允许撤回",
+  batch_locked: "批次已开始处理，无法撤回",
   version_conflict: "版本冲突：数据已被更新，请刷新后重试",
   invalid_bbox: "视野范围参数不合法",
   validation_error: "提交的数据未通过校验"

@@ -11,7 +11,10 @@ export type FormRow = {
   industry: string;
   lng: number;
   lat: number;
+  created_by: string;
   created_at: string;
+  withdrawn_at?: string | null;
+  withdraw_reason?: string | null;
 };
 
 export type FormList = {items: FormRow[]; total: number; page: number; size: number};
@@ -19,4 +22,11 @@ export type FormList = {items: FormRow[]; total: number; page: number; size: num
 export function fetchForms(city: string, status: string) {
   const params = new URLSearchParams({city, status, size: "20"});
   return apiFetch<FormList>(`/api/v1/forms?${params.toString()}`);
+}
+
+export function withdrawForm(formId: string, reason: string | null) {
+  return apiFetch<FormRow>(`/api/v1/forms/${formId}/withdraw`, {
+    method: "POST",
+    body: JSON.stringify({reason})
+  });
 }

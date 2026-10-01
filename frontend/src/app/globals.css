@@ -281,3 +281,16 @@ button:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.danger-button {
+  border-color: var(--danger);
+  color: var(--danger);
+  border-radius: 6px;
+  height: 32px;
+  padding: 0 10px;
+}
+
+.danger-button:hover {
+  background: #fff5f5;
+  border-color: var(--danger);
+}
