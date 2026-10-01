@@ -5,6 +5,7 @@
 ## 会话记录
 
 - 2026-10-01，本次会话目标：P8 撤回机制（模型/状态机/API/批次联动/统计口径、前端撤回动线、测试与证据）。
+- 2026-10-01，Claude 抽查 P8：实现层逐条核对 §10.1 + 独立复跑 9/38；发现并修复 run-on-canceled 边界（`80e03bd`）；验证记录见文末。
 - 2026-09-19，本次会话目标：RAG 从 retrieval-only 升级为 DeepSeek 真实生成；补 `.env` 加载、错误降级、证据与文档同步。
 - 2026-09-19，本次会话目标：P6 加分项（按用户指定顺序：Spark 同构 → RAG → 报表预测），随后进入 P7 收尾（架构文档、跨端方案、面试问答手册、README、演示脚本、quiz、完整性审计）。
 - 2026-09-19，本次会话目标：P6 扩展层（先按抽查要求依次清掉 P4 遗留 4 项、地图 CSS + E2E 断言、指标修正；再实现文档域 CRUD/版本/软删/jieba 检索）。
@@ -27,7 +28,7 @@
 | P5 | 已完成 | `cd frontend && npm run build` pass；`cd frontend && npm run test:e2e` pass；`backend/.venv/bin/pytest backend/tests/test_frontend_contract.py --junitxml=artifacts/test/p5_backend.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass | `artifacts/playwright/map.png`; `artifacts/frontend/perf.json`; `artifacts/test/p5_backend.xml`; `artifacts/test/backend_all.xml`; `docs/07-前端性能与缓存报告.md` | `8bdb7a7` | 无 |
 | P6 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_docs.py --junitxml=artifacts/test/p6_docs.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 npm run test:e2e` pass；`scripts/compare_spark_python.py` pass；`scripts/rag_demo.py` pass；`scripts/forecast_reports.py` pass | `artifacts/test/p6_docs.xml`; `artifacts/test/backend_all.xml`; `artifacts/openapi.json`; `artifacts/frontend/perf.json`; `artifacts/playwright/map.png`; `artifacts/bench/spark_compare.json`; `artifacts/rag/rag_demo.json`; `artifacts/bench/report_forecast.json`; `docs/04-知识文档存储与RAG设计.md` | 本次 RAG 升级提交 | RAG 已升级为 `mode=deepseek` 真实生成；无 key/调用失败时保留 retrieval-only 降级 |
 | P7 | 已完成 | `backend/.venv/bin/python scripts/audit_requirements.py` pass | `artifacts/audit/requirements.json`; `docs/01-系统架构设计.md`; `docs/05-跨端适配方案.md`; `docs/09-面试问答手册.md`; `docs/10-AI协作声明.md`; `docs/quiz.md`; `README.md`; `scripts/demo.sh` | 待提交 P7 收尾 | 无 |
-| P8 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_withdraw.py --junitxml=artifacts/test/p8.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e -- withdraw.spec.ts` pass | `artifacts/test/p8.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/withdraw.png`; `artifacts/data/load_summary.json`; `docs/03-提交成功率统计设计.md`; `docs/06-批处理流程设计.md` | `66b46c7`; `40721cd`; `f5fb7df` | 无 |
+| P8 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_withdraw.py --junitxml=artifacts/test/p8.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e -- withdraw.spec.ts` pass | `artifacts/test/p8.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/withdraw.png`; `artifacts/data/load_summary.json`; `docs/03-提交成功率统计设计.md`; `docs/06-批处理流程设计.md` | `66b46c7`; `40721cd`; `f5fb7df` | Claude 抽查 PASS（2026-10-01）；run-on-canceled 边界收紧修复：`80e03bd` |
 
 ## Blocker
 
@@ -258,3 +259,15 @@
 - 用户决定：`docs/09-面试问答手册.md` 与 `docs/quiz.md` 属私人面试准备材料，从仓库移除（本地留存于仓库外目录）；01–08 交付文档、00 系列过程证据、EXECUTION 账本、10 AI 声明保留。
 - 处理：物理移出 + git 移除（按用户选择**不重写历史**——旧 commit 中仍可检索到这两个文件；如需彻底清除需 filter-repo + force push）。
 - 同步：README 关键文档列表移除 09 引用；《代码理解》md 的引用改为本地路径。00-施工书/EXECUTION 中的历史记录条目保持原样（如实记录当时的计划）。
+
+### P8 抽查（2026-10-01）— PASS（含 1 项规格未覆盖边界的收紧修复）
+
+- 实现层逐条核对（不只看测试）：
+  - 统计口径 `backend/app/stats.py:155-157,163-164`：`withdrawn` 键集从端到端分母剔除（`active_denominator_keys = denominator_keys - withdrawn`），新增 `withdrawal_rate = 撤回键 ÷ 去重 attempts`；submit/db 两口径分母保持全量 —— 与 §10.1 撤回国口径一致。
+  - 撤回端点 `backend/app/main.py:289-306`：条件更新 `WHERE status=previous`，0 行受影响→409 `not_withdrawable`（并发安全）；`main.py:285-287`：来源 `batched` 时先 `SELECT ... FOR UPDATE` 锁批次行，仅 `batch.status=created` 允许（否则 409 `batch_locked`）；`main.py:308-313`：出批=删 `batch_items` 行 + `item_count-1` + 空批置 `canceled`；`main.py:323`：`form_withdrawn` 事件复用表单原 `idempotency_key`（统计交集口径的关键前提）；`main.py:270-274`：跨租户 404 / 同租户非创建者 403。
+  - 管线配合 `backend/app/batch_pipeline.py:223`：对 `withdrawn` 显式跳过（出批删除 BatchItem 后本就不可达，双保险）。
+  - 测试矩阵（`backend/tests/test_withdraw.py`，9 条）：创建者+审计+事件 / 同租户他人 403 + 跨租户 404 / 终态 published 与重复撤回 409 / 空批移除 BatchItem 且 `canceled` / 非空批保持 `created` / 批已启动 `batch_locked` / 管线跳过 withdrawn / 统计数值断言（撤回率 1/3、端到端 1/2）/ run-on-canceled 回归（新增）。
+- 独立复跑（Claude 亲自执行，非引用执行方产物）：`test_withdraw.py` 9 passed（15.3s）；全量 `backend/tests` 38 passed（65.3s）；`npx tsc --noEmit` 通过。JUnit 产物已刷新至 HEAD（`artifacts/test/p8.xml`、`artifacts/test/backend_all.xml`）。
+- 抽查发现并修复（规格未覆盖的边缘行为）：对已空置 `canceled` 的批次调 `POST /api/v1/batches/{id}/run`，原实现会将其推进为 `completed`（0 条处理），与"空批 canceled"的终态语义矛盾。修复：run 端点前置 409 `{"code":"batch_canceled"}`（`main.py:579-580`），前端错误映射增中文文案（`client.ts:81`），回归测试走真实动线（撤回→空批 canceled→run 被拒→状态保持）。commit `80e03bd`。
+- 未为此微修重跑浏览器 E2E 的说明：修复只新增一个此前不存在的错误分支（canceled 批的运行路径），撤回动线（`withdraw.png` 证据路径）未受影响；P9 全量重跑 E2E 时自然覆盖。
+- 结论：P8 DoD 达标、实现与 §10.1 逐条一致 —— **PASS**。
