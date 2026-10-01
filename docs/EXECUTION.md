@@ -7,6 +7,7 @@
 - 2026-10-01，本次会话目标：P9 实时流转（自动状态 worker、批次异步进度、前端实时指示/时间线、不刷新 E2E 证据）。
 - 2026-10-01，本次会话目标：P8 撤回机制（模型/状态机/API/批次联动/统计口径、前端撤回动线、测试与证据）。
 - 2026-10-01，Claude 抽查 P8：实现层逐条核对 §10.1 + 独立复跑 9/38；发现并修复 run-on-canceled 边界（`80e03bd`）；验证记录见文末。
+- 2026-10-01，Claude 抽查 P9：独立复跑 7/41、亲跑 realtime E2E（2919ms）、浏览器探针；发现 admin 跨租户实时缺口，用户批复全局订阅 → P9.1 下发 Codex（`codex-p9修复prompt.md`），验证记录见文末。
 - 2026-09-19，本次会话目标：RAG 从 retrieval-only 升级为 DeepSeek 真实生成；补 `.env` 加载、错误降级、证据与文档同步。
 - 2026-09-19，本次会话目标：P6 加分项（按用户指定顺序：Spark 同构 → RAG → 报表预测），随后进入 P7 收尾（架构文档、跨端方案、面试问答手册、README、演示脚本、quiz、完整性审计）。
 - 2026-09-19，本次会话目标：P6 扩展层（先按抽查要求依次清掉 P4 遗留 4 项、地图 CSS + E2E 断言、指标修正；再实现文档域 CRUD/版本/软删/jieba 检索）。
@@ -30,7 +31,7 @@
 | P6 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_docs.py --junitxml=artifacts/test/p6_docs.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 npm run test:e2e` pass；`scripts/compare_spark_python.py` pass；`scripts/rag_demo.py` pass；`scripts/forecast_reports.py` pass | `artifacts/test/p6_docs.xml`; `artifacts/test/backend_all.xml`; `artifacts/openapi.json`; `artifacts/frontend/perf.json`; `artifacts/playwright/map.png`; `artifacts/bench/spark_compare.json`; `artifacts/rag/rag_demo.json`; `artifacts/bench/report_forecast.json`; `docs/04-知识文档存储与RAG设计.md` | 本次 RAG 升级提交 | RAG 已升级为 `mode=deepseek` 真实生成；无 key/调用失败时保留 retrieval-only 降级 |
 | P7 | 已完成 | `backend/.venv/bin/python scripts/audit_requirements.py` pass | `artifacts/audit/requirements.json`; `docs/01-系统架构设计.md`; `docs/05-跨端适配方案.md`; `docs/09-面试问答手册.md`; `docs/10-AI协作声明.md`; `docs/quiz.md`; `README.md`; `scripts/demo.sh` | 待提交 P7 收尾 | 无 |
 | P8 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_withdraw.py --junitxml=artifacts/test/p8.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e -- withdraw.spec.ts` pass | `artifacts/test/p8.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/withdraw.png`; `artifacts/data/load_summary.json`; `docs/03-提交成功率统计设计.md`; `docs/06-批处理流程设计.md` | `66b46c7`; `40721cd`; `f5fb7df` | Claude 抽查 PASS（2026-10-01）；run-on-canceled 边界收紧修复：`80e03bd` |
-| P9 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_worker.py backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p9.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 npx playwright test tests/e2e/realtime.spec.ts --project=chromium` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p9.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/realtime_before.png`; `artifacts/playwright/realtime_after.png`; `artifacts/openapi.json`; `artifacts/data/load_summary.json`; `docs/02-地理聚合与性能优化.md`; `docs/06-批处理流程设计.md` | `9618df3` | 无 |
+| P9 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_worker.py backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p9.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 npx playwright test tests/e2e/realtime.spec.ts --project=chromium` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass | `artifacts/test/p9.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/realtime_before.png`; `artifacts/playwright/realtime_after.png`; `artifacts/openapi.json`; `artifacts/data/load_summary.json`; `docs/02-地理聚合与性能优化.md`; `docs/06-批处理流程设计.md` | `9618df3` | Claude 抽查主体 PASS（2026-10-01）；跨租户 admin 实时缺口 → 用户批复全局订阅修复（P9.1，`codex-p9修复prompt.md`，待 P9.1 核验后关闭） |
 
 ## Blocker
 
@@ -274,11 +275,18 @@
 - 未为此微修重跑浏览器 E2E 的说明：修复只新增一个此前不存在的错误分支（canceled 批的运行路径），撤回动线（`withdraw.png` 证据路径）未受影响；P9 全量重跑 E2E 时自然覆盖。
 - 结论：P8 DoD 达标、实现与 §10.1 逐条一致 —— **PASS**。
 
-### P9 实时流转（2026-10-01）— PASS
+### P9 抽查（2026-10-01）— 主体 PASS；1 项跨租户实时缺口已批复修复（P9.1）
 
-- 后端：新增 FastAPI lifespan 状态 worker，默认演示间隔 5s（`VALIDATE_WORKER_INTERVAL_SECONDS`），单轮处理 `submitted -> validating -> validated/rejected`，每步写 `form_audit_events` 并发布 `form.status_changed`；worker 首轮先等待一个周期，保证周期语义清晰。
-- 批处理：`POST /api/v1/batches/{id}/run` 改为 `202 Accepted`，后台运行管线并发布 `batch.progress` / `batch.status_changed`；测试改为先断言接收态，再轮询终态与 checkpoint/DLQ。
-- 前端：顶部实时连接指示（WS/轮询/断开）、表单详情时间线、批次进度条；WebSocket 断开后继续走 `/events?since=...` 轮询。
-- 独立验证：`backend/.venv/bin/pytest backend/tests/test_worker.py backend/tests/test_batch_pipeline.py --junitxml=artifacts/test/p9.xml` → 7 passed；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` → 41 passed；`cd frontend && npm run build` → pass；realtime E2E → 1 passed，状态传播 `4956ms`。
-- 证据：`artifacts/test/p9.xml`、`artifacts/test/backend_all.xml`、`artifacts/playwright/realtime_before.png`、`artifacts/playwright/realtime_after.png`、`artifacts/openapi.json`、`artifacts/data/load_summary.json`。
-- 说明：当前 worker 为单实例演示路径，多实例生产需加分布式锁或迁移到独立队列；本 Phase 不做 P10 仓库瘦身。
+核验人：Claude（独立复跑 + 浏览器实测 + 直连 WS 抓证；不引用执行方自述）。
+
+- 已核通过（逐项有证据）：
+  1. worker 实现与 §10.2 一致：CAS 条件更新（`status_worker.py:36-48`，0 行受影响即放弃）、每步写审计（`status_auto_changed`，actor=`system_worker`）、发 `form.status_changed`；间隔可配（`config.py:34`：dev 默认 5s / 生产 30s；`.env.example` 已注）；lifespan 启停（`main.py:57-63`）；校验含「字段完整性 + 坐标范围」（§10.2 明文要求）。
+  2. 异步 run：`POST /batches/{id}/run` → 202 + processing、后台任务跑管线、每 10 条或终点发 `batch.progress`、完成发 `batch.status_changed`、失败 rollback + `logger.exception`。P4 测试语义升级逐条比对**非弱化**（`published==4` 由「checkpoint 四阶段集合 + business_events==4」等价替换；同步断言改终态轮询），§10.2 明文允许。
+  3. 前端接线正确：`realtime.ts` 状态机（connecting→ws→polling→disconnected）+ `batch-progress` CustomEvent；时间线读 `/forms/{id}/audit`；进度条 `progressByBatch`（单元格随行渲染）。
+  4. 独立复跑：`test_worker.py + test_batch_pipeline.py` → **7 passed**；全量 **41 passed**；`npx tsc --noEmit` 通过。
+  5. 「不刷新自动推进」证据真实：亲自重跑 `realtime.spec.ts` → **1 passed，传播 2919ms**；`realtime_before/after.png` 由本次运行重新生成（同一行 `form_bad39…` submitted→validated，观察段无 reload/goto、无 route 拦截；全库无 `refetchInterval`——行更新只能来自实时链路）；日志实证观察窗内无用户操作，4.956s 等待段只能由推送解释。
+  6. 浏览器实测（一次性探针，未入库）：时间线面板正常（worker 审计链 + `system_worker` 署名）；受控复刻 2/2 通过：admin 运行 tenant_01 批次 → `batch-progress-<id>` 单元格渲染（4/4）。
+- 抽查发现（真缺陷，已复现取证）：**admin 的实时通道仅覆盖本租户**（`realtime.py:34-45` + WS/poll 端点按 token tenant 订阅），而 admin 的 REST 视角是全局的 → admin 运行/观察其他租户的批次（192/204）时进度与终态不推送。证据：Python 直连 admin WS 运行 tenant_07 批次 20 秒无任何事件（批次已在后台 completed）；浏览器探针无进度单元格；用户本人运行 `batch_fe3cc…（tenant_07）` 同现象。同一缺陷也影响 admin 观察其他租户的表单流转。
+- 处置：**用户 2026-10-01 批复口径 = admin 全局订阅**（普通租户隔离不放松）；修复已下发 `codex-p9修复prompt.md`（P9.1：realtime/端点改造 + 3 条新 pytest + 跨租户 E2E + 文档/账本），Claude 负责终核。
+- 已知限制（非缺陷）：worker 单实例前提，多实例生产需分布式锁或独立队列（已注 README/docs/06）。
+- 遗留（低优观察）：①`build` 接口对每个新批次各发一条 `batch.status_changed`（204 批→204 条，前端 invalidate 合并为约 13 次列表刷新，日志实证；功能正确、有冗余，v3 遗留，建议后续合并为单条聚合事件）；②worker 异常为静默吞（下一 tick 重试），建议补一行 `logger.exception`。
