@@ -10,7 +10,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from sqlalchemy import delete, func, insert, select
+from sqlalchemy import delete, func, insert, select, text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,7 +36,7 @@ from backend.app.schemas import REQUIRED_BY_TYPE  # noqa: E402
 from backend.app.security import hash_password  # noqa: E402
 
 
-VALID_STATUSES = {"draft", "submitted", "validating", "validated", "rejected", "batched", "processing", "published", "failed"}
+VALID_STATUSES = {"draft", "submitted", "validating", "validated", "rejected", "batched", "processing", "published", "failed", "withdrawn"}
 DEMO_BATCH_WORKSET_SIZE = 1500
 
 
@@ -157,6 +157,40 @@ def events_for_row(row: dict, inserted: bool, reason: str | None) -> list[dict]:
     return events
 
 
+async def ensure_v4_schema(conn) -> None:
+    database = await conn.scalar(text("SELECT DATABASE()"))
+    result = await conn.execute(
+        text(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+            "WHERE TABLE_SCHEMA = :database AND TABLE_NAME = 'forms'"
+        ),
+        {"database": database},
+    )
+    columns = {row[0] for row in result}
+    if "withdrawn_at" not in columns:
+        await conn.execute(text("ALTER TABLE forms ADD COLUMN withdrawn_at DATETIME NULL"))
+    if "withdraw_reason" not in columns:
+        await conn.execute(text("ALTER TABLE forms ADD COLUMN withdraw_reason VARCHAR(255) NULL"))
+    await conn.execute(
+        text(
+            "ALTER TABLE forms MODIFY status "
+            "ENUM('draft','submitted','validating','validated','rejected','batched','processing','published','failed','withdrawn') NOT NULL"
+        )
+    )
+    await conn.execute(
+        text(
+            "ALTER TABLE batches MODIFY status "
+            "ENUM('created','processing','completed','failed','canceled') NOT NULL"
+        )
+    )
+    await conn.execute(
+        text(
+            "ALTER TABLE submission_events MODIFY event_type "
+            "ENUM('submit_attempt','submit_api_success','submit_api_failed','db_insert_success','validation_failed','business_published','form_withdrawn') NOT NULL"
+        )
+    )
+
+
 async def reset_tables(conn) -> None:
     for table in [DLQItem, BatchCheckpoint, BatchItem, Batch, FormAuditEvent, SubmissionEvent, Form, User, Tenant]:
         await conn.execute(delete(table))
@@ -248,6 +282,7 @@ async def main_async(args) -> int:
     engine = create_async_engine(settings.mysql_dsn, pool_pre_ping=True)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await ensure_v4_schema(conn)
         if args.reset:
             await reset_tables(conn)
         await bulk_insert(conn, Tenant, tenant_rows)

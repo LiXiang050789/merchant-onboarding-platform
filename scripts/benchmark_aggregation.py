@@ -34,7 +34,7 @@ from backend.app.models import Form  # noqa: E402
 from sqlalchemy.ext.asyncio import create_async_engine  # noqa: E402
 
 
-VALID_STATUSES = {"draft", "submitted", "validating", "validated", "rejected", "batched", "processing", "published", "failed"}
+VALID_STATUSES = {"draft", "submitted", "validating", "validated", "rejected", "batched", "processing", "published", "failed", "withdrawn"}
 
 
 def load_points(path: Path, limit: int) -> PointSet:

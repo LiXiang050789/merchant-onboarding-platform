@@ -78,6 +78,8 @@ class FormOut(BaseModel):
     created_by: str
     created_at: datetime
     updated_at: datetime
+    withdrawn_at: datetime | None = None
+    withdraw_reason: str | None = None
 
 
 class FormListResponse(BaseModel):
@@ -91,6 +93,10 @@ class StatusPatch(BaseModel):
     target_status: FormStatus
 
 
+class WithdrawRequest(BaseModel):
+    reason: str | None = Field(default=None, max_length=255)
+
+
 class SuccessRateMetric(BaseModel):
     numerator: int
     denominator: int
@@ -102,6 +108,7 @@ class SuccessRateResponse(BaseModel):
     submit_success_rate: SuccessRateMetric
     db_success_rate: SuccessRateMetric
     end_to_end_success_rate: SuccessRateMetric
+    withdrawal_rate: SuccessRateMetric
     deduped_attempts: int
 
 

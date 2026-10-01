@@ -220,7 +220,7 @@ async def run_batch(session: AsyncSession, batch: Batch) -> RunSummary:
 
     for form in forms:
         stage = PIPELINE_STAGE[form.form_type]
-        if form.status == FormStatus.published:
+        if form.status in {FormStatus.published, FormStatus.withdrawn}:
             continue
         if form.status == FormStatus.failed and form.retry_count >= 3:
             failed += 1

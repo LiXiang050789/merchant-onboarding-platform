@@ -152,13 +152,16 @@ async def compute_success_rate(
     denominator = len(denominator_keys)
     submit_success = len(denominator_keys & by_type[SubmissionEventType.submit_api_success])
     db_success = len(denominator_keys & by_type[SubmissionEventType.db_insert_success])
-    end_to_end = len(denominator_keys & by_type[SubmissionEventType.business_published])
+    withdrawn = denominator_keys & by_type[SubmissionEventType.form_withdrawn]
+    active_denominator_keys = denominator_keys - withdrawn
+    end_to_end = len(active_denominator_keys & by_type[SubmissionEventType.business_published])
 
     payload = {
         "window": f"{start.isoformat()}..{end.isoformat()}",
         "submit_success_rate": metric(submit_success, denominator),
         "db_success_rate": metric(db_success, denominator),
-        "end_to_end_success_rate": metric(end_to_end, denominator),
+        "end_to_end_success_rate": metric(end_to_end, len(active_denominator_keys)),
+        "withdrawal_rate": metric(len(withdrawn), denominator),
         "deduped_attempts": denominator,
         "cache_hit": False,
     }

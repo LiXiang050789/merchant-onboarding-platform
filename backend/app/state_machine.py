@@ -4,15 +4,16 @@ from .models import FormStatus
 
 
 ALLOWED_TRANSITIONS: dict[FormStatus, set[FormStatus]] = {
-    FormStatus.draft: {FormStatus.submitted},
-    FormStatus.submitted: {FormStatus.validating},
-    FormStatus.validating: {FormStatus.validated, FormStatus.rejected},
-    FormStatus.validated: {FormStatus.batched},
-    FormStatus.batched: {FormStatus.processing},
+    FormStatus.draft: {FormStatus.submitted, FormStatus.withdrawn},
+    FormStatus.submitted: {FormStatus.validating, FormStatus.withdrawn},
+    FormStatus.validating: {FormStatus.validated, FormStatus.rejected, FormStatus.withdrawn},
+    FormStatus.validated: {FormStatus.batched, FormStatus.withdrawn},
+    FormStatus.batched: {FormStatus.processing, FormStatus.withdrawn},
     FormStatus.processing: {FormStatus.published, FormStatus.failed},
     FormStatus.failed: {FormStatus.processing},
     FormStatus.rejected: set(),
     FormStatus.published: set(),
+    FormStatus.withdrawn: set(),
 }
 
 

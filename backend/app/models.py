@@ -37,6 +37,7 @@ class FormStatus(StrEnum):
     processing = "processing"
     published = "published"
     failed = "failed"
+    withdrawn = "withdrawn"
 
 
 class SubmissionEventType(StrEnum):
@@ -46,6 +47,7 @@ class SubmissionEventType(StrEnum):
     db_insert_success = "db_insert_success"
     validation_failed = "validation_failed"
     business_published = "business_published"
+    form_withdrawn = "form_withdrawn"
 
 
 class BatchStatus(StrEnum):
@@ -53,6 +55,7 @@ class BatchStatus(StrEnum):
     processing = "processing"
     completed = "completed"
     failed = "failed"
+    canceled = "canceled"
 
 
 class Tenant(Base):
@@ -95,6 +98,8 @@ class Form(Base):
     payload: Mapped[dict] = mapped_column(JSON, nullable=False)
     batch_id: Mapped[str | None] = mapped_column(String(26), nullable=True)
     retry_count: Mapped[int] = mapped_column(nullable=False, default=0)
+    withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    withdraw_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_by: Mapped[str] = mapped_column(String(26), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)

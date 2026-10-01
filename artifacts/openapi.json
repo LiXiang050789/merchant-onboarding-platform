@@ -353,6 +353,60 @@
         }
       }
     },
+    "/api/v1/forms/{form_id}/withdraw": {
+      "post": {
+        "summary": "Withdraw Form",
+        "operationId": "withdraw_form_api_v1_forms__form_id__withdraw_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "form_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Form Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FormOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/docs": {
       "post": {
         "summary": "Create Doc",
@@ -1322,7 +1376,8 @@
           "created",
           "processing",
           "completed",
-          "failed"
+          "failed",
+          "canceled"
         ],
         "title": "BatchStatus"
       },
@@ -1623,6 +1678,29 @@
             "type": "string",
             "format": "date-time",
             "title": "Updated At"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          },
+          "withdraw_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdraw Reason"
           }
         },
         "type": "object",
@@ -1656,7 +1734,8 @@
           "batched",
           "processing",
           "published",
-          "failed"
+          "failed",
+          "withdrawn"
         ],
         "title": "FormStatus"
       },
@@ -1764,6 +1843,9 @@
           "end_to_end_success_rate": {
             "$ref": "#/components/schemas/SuccessRateMetric"
           },
+          "withdrawal_rate": {
+            "$ref": "#/components/schemas/SuccessRateMetric"
+          },
           "deduped_attempts": {
             "type": "integer",
             "title": "Deduped Attempts"
@@ -1775,6 +1857,7 @@
           "submit_success_rate",
           "db_success_rate",
           "end_to_end_success_rate",
+          "withdrawal_rate",
           "deduped_attempts"
         ],
         "title": "SuccessRateResponse"
@@ -1834,6 +1917,24 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WithdrawRequest": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "WithdrawRequest"
       }
     },
     "securitySchemes": {

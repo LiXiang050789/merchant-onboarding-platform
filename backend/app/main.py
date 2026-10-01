@@ -11,7 +11,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from jwt import InvalidTokenError
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .batch_pipeline import build_batches, get_batch_for_actor, list_batches, run_batch
@@ -20,7 +20,7 @@ from .config import settings
 from .db import get_session
 from .dependencies import current_user
 from .docs_store import DocNotFoundError, DocsRepository, DocVersionConflictError, get_docs_repo
-from .models import FormStatus, FormType, SubmissionEvent, SubmissionEventType, User
+from .models import Batch, BatchItem, BatchStatus, Form, FormStatus, FormType, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
 from .realtime import event_to_dict, events_since, publish_event, subscribe, unsubscribe
 from .schemas import (
@@ -42,6 +42,7 @@ from .schemas import (
     StatusPatch,
     SuccessRateResponse,
     TokenResponse,
+    WithdrawRequest,
 )
 from .security import create_access_token, create_refresh_token, decode_token, verify_password
 from .stats import compute_success_rate, default_window
@@ -248,6 +249,90 @@ async def patch_status(
     await session.commit()
     await publish_event(form.tenant_id, "form.status_changed", {"form_id": form.id, "status": form.status.value})
     return FormOut.model_validate(form, from_attributes=True)
+
+
+WITHDRAWABLE_STATUSES = {
+    FormStatus.draft,
+    FormStatus.submitted,
+    FormStatus.validating,
+    FormStatus.validated,
+    FormStatus.batched,
+}
+
+
+@app.post("/api/v1/forms/{form_id}/withdraw", response_model=FormOut)
+async def withdraw_form(
+    form_id: str,
+    payload: WithdrawRequest,
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> FormOut:
+    form = await session.scalar(select(Form).where(Form.id == form_id, Form.tenant_id == actor.tenant_id))
+    if form is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
+    if form.created_by != actor.id:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail={"code": "forbidden"})
+    previous = form.status
+    if previous not in WITHDRAWABLE_STATUSES:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail={"code": "not_withdrawable"})
+
+    now = datetime.now(UTC).replace(tzinfo=None)
+    reason = (payload.reason or "").strip()[:255] or None
+    batch: Batch | None = None
+    if previous == FormStatus.batched:
+        if not form.batch_id:
+            raise HTTPException(status.HTTP_409_CONFLICT, detail={"code": "batch_locked"})
+        batch = await session.get(Batch, form.batch_id, with_for_update=True)
+        if batch is None or batch.status != BatchStatus.created:
+            raise HTTPException(status.HTTP_409_CONFLICT, detail={"code": "batch_locked"})
+
+    result = await session.execute(
+        update(Form)
+        .where(
+            Form.id == form.id,
+            Form.tenant_id == actor.tenant_id,
+            Form.created_by == actor.id,
+            Form.status == previous,
+        )
+        .values(
+            status=FormStatus.withdrawn,
+            batch_id=None,
+            withdrawn_at=now,
+            withdraw_reason=reason,
+            updated_at=now,
+        )
+    )
+    if result.rowcount != 1:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail={"code": "not_withdrawable"})
+
+    if previous == FormStatus.batched and batch is not None:
+        await session.execute(delete(BatchItem).where(BatchItem.batch_id == batch.id, BatchItem.form_id == form.id))
+        batch.item_count = max(0, batch.item_count - 1)
+        batch.updated_at = now
+        if batch.item_count == 0:
+            batch.status = BatchStatus.canceled
+
+    updated_form = await session.scalar(select(Form).where(Form.id == form.id))
+    if updated_form is None:  # pragma: no cover - impossible after rowcount=1
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
+    await FormRepository(session, actor).audit(updated_form, "form_withdrawn", previous, FormStatus.withdrawn)
+    session.add(
+        SubmissionEvent(
+            tenant_id=updated_form.tenant_id,
+            form_id=updated_form.id,
+            idempotency_key=updated_form.idempotency_key,
+            event_type=SubmissionEventType.form_withdrawn,
+            client_trace_id=uuid4().hex[:26],
+            occurred_at=now,
+            received_at=now,
+            meta={"reason": reason} if reason else {"reason": None},
+        )
+    )
+    await session.commit()
+    await publish_event(updated_form.tenant_id, "form.status_changed", {"form_id": updated_form.id, "status": updated_form.status.value})
+    if batch is not None:
+        await publish_event(batch.tenant_id, "batch.status_changed", {"batch_id": batch.id, "status": batch.status.value})
+    return FormOut.model_validate(updated_form, from_attributes=True)
 
 
 def actor_can_transition(actor: User, city_code: str, previous: FormStatus, target: FormStatus) -> bool:
