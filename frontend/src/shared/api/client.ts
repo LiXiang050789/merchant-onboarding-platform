@@ -78,6 +78,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   illegal_transition: "当前状态不允许该流转",
   not_withdrawable: "当前状态不允许撤回",
   batch_locked: "批次已开始处理，无法撤回",
+  batch_canceled: "批次已取消（表单项已全部撤回），无法运行",
   version_conflict: "版本冲突：数据已被更新，请刷新后重试",
   invalid_bbox: "视野范围参数不合法",
   validation_error: "提交的数据未通过校验"

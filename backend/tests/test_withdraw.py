@@ -229,6 +229,28 @@ async def test_batch_pipeline_skips_withdrawn_items(session):
     assert active.status == FormStatus.published
 
 
+async def test_run_canceled_batch_is_rejected(client, session):
+    batch_id = "batch_run_canceled"
+    form = make_form(15, status=FormStatus.batched, batch_id=batch_id)
+    session.add_all([batch(batch_id, 1), form, BatchItem(batch_id=batch_id, form_id=form.id, distance_m=12)])
+    await session.commit()
+
+    withdrawn = await client.post(f"/api/v1/forms/{form.id}/withdraw", json={}, headers=await auth(client))
+    assert withdrawn.status_code == 200, withdrawn.text
+
+    refreshed_batch = await session.get(Batch, batch_id)
+    assert refreshed_batch is not None
+    await session.refresh(refreshed_batch)
+    assert refreshed_batch.status == BatchStatus.canceled
+
+    run_response = await client.post(f"/api/v1/batches/{batch_id}/run", headers=await auth(client, "op@example.com", "pass-op"))
+    assert run_response.status_code == 409
+    assert run_response.json()["code"] == "batch_canceled"
+
+    await session.refresh(refreshed_batch)
+    assert refreshed_batch.status == BatchStatus.canceled
+
+
 async def test_withdrawal_rate_and_end_to_end_denominator_exclude_withdrawn(session):
     session.add_all([make_form(12), make_form(13), make_form(14)])
     session.add_all(

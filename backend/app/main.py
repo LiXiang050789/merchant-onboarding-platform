@@ -576,6 +576,8 @@ async def run_batch_endpoint(
     batch = await get_batch_for_actor(session, actor, batch_id)
     if batch is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
+    if batch.status == BatchStatus.canceled:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail={"code": "batch_canceled"})
     summary = await run_batch(session, batch)
     await session.commit()
     await publish_event(batch.tenant_id, "batch.status_changed", {"batch_id": batch.id, "status": summary.status.value})
