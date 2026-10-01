@@ -8,6 +8,7 @@ export type StatsPayload = {
   submit_success_rate: Metric;
   db_success_rate: Metric;
   end_to_end_success_rate: Metric;
+  withdrawal_rate: Metric;
   deduped_attempts: number;
 };
 

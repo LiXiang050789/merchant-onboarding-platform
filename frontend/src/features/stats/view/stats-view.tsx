@@ -34,6 +34,11 @@ export function StatsView() {
           <b>{percent(data?.end_to_end_success_rate.rate)}</b>
           <span>{data?.end_to_end_success_rate.numerator ?? 0}/{data?.end_to_end_success_rate.denominator ?? 0}</span>
         </div>
+        <div className="panel metric">
+          撤回率
+          <b>{percent(data?.withdrawal_rate.rate)}</b>
+          <span>{data?.withdrawal_rate.numerator ?? 0}/{data?.withdrawal_rate.denominator ?? 0}</span>
+        </div>
       </div>
       <p data-testid="stats-attempts">deduped attempts: {data?.deduped_attempts ?? 0}</p>
     </section>
