@@ -397,9 +397,9 @@
   "time_anchor": {
     "original_min": "2026-09-01T00:00:00",
     "original_max": "2026-09-14T23:59:14",
-    "shifted_min": "2026-09-17T09:26:58",
-    "shifted_max": "2026-10-01T09:26:12",
-    "shift_seconds": 1416418
+    "shifted_min": "2026-09-17T10:06:09",
+    "shifted_max": "2026-10-01T10:05:23",
+    "shift_seconds": 1418769
   },
   "tenants": 20,
   "demo_accounts": {
