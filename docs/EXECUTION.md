@@ -4,6 +4,7 @@
 
 ## 会话记录
 
+- 2026-10-01，本次会话目标：P8 撤回机制（模型/状态机/API/批次联动/统计口径、前端撤回动线、测试与证据）。
 - 2026-09-19，本次会话目标：RAG 从 retrieval-only 升级为 DeepSeek 真实生成；补 `.env` 加载、错误降级、证据与文档同步。
 - 2026-09-19，本次会话目标：P6 加分项（按用户指定顺序：Spark 同构 → RAG → 报表预测），随后进入 P7 收尾（架构文档、跨端方案、面试问答手册、README、演示脚本、quiz、完整性审计）。
 - 2026-09-19，本次会话目标：P6 扩展层（先按抽查要求依次清掉 P4 遗留 4 项、地图 CSS + E2E 断言、指标修正；再实现文档域 CRUD/版本/软删/jieba 检索）。
@@ -26,6 +27,7 @@
 | P5 | 已完成 | `cd frontend && npm run build` pass；`cd frontend && npm run test:e2e` pass；`backend/.venv/bin/pytest backend/tests/test_frontend_contract.py --junitxml=artifacts/test/p5_backend.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass | `artifacts/playwright/map.png`; `artifacts/frontend/perf.json`; `artifacts/test/p5_backend.xml`; `artifacts/test/backend_all.xml`; `docs/07-前端性能与缓存报告.md` | `8bdb7a7` | 无 |
 | P6 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_docs.py --junitxml=artifacts/test/p6_docs.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`backend/.venv/bin/python scripts/export_openapi.py` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 npm run test:e2e` pass；`scripts/compare_spark_python.py` pass；`scripts/rag_demo.py` pass；`scripts/forecast_reports.py` pass | `artifacts/test/p6_docs.xml`; `artifacts/test/backend_all.xml`; `artifacts/openapi.json`; `artifacts/frontend/perf.json`; `artifacts/playwright/map.png`; `artifacts/bench/spark_compare.json`; `artifacts/rag/rag_demo.json`; `artifacts/bench/report_forecast.json`; `docs/04-知识文档存储与RAG设计.md` | 本次 RAG 升级提交 | RAG 已升级为 `mode=deepseek` 真实生成；无 key/调用失败时保留 retrieval-only 降级 |
 | P7 | 已完成 | `backend/.venv/bin/python scripts/audit_requirements.py` pass | `artifacts/audit/requirements.json`; `docs/01-系统架构设计.md`; `docs/05-跨端适配方案.md`; `docs/09-面试问答手册.md`; `docs/10-AI协作声明.md`; `docs/quiz.md`; `README.md`; `scripts/demo.sh` | 待提交 P7 收尾 | 无 |
+| P8 | 已完成 | `backend/.venv/bin/pytest backend/tests/test_withdraw.py --junitxml=artifacts/test/p8.xml` pass；`backend/.venv/bin/pytest backend/tests --junitxml=artifacts/test/backend_all.xml` pass；`cd frontend && npm run build` pass；`cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e -- withdraw.spec.ts` pass | `artifacts/test/p8.xml`; `artifacts/test/backend_all.xml`; `artifacts/playwright/withdraw.png`; `artifacts/data/load_summary.json`; `docs/03-提交成功率统计设计.md`; `docs/06-批处理流程设计.md` | `66b46c7`; `40721cd`; 待提交 P8 文档 | 无 |
 
 ## Blocker
 
