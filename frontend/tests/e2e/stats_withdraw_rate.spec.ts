@@ -33,9 +33,11 @@ test("withdrawing a seed form increments the stats withdrawal numerator", async 
   fs.mkdirSync(screenshotDir, {recursive: true});
 
   await page.goto("/login");
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("账号").fill("tenant_01@example.com");
   await page.getByLabel("密码").fill("seed-pass");
   await page.getByRole("button", {name: "登录"}).click();
+  await page.waitForURL("**/map", {timeout: 30_000});
   await expect(page.getByText("地图聚合")).toBeVisible();
   const token = await page.evaluate(() => window.localStorage.getItem("merchant_access_token"));
   expect(token).toBeTruthy();
