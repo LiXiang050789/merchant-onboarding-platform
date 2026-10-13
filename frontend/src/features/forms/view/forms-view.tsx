@@ -69,6 +69,7 @@ export function FormsView() {
       {selectedFormId ? (
         <div className="timeline" data-testid="form-timeline">
           <div className="timeline-title">{selectedFormId}</div>
+          {auditQuery.isSuccess && auditQuery.data.items.length === 0 ? <p className="muted">暂无审计记录</p> : null}
           {auditQuery.data?.items.map((event) => (
             <div className="timeline-item" key={event.id}>
               <span>{event.from_status ?? "-"} → {event.to_status ?? "-"}</span>
