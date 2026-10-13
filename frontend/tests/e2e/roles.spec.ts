@@ -48,6 +48,18 @@ test("switch accounts to demonstrate role permissions and region scope", async (
   await page.screenshot({path: path.join(screenshotDir, "roles_operator_scope.png"), fullPage: true});
   console.log(`operator cities=${JSON.stringify([...new Set(cityValues)])} rows=${cityValues.length} elapsedMs=${Date.now() - started}`);
 
+  const operatorBeijingResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return url.pathname === "/api/v1/forms" && url.searchParams.get("city") === "beijing";
+  });
+  await page.getByLabel("城市").selectOption("beijing");
+  const operatorResponse = await operatorBeijingResponse;
+  expect(operatorResponse.status()).toBe(200);
+  const operatorForms = await operatorResponse.json();
+  expect(operatorForms.items).toHaveLength(0);
+  await expect(page.locator("tbody tr")).toHaveCount(0);
+  console.log(`operator beijing items=${operatorForms.items.length}`);
+
   await logout();
   await login("admin@example.com", "管理员");
   await page.getByRole("link", {name: "批次", exact: true}).click();
@@ -59,4 +71,16 @@ test("switch accounts to demonstrate role permissions and region scope", async (
   await expect(page.getByRole("button", {name: "构建批次"})).toBeEnabled();
   await expect(page.getByTestId("batch-error")).toHaveCount(0);
   console.log(`admin build status=200 elapsedMs=${Date.now() - started}`);
+
+  await page.getByRole("link", {name: "表单", exact: true}).click();
+  const adminBeijingResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return url.pathname === "/api/v1/forms" && url.searchParams.get("city") === "beijing";
+  });
+  await page.getByLabel("城市").selectOption("beijing");
+  const adminResponse = await adminBeijingResponse;
+  expect(adminResponse.status()).toBe(200);
+  const adminForms = await adminResponse.json();
+  expect(adminForms.items.length).toBeGreaterThan(0);
+  console.log(`admin beijing items=${adminForms.items.length}`);
 });
