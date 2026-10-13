@@ -34,6 +34,13 @@ export function getCurrentUserId(): string | null {
   return typeof payload?.sub === "string" ? payload.sub : null;
 }
 
+export function getCurrentRole(): string | null {
+  const token = getAccessToken();
+  if (!token) return null;
+  const payload = decodeJwtPayload(token);
+  return typeof payload?.role === "string" ? payload.role : null;
+}
+
 export function setTokens(tokens: TokenPair): void {
   window.localStorage.setItem("merchant_access_token", tokens.access_token);
   window.localStorage.setItem("merchant_refresh_token", tokens.refresh_token);
