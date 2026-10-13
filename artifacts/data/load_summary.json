@@ -1,8 +1,8 @@
 {
   "source": "artifacts/data/forms_seed.csv",
   "input_rows": 100000,
-  "inserted_forms": 97354,
-  "submission_events": 383040,
+  "inserted_forms": 97379,
+  "submission_events": 383131,
   "skipped_rows": 2646,
   "skip_reasons": {
     "missing_required": 994,
@@ -397,9 +397,122 @@
   "time_anchor": {
     "original_min": "2026-09-01T00:00:00",
     "original_max": "2026-09-14T23:59:14",
-    "shifted_min": "2026-09-29T08:56:19",
-    "shifted_max": "2026-10-13T08:55:33",
-    "shift_seconds": 2451379
+    "shifted_min": "2026-09-29T11:43:48",
+    "shifted_max": "2026-10-13T11:43:02",
+    "shift_seconds": 2461428
+  },
+  "demo_withdrawals": {
+    "beijing": {
+      "original_candidate_count": 1,
+      "generated_ids": [
+        "form_100000",
+        "form_100001",
+        "form_100002",
+        "form_100003",
+        "form_100004"
+      ],
+      "withdrawn_ids": [
+        "form_100000",
+        "form_100001",
+        "form_100002"
+      ],
+      "spare_candidate_ids": [
+        "form_100003",
+        "form_100004",
+        "form_026960"
+      ],
+      "original_attempts": 81,
+      "attempts_after_generation": 86
+    },
+    "chengdu": {
+      "original_candidate_count": 0,
+      "generated_ids": [
+        "form_100005",
+        "form_100006",
+        "form_100007",
+        "form_100008",
+        "form_100009"
+      ],
+      "withdrawn_ids": [
+        "form_100005",
+        "form_100006",
+        "form_100007"
+      ],
+      "spare_candidate_ids": [
+        "form_100008",
+        "form_100009"
+      ],
+      "original_attempts": 29,
+      "attempts_after_generation": 34
+    },
+    "hangzhou": {
+      "original_candidate_count": 3,
+      "generated_ids": [
+        "form_100010",
+        "form_100011",
+        "form_100012",
+        "form_100013",
+        "form_100014"
+      ],
+      "withdrawn_ids": [
+        "form_100010",
+        "form_100011",
+        "form_100012"
+      ],
+      "spare_candidate_ids": [
+        "form_100013",
+        "form_100014",
+        "form_027160",
+        "form_048540",
+        "form_072320"
+      ],
+      "original_attempts": 57,
+      "attempts_after_generation": 62
+    },
+    "shanghai": {
+      "original_candidate_count": 0,
+      "generated_ids": [
+        "form_100015",
+        "form_100016",
+        "form_100017",
+        "form_100018",
+        "form_100019"
+      ],
+      "withdrawn_ids": [
+        "form_100015",
+        "form_100016",
+        "form_100017"
+      ],
+      "spare_candidate_ids": [
+        "form_100018",
+        "form_100019"
+      ],
+      "original_attempts": 95,
+      "attempts_after_generation": 100
+    },
+    "shenzhen": {
+      "original_candidate_count": 2,
+      "generated_ids": [
+        "form_100020",
+        "form_100021",
+        "form_100022",
+        "form_100023",
+        "form_100024"
+      ],
+      "withdrawn_ids": [
+        "form_100020",
+        "form_100021",
+        "form_100022"
+      ],
+      "spare_candidate_ids": [
+        "form_100023",
+        "form_100024",
+        "form_024860",
+        "form_048820"
+      ],
+      "original_attempts": 61,
+      "attempts_after_generation": 66
+    }
   },
   "tenants": 20,
   "demo_accounts": {

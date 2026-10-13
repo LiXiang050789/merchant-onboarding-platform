@@ -4,7 +4,9 @@ from __future__ import annotations
 import argparse
 import asyncio
 import csv
+import hashlib
 import json
+import re
 import sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
@@ -38,6 +40,88 @@ from backend.app.security import hash_password  # noqa: E402
 
 VALID_STATUSES = {"draft", "submitted", "validating", "validated", "rejected", "batched", "processing", "published", "failed", "withdrawn"}
 DEMO_BATCH_WORKSET_SIZE = 1500
+DEMO_WITHDRAWALS_PER_CITY = 3
+DEMO_CITY_CENTERS = {
+    "beijing": (116.4074, 39.9042),
+    "chengdu": (104.0665, 30.5728),
+    "hangzhou": (120.1551, 30.2741),
+    "shanghai": (121.4737, 31.2304),
+    "shenzhen": (114.0579, 22.5431),
+}
+
+
+def add_demo_withdrawals(rows: list[dict], forms: list[dict], events: list[dict], end: datetime) -> tuple[dict, list[dict]]:
+    start = end - timedelta(hours=24)
+    excluded = {"form_042360"}
+    for directory in (ROOT / "backend/tests", ROOT / "frontend/tests"):
+        for path in directory.rglob("*"):
+            if path.suffix in {".py", ".ts"}:
+                excluded.update(re.findall(r"\bform_\d+\b", path.read_text(encoding="utf-8")))
+    recent_attempt_ids = {
+        event["form_id"] for event in events
+        if event["event_type"] == SubmissionEventType.submit_attempt.value
+        and start <= event["received_at"] <= end
+    }
+    next_sequence = max(int(row["id"][5:]) for row in rows if re.fullmatch(r"form_\d+", row["id"])) + 1
+    form_types = ("merchant_info", "property", "product", "report", "merchant_info")
+    reason = "演示样例：客户取消入驻"
+    summary = {}
+    audits = []
+    for city_index, (city, (lng, lat)) in enumerate(DEMO_CITY_CENTERS.items()):
+        existing = [form for form in forms if form["tenant_id"] == "tenant_01" and form["city_code"] == city]
+        candidates = sorted(
+            form["id"] for form in existing
+            if form["id"] not in excluded and form["id"] in recent_attempt_ids
+            and form["status"] in {"submitted", "validating", "validated"}
+        )
+        original_attempts = len({form["idempotency_key"] for form in existing if form["id"] in recent_attempt_ids})
+        generated_ids = []
+        withdrawn_ids = []
+        generated_spares = []
+        for index, form_type in enumerate(form_types):
+            offset = city_index * len(form_types) + index
+            form_id = f"form_{next_sequence + offset:06d}"
+            created_at = end - timedelta(minutes=30) + timedelta(seconds=20 * offset)
+            row = {
+                "id": form_id, "tenant_id": "tenant_01", "form_type": form_type,
+                "status": "validated", "idempotency_key": f"idem_demo_{form_id}",
+                "payload_required_name": f"{form_type}_{form_id}", "created_at": created_at.isoformat(),
+            }
+            payload = row_payload(row)
+            withdrawn_at = created_at + timedelta(minutes=5)
+            withdrawn = index < DEMO_WITHDRAWALS_PER_CITY
+            forms.append({
+                "id": form_id, "tenant_id": "tenant_01", "form_type": form_type,
+                "status": "withdrawn" if withdrawn else "validated", "idempotency_key": row["idempotency_key"],
+                "city_code": city, "district_code": "core", "industry": "retail",
+                "lng": lng + index * 0.001, "lat": lat + index * 0.001, "payload": payload,
+                "batch_id": None, "retry_count": 0, "created_by": "user_01", "created_at": created_at,
+                "updated_at": withdrawn_at if withdrawn else created_at,
+                "withdrawn_at": withdrawn_at if withdrawn else None, "withdraw_reason": reason if withdrawn else None,
+            })
+            events.extend(events_for_row(row, inserted=True, reason=None))
+            generated_ids.append(form_id)
+            if withdrawn:
+                withdrawn_ids.append(form_id)
+                events.append({
+                    "tenant_id": "tenant_01", "form_id": form_id, "idempotency_key": row["idempotency_key"],
+                    "event_type": SubmissionEventType.form_withdrawn.value, "client_trace_id": f"trace_withdraw_{form_id}"[:26],
+                    "occurred_at": withdrawn_at, "received_at": withdrawn_at, "meta": {"reason": reason},
+                })
+                audits.append({
+                    "tenant_id": "tenant_01", "form_id": form_id, "actor_id": "user_01",
+                    "event_type": "form_withdrawn", "from_status": "validated", "to_status": "withdrawn",
+                    "payload_hash": hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest(),
+                    "created_at": withdrawn_at,
+                })
+            else:
+                generated_spares.append(form_id)
+        summary[city] = {
+            "original_candidate_count": len(candidates), "generated_ids": generated_ids,
+            "withdrawn_ids": withdrawn_ids, "spare_candidate_ids": generated_spares + candidates,
+            "original_attempts": original_attempts, "attempts_after_generation": original_attempts + len(form_types),
+        }
+    return summary, audits
 
 
 def parse_time(value: str) -> datetime:
@@ -272,12 +356,16 @@ async def main_async(args) -> int:
                 "payload": row_payload(row),
                 "batch_id": None,
                 "retry_count": 0,
+                "withdrawn_at": None,
+                "withdraw_reason": None,
                 "created_by": row["created_by"],
                 "created_at": created_at,
                 "updated_at": created_at,
             }
         )
         event_rows.extend(events_for_row(row, inserted=True, reason=None))
+
+    demo_withdrawals, audit_rows = add_demo_withdrawals(rows, form_rows, event_rows, parse_time(timeline["shifted_max"]))
 
     engine = create_async_engine(settings.mysql_dsn, pool_pre_ping=True)
     async with engine.begin() as conn:
@@ -289,6 +377,7 @@ async def main_async(args) -> int:
         await bulk_insert(conn, User, user_rows)
         await bulk_insert(conn, Form, form_rows)
         await bulk_insert(conn, SubmissionEvent, event_rows)
+        await bulk_insert(conn, FormAuditEvent, audit_rows)
         total_forms = int(await conn.scalar(select(func.count()).select_from(Form)) or 0)
         total_events = int(await conn.scalar(select(func.count()).select_from(SubmissionEvent)) or 0)
 
@@ -302,6 +391,7 @@ async def main_async(args) -> int:
         "validated_workset_rows": sum(validated_workset.values()),
         "validated_workset_distribution": dict(sorted(validated_workset.items())),
         "time_anchor": timeline,
+        "demo_withdrawals": demo_withdrawals,
         "tenants": len(tenants),
         "demo_accounts": {
             "merchant": "tenant_01@example.com / seed-pass",
