@@ -397,9 +397,9 @@
   "time_anchor": {
     "original_min": "2026-09-01T00:00:00",
     "original_max": "2026-09-14T23:59:14",
-    "shifted_min": "2026-09-29T12:08:07",
-    "shifted_max": "2026-10-13T12:07:21",
-    "shift_seconds": 2462887
+    "shifted_min": "2026-09-29T14:37:53",
+    "shifted_max": "2026-10-13T14:37:07",
+    "shift_seconds": 2471873
   },
   "demo_withdrawals": {
     "beijing": {
@@ -512,6 +512,298 @@
       ],
       "original_attempts": 61,
       "attempts_after_generation": 66
+    }
+  },
+  "demo_batches": {
+    "beijing": {
+      "orphan_pool_size": 38,
+      "batch_ids": [
+        "batch_demo_beijing_1",
+        "batch_demo_beijing_2"
+      ],
+      "batches": [
+        {
+          "batch_id": "batch_demo_beijing_1",
+          "item_count": 19,
+          "member_ids": [
+            "form_005780",
+            "form_007800",
+            "form_008080",
+            "form_009940",
+            "form_017340",
+            "form_019180",
+            "form_022120",
+            "form_022840",
+            "form_023940",
+            "form_025840",
+            "form_030440",
+            "form_030800",
+            "form_034220",
+            "form_037760",
+            "form_039320",
+            "form_039680",
+            "form_044580",
+            "form_046680",
+            "form_047480"
+          ]
+        },
+        {
+          "batch_id": "batch_demo_beijing_2",
+          "item_count": 19,
+          "member_ids": [
+            "form_051920",
+            "form_052240",
+            "form_060900",
+            "form_063180",
+            "form_064860",
+            "form_071080",
+            "form_071540",
+            "form_073960",
+            "form_075460",
+            "form_075920",
+            "form_080360",
+            "form_085440",
+            "form_087120",
+            "form_088220",
+            "form_090520",
+            "form_094420",
+            "form_095660",
+            "form_095900",
+            "form_097320"
+          ]
+        }
+      ]
+    },
+    "chengdu": {
+      "orphan_pool_size": 30,
+      "batch_ids": [
+        "batch_demo_chengdu_1",
+        "batch_demo_chengdu_2"
+      ],
+      "batches": [
+        {
+          "batch_id": "batch_demo_chengdu_1",
+          "item_count": 15,
+          "member_ids": [
+            "form_003880",
+            "form_011280",
+            "form_015900",
+            "form_016680",
+            "form_019940",
+            "form_020260",
+            "form_024500",
+            "form_025800",
+            "form_026400",
+            "form_029460",
+            "form_029860",
+            "form_033040",
+            "form_035180",
+            "form_039940",
+            "form_052940"
+          ]
+        },
+        {
+          "batch_id": "batch_demo_chengdu_2",
+          "item_count": 15,
+          "member_ids": [
+            "form_055140",
+            "form_060820",
+            "form_064040",
+            "form_066880",
+            "form_069500",
+            "form_075740",
+            "form_076760",
+            "form_076900",
+            "form_077060",
+            "form_077500",
+            "form_078040",
+            "form_080180",
+            "form_083800",
+            "form_093500",
+            "form_093920"
+          ]
+        }
+      ]
+    },
+    "hangzhou": {
+      "orphan_pool_size": 23,
+      "batch_ids": [
+        "batch_demo_hangzhou_1",
+        "batch_demo_hangzhou_2"
+      ],
+      "batches": [
+        {
+          "batch_id": "batch_demo_hangzhou_1",
+          "item_count": 12,
+          "member_ids": [
+            "form_004280",
+            "form_009440",
+            "form_009460",
+            "form_011360",
+            "form_012460",
+            "form_036640",
+            "form_036960",
+            "form_037720",
+            "form_043140",
+            "form_045720",
+            "form_057920",
+            "form_061400"
+          ]
+        },
+        {
+          "batch_id": "batch_demo_hangzhou_2",
+          "item_count": 11,
+          "member_ids": [
+            "form_062280",
+            "form_065120",
+            "form_070100",
+            "form_071580",
+            "form_075020",
+            "form_078220",
+            "form_082620",
+            "form_082820",
+            "form_087360",
+            "form_094840",
+            "form_096160"
+          ]
+        }
+      ]
+    },
+    "shanghai": {
+      "orphan_pool_size": 54,
+      "batch_ids": [
+        "batch_demo_shanghai_1",
+        "batch_demo_shanghai_2"
+      ],
+      "batches": [
+        {
+          "batch_id": "batch_demo_shanghai_1",
+          "item_count": 27,
+          "member_ids": [
+            "form_002860",
+            "form_005740",
+            "form_007440",
+            "form_009320",
+            "form_009700",
+            "form_012360",
+            "form_012480",
+            "form_013860",
+            "form_018600",
+            "form_019300",
+            "form_021720",
+            "form_022380",
+            "form_023560",
+            "form_024640",
+            "form_024840",
+            "form_029940",
+            "form_030620",
+            "form_030720",
+            "form_037280",
+            "form_037380",
+            "form_047040",
+            "form_048520",
+            "form_048700",
+            "form_050240",
+            "form_051280",
+            "form_051420",
+            "form_051560"
+          ]
+        },
+        {
+          "batch_id": "batch_demo_shanghai_2",
+          "item_count": 27,
+          "member_ids": [
+            "form_051720",
+            "form_051860",
+            "form_052000",
+            "form_052640",
+            "form_052980",
+            "form_060060",
+            "form_060360",
+            "form_062120",
+            "form_065180",
+            "form_066800",
+            "form_068200",
+            "form_068640",
+            "form_069180",
+            "form_074420",
+            "form_075240",
+            "form_075360",
+            "form_075980",
+            "form_076140",
+            "form_078420",
+            "form_080120",
+            "form_081960",
+            "form_084180",
+            "form_084460",
+            "form_086540",
+            "form_095240",
+            "form_095520",
+            "form_097860"
+          ]
+        }
+      ]
+    },
+    "shenzhen": {
+      "orphan_pool_size": 40,
+      "batch_ids": [
+        "batch_demo_shenzhen_1",
+        "batch_demo_shenzhen_2"
+      ],
+      "batches": [
+        {
+          "batch_id": "batch_demo_shenzhen_1",
+          "item_count": 20,
+          "member_ids": [
+            "form_001300",
+            "form_005200",
+            "form_005820",
+            "form_009540",
+            "form_016360",
+            "form_023880",
+            "form_031080",
+            "form_032600",
+            "form_032840",
+            "form_033660",
+            "form_035020",
+            "form_035760",
+            "form_038220",
+            "form_038680",
+            "form_039120",
+            "form_039200",
+            "form_041580",
+            "form_041600",
+            "form_044000",
+            "form_045220"
+          ]
+        },
+        {
+          "batch_id": "batch_demo_shenzhen_2",
+          "item_count": 20,
+          "member_ids": [
+            "form_050620",
+            "form_052860",
+            "form_055840",
+            "form_056220",
+            "form_056760",
+            "form_058020",
+            "form_062540",
+            "form_063500",
+            "form_064700",
+            "form_066340",
+            "form_073220",
+            "form_075580",
+            "form_077200",
+            "form_084760",
+            "form_085220",
+            "form_086420",
+            "form_095540",
+            "form_097680",
+            "form_097900",
+            "form_098860"
+          ]
+        }
+      ]
     }
   },
   "tenants": 20,

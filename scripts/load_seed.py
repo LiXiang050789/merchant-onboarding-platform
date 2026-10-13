@@ -12,6 +12,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import numpy as np
 from sqlalchemy import delete, func, insert, select, text
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -19,11 +20,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from backend.app.config import settings  # noqa: E402
+from backend.app.aggregation import haversine_meters  # noqa: E402
 from backend.app.db import Base  # noqa: E402
 from backend.app.models import (  # noqa: E402
     Batch,
     BatchCheckpoint,
     BatchItem,
+    BatchStatus,
     DLQItem,
     Form,
     FormAuditEvent,
@@ -126,6 +129,41 @@ def add_demo_withdrawals(rows: list[dict], forms: list[dict], events: list[dict]
 
 def parse_time(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).replace(tzinfo=None)
+
+
+def add_demo_batches(forms: list[dict], end: datetime) -> tuple[dict, list[dict], list[dict]]:
+    summary = {}
+    batches = []
+    items = []
+    for city in DEMO_CITY_CENTERS:
+        pool = sorted(
+            (form for form in forms if form["tenant_id"] == "tenant_01" and form["city_code"] == city
+             and form["status"] == "batched" and form["batch_id"] is None),
+            key=lambda form: form["id"],
+        )
+        if len(pool) > 100:
+            raise ValueError(f"{city}: orphan pool exceeds two batches with capacity 50")
+        midpoint = (len(pool) + 1) // 2
+        groups = [pool[:midpoint], pool[midpoint:]] if len(pool) >= 2 else ([pool] if pool else [])
+        city_batches = []
+        for sequence, members in enumerate(groups, start=1):
+            batch_id = f"batch_demo_{city}_{sequence}"
+            lng = np.array([form["lng"] for form in members])
+            lat = np.array([form["lat"] for form in members])
+            distances = haversine_meters(lng[0], lat[0], lng, lat)
+            batches.append({
+                "id": batch_id, "tenant_id": "tenant_01", "city_code": city,
+                "status": BatchStatus.created.value, "center_lng": float(np.mean(lng)),
+                "center_lat": float(np.mean(lat)), "capacity": 50, "item_count": len(members),
+                "created_at": end, "updated_at": end,
+            })
+            for form, distance in zip(members, distances):
+                form["batch_id"] = batch_id
+                form["updated_at"] = end
+                items.append({"batch_id": batch_id, "form_id": form["id"], "distance_m": int(round(float(distance)))})
+            city_batches.append({"batch_id": batch_id, "item_count": len(members), "member_ids": [form["id"] for form in members]})
+        summary[city] = {"orphan_pool_size": len(pool), "batch_ids": [batch["batch_id"] for batch in city_batches], "batches": city_batches}
+    return summary, batches, items
 
 
 def shift_seed_timeline(rows: list[dict], anchor_end: datetime) -> dict:
@@ -366,6 +404,7 @@ async def main_async(args) -> int:
         event_rows.extend(events_for_row(row, inserted=True, reason=None))
 
     demo_withdrawals, audit_rows = add_demo_withdrawals(rows, form_rows, event_rows, parse_time(timeline["shifted_max"]))
+    demo_batches, batch_rows, batch_item_rows = add_demo_batches(form_rows, parse_time(timeline["shifted_max"]))
 
     engine = create_async_engine(settings.mysql_dsn, pool_pre_ping=True)
     async with engine.begin() as conn:
@@ -378,6 +417,8 @@ async def main_async(args) -> int:
         await bulk_insert(conn, Form, form_rows)
         await bulk_insert(conn, SubmissionEvent, event_rows)
         await bulk_insert(conn, FormAuditEvent, audit_rows)
+        await bulk_insert(conn, Batch, batch_rows)
+        await bulk_insert(conn, BatchItem, batch_item_rows)
         total_forms = int(await conn.scalar(select(func.count()).select_from(Form)) or 0)
         total_events = int(await conn.scalar(select(func.count()).select_from(SubmissionEvent)) or 0)
 
@@ -392,6 +433,7 @@ async def main_async(args) -> int:
         "validated_workset_distribution": dict(sorted(validated_workset.items())),
         "time_anchor": timeline,
         "demo_withdrawals": demo_withdrawals,
+        "demo_batches": demo_batches,
         "tenants": len(tenants),
         "demo_accounts": {
             "merchant": "tenant_01@example.com / seed-pass",
