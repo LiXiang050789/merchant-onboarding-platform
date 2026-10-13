@@ -1,0 +1,68 @@
+{
+  "batch_id": "batch_demo_shanghai_1",
+  "processing_elapsed_ms": 1888,
+  "events": [
+    {
+      "seq": 1901,
+      "type": "batch.status_changed",
+      "payload": {
+        "batch_id": "batch_demo_shanghai_1",
+        "status": "processing"
+      },
+      "sent_at": "2026-10-13T12:29:33.442037+00:00"
+    },
+    {
+      "seq": 1902,
+      "type": "batch.progress",
+      "payload": {
+        "batch_id": "batch_demo_shanghai_1",
+        "processed": 10,
+        "total": 27,
+        "status": "processing"
+      },
+      "sent_at": "2026-10-13T12:29:34.453527+00:00"
+    },
+    {
+      "seq": 1903,
+      "type": "batch.progress",
+      "payload": {
+        "batch_id": "batch_demo_shanghai_1",
+        "processed": 20,
+        "total": 27,
+        "status": "processing"
+      },
+      "sent_at": "2026-10-13T12:29:34.994400+00:00"
+    },
+    {
+      "seq": 1904,
+      "type": "batch.progress",
+      "payload": {
+        "batch_id": "batch_demo_shanghai_1",
+        "processed": 27,
+        "total": 27,
+        "status": "processing"
+      },
+      "sent_at": "2026-10-13T12:29:35.300198+00:00"
+    },
+    {
+      "seq": 1905,
+      "type": "batch.progress",
+      "payload": {
+        "batch_id": "batch_demo_shanghai_1",
+        "processed": 27,
+        "total": 27,
+        "status": "completed"
+      },
+      "sent_at": "2026-10-13T12:29:35.308845+00:00"
+    },
+    {
+      "seq": 1906,
+      "type": "batch.status_changed",
+      "payload": {
+        "batch_id": "batch_demo_shanghai_1",
+        "status": "completed"
+      },
+      "sent_at": "2026-10-13T12:29:35.329685+00:00"
+    }
+  ]
+}

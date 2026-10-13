@@ -68,7 +68,7 @@ cd frontend && npm run dev
 1. 用 `admin@example.com / seed-pass` 登录。
 2. `/map` 查看上海聚合 marker，切换状态为 `validated`。
 3. `/forms` 查看表单，撤回本人表单，观察状态时间线。
-4. `/batches` 构建/运行批次，观察 `202 Accepted`、实时进度与终态变化。
+4. `/batches` 构建/运行批次，观察 `202 Accepted`、实时进度与终态变化（reset 后每城自带 2 个待运行样例批次）。
 5. `/stats` 查看近 24h 成功率、端到端成功率和撤回率（种子自带少量撤回样例）；撤回近期 seed 表单后，撤回率分子会随之增加。
 6. `/docs` 创建知识文档、生成新版本、软删除。
 7. 退出登录换账号（商户/运营/admin），观察权限与数据范围差异。
