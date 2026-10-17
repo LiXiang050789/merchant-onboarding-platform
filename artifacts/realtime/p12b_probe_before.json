@@ -1,0 +1,1281 @@
+{
+  "form_id": "form_5fc07ea4502b40a2b8a2",
+  "requests": [
+    {
+      "time": "2026-10-17T07:55:32.015Z",
+      "query": "?city=shanghai&size=20&status=submitted",
+      "method": "GET",
+      "status": 200,
+      "target_status": null,
+      "total": 0
+    },
+    {
+      "time": "2026-10-17T07:55:32.179Z",
+      "query": "?city=shanghai&size=20&status=published",
+      "method": "GET",
+      "status": 200,
+      "target_status": null,
+      "total": 24843
+    },
+    {
+      "time": "2026-10-17T07:55:32.340Z",
+      "query": "?city=shanghai&size=20&status=submitted",
+      "method": "GET",
+      "status": 200,
+      "target_status": "submitted",
+      "total": 1
+    },
+    {
+      "time": "2026-10-17T07:55:33.094Z",
+      "query": "?city=shanghai&size=20&status=submitted",
+      "method": "GET",
+      "status": 200,
+      "target_status": null,
+      "total": 0
+    },
+    {
+      "time": "2026-10-17T07:55:33.266Z",
+      "query": "?city=shanghai&size=20&status=submitted",
+      "method": "GET",
+      "status": 200,
+      "target_status": null,
+      "total": 0
+    },
+    {
+      "time": "2026-10-17T07:55:47.938Z",
+      "query": "?city=shanghai&size=20",
+      "method": "GET",
+      "status": 200,
+      "target_status": "validated",
+      "total": 29220
+    }
+  ],
+  "frames": [
+    {
+      "time": "2026-10-17T07:55:31.832Z",
+      "type": "open"
+    },
+    {
+      "time": "2026-10-17T07:55:31.832Z",
+      "type": "open"
+    },
+    {
+      "time": "2026-10-17T07:55:31.847Z",
+      "type": "message",
+      "frame": {}
+    },
+    {
+      "time": "2026-10-17T07:55:31.862Z",
+      "type": "message",
+      "frame": {}
+    },
+    {
+      "time": "2026-10-17T07:55:32.145Z",
+      "type": "message",
+      "frame": {
+        "seq": 4,
+        "type": "form.status_changed",
+        "payload": {
+          "form_id": "form_5fc07ea4502b40a2b8a2",
+          "status": "submitted"
+        },
+        "sent_at": "2026-10-17T07:55:32.143235+00:00"
+      }
+    },
+    {
+      "time": "2026-10-17T07:55:32.910Z",
+      "type": "message",
+      "frame": {
+        "seq": 5,
+        "type": "form.status_changed",
+        "payload": {
+          "form_id": "form_5fc07ea4502b40a2b8a2",
+          "status": "validating"
+        },
+        "sent_at": "2026-10-17T07:55:32.908992+00:00"
+      }
+    },
+    {
+      "time": "2026-10-17T07:55:32.912Z",
+      "type": "message",
+      "frame": {
+        "seq": 6,
+        "type": "form.status_changed",
+        "payload": {
+          "form_id": "form_5fc07ea4502b40a2b8a2",
+          "status": "validated"
+        },
+        "sent_at": "2026-10-17T07:55:32.909084+00:00"
+      }
+    }
+  ],
+  "queries": [
+    {
+      "time": "2026-10-17T07:55:32.015Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.015Z",
+      "event": "updated",
+      "action": "success",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.020Z",
+      "event": "observerOptionsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.146Z",
+      "event": "updated",
+      "action": "invalidate",
+      "key": [
+        "forms",
+        "shanghai",
+        "published"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T07:55:32.146Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.146Z",
+      "event": "updated",
+      "action": "invalidate",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.146Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T07:55:32.146Z",
+      "event": "updated",
+      "action": "fetch",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T07:55:32.178Z",
+      "event": "updated",
+      "action": "success",
+      "key": [
+        "forms",
+        "shanghai",
+        "published"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.339Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.339Z",
+      "event": "updated",
+      "action": "success",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.345Z",
+      "event": "observerOptionsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.910Z",
+      "event": "updated",
+      "action": "invalidate",
+      "key": [
+        "forms",
+        "shanghai",
+        "published"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.910Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.910Z",
+      "event": "updated",
+      "action": "invalidate",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:32.911Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T07:55:32.911Z",
+      "event": "updated",
+      "action": "fetch",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T07:55:32.913Z",
+      "event": "updated",
+      "action": "fetch",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T07:55:33.265Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:33.265Z",
+      "event": "updated",
+      "action": "success",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:33.273Z",
+      "event": "observerOptionsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:47.669Z",
+      "event": "added",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:47.673Z",
+      "event": "observerRemoved",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:47.673Z",
+      "event": "observerAdded",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:47.673Z",
+      "event": "observerOptionsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:47.673Z",
+      "event": "updated",
+      "action": "fetch",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T07:55:47.937Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:47.937Z",
+      "event": "updated",
+      "action": "success",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T07:55:47.966Z",
+      "event": "observerOptionsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    }
+  ],
+  "samples": [
+    {
+      "time": "2026-10-17T07:55:33.176Z",
+      "phase": "submitted",
+      "row": "form_5fc07ea4502b40a2b8a2merchant_infoshanghairestaurantsubmitted撤回查看",
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 4
+    },
+    {
+      "time": "2026-10-17T07:55:34.293Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:35.406Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:36.519Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:37.632Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:38.743Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:39.855Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:40.969Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:42.083Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:43.198Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:44.313Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:45.428Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:46.542Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:47.653Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 5
+    },
+    {
+      "time": "2026-10-17T07:55:48.688Z",
+      "phase": "all",
+      "row": "form_5fc07ea4502b40a2b8a2merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T07:55:49.699Z",
+      "phase": "all",
+      "row": "form_5fc07ea4502b40a2b8a2merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T07:55:50.714Z",
+      "phase": "all",
+      "row": "form_5fc07ea4502b40a2b8a2merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 7,
+      "last": [
+        {
+          "time": "2026-10-17T07:55:32.145Z",
+          "type": "message",
+          "frame": {
+            "seq": 4,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T07:55:32.143235+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.910Z",
+          "type": "message",
+          "frame": {
+            "seq": 5,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T07:55:32.908992+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T07:55:32.912Z",
+          "type": "message",
+          "frame": {
+            "seq": 6,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_5fc07ea4502b40a2b8a2",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T07:55:32.909084+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    }
+  ]
+}

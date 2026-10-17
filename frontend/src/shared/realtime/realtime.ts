@@ -19,14 +19,19 @@ function emitBrowserEvent(message: RealtimeMessage) {
 }
 
 function invalidate(queryClient: QueryClient, type: string) {
+  const refresh = (key: string) => {
+    const queryKey = [key];
+    // In-flight first fetches have no data, so invalidate alone can reuse a stale response.
+    void queryClient.cancelQueries({queryKey}).then(() => queryClient.invalidateQueries({queryKey}));
+  };
   if (type.startsWith("form.")) {
-    void queryClient.invalidateQueries({queryKey: ["forms"]});
-    void queryClient.invalidateQueries({queryKey: ["clusters"]});
-    void queryClient.invalidateQueries({queryKey: ["stats"]});
+    refresh("forms");
+    refresh("clusters");
+    refresh("stats");
   }
   if (type.startsWith("batch.")) {
-    void queryClient.invalidateQueries({queryKey: ["batches"]});
-    void queryClient.invalidateQueries({queryKey: ["clusters"]});
+    refresh("batches");
+    refresh("clusters");
   }
 }
 

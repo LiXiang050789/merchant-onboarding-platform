@@ -1,0 +1,1257 @@
+{
+  "form_id": "form_efa12ba129d744248fb4",
+  "requests": [
+    {
+      "time": "2026-10-17T08:01:52.547Z",
+      "query": "?city=shanghai&size=20&status=submitted",
+      "method": "GET",
+      "status": 200,
+      "target_status": null,
+      "total": 0
+    },
+    {
+      "time": "2026-10-17T08:01:52.638Z",
+      "query": "?city=shanghai&size=20&status=published",
+      "method": "GET",
+      "status": 200,
+      "target_status": null,
+      "total": 24843
+    },
+    {
+      "time": "2026-10-17T08:01:52.882Z",
+      "query": "?city=shanghai&size=20&status=submitted",
+      "method": "GET",
+      "status": 200,
+      "target_status": "submitted",
+      "total": 1
+    },
+    {
+      "time": "2026-10-17T08:01:53.360Z",
+      "query": "?city=shanghai&size=20",
+      "method": "GET",
+      "status": 200,
+      "target_status": "submitted",
+      "total": 29223
+    },
+    {
+      "time": "2026-10-17T08:01:56.600Z",
+      "query": "?city=shanghai&size=20",
+      "method": "GET",
+      "status": 200,
+      "target_status": "validated",
+      "total": 29223
+    },
+    {
+      "time": "2026-10-17T08:01:56.850Z",
+      "query": "?city=shanghai&size=20",
+      "method": "GET",
+      "status": 200,
+      "target_status": "validated",
+      "total": 29223
+    }
+  ],
+  "frames": [
+    {
+      "time": "2026-10-17T08:01:52.358Z",
+      "type": "open"
+    },
+    {
+      "time": "2026-10-17T08:01:52.359Z",
+      "type": "open"
+    },
+    {
+      "time": "2026-10-17T08:01:52.694Z",
+      "type": "message",
+      "frame": {
+        "seq": 13,
+        "type": "form.status_changed",
+        "payload": {
+          "form_id": "form_efa12ba129d744248fb4",
+          "status": "submitted"
+        },
+        "sent_at": "2026-10-17T08:01:52.692329+00:00"
+      }
+    },
+    {
+      "time": "2026-10-17T08:01:56.335Z",
+      "type": "message",
+      "frame": {
+        "seq": 14,
+        "type": "form.status_changed",
+        "payload": {
+          "form_id": "form_efa12ba129d744248fb4",
+          "status": "validating"
+        },
+        "sent_at": "2026-10-17T08:01:56.334796+00:00"
+      }
+    },
+    {
+      "time": "2026-10-17T08:01:56.338Z",
+      "type": "message",
+      "frame": {
+        "seq": 15,
+        "type": "form.status_changed",
+        "payload": {
+          "form_id": "form_efa12ba129d744248fb4",
+          "status": "validated"
+        },
+        "sent_at": "2026-10-17T08:01:56.334864+00:00"
+      }
+    }
+  ],
+  "queries": [
+    {
+      "time": "2026-10-17T08:01:52.546Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:52.546Z",
+      "event": "updated",
+      "action": "success",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:52.551Z",
+      "event": "observerOptionsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:52.637Z",
+      "event": "updated",
+      "action": "success",
+      "key": [
+        "forms",
+        "shanghai",
+        "published"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:52.695Z",
+      "event": "updated",
+      "action": "invalidate",
+      "key": [
+        "forms",
+        "shanghai",
+        "published"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:52.695Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:52.695Z",
+      "event": "updated",
+      "action": "invalidate",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:52.697Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T08:01:52.697Z",
+      "event": "updated",
+      "action": "fetch",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T08:01:52.881Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:52.881Z",
+      "event": "updated",
+      "action": "success",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:52.889Z",
+      "event": "observerOptionsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:53.096Z",
+      "event": "added",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:53.102Z",
+      "event": "observerRemoved",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:53.102Z",
+      "event": "observerAdded",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:53.102Z",
+      "event": "observerOptionsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:53.102Z",
+      "event": "updated",
+      "action": "fetch",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T08:01:56.336Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:56.336Z",
+      "event": "updated",
+      "action": "setState",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:56.337Z",
+      "event": "updated",
+      "action": "invalidate",
+      "key": [
+        "forms",
+        "shanghai",
+        "submitted"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:56.337Z",
+      "event": "updated",
+      "action": "invalidate",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:56.337Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T08:01:56.337Z",
+      "event": "updated",
+      "action": "fetch",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T08:01:56.339Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:56.339Z",
+      "event": "updated",
+      "action": "setState",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": true,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:56.339Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T08:01:56.339Z",
+      "event": "updated",
+      "action": "fetch",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": true,
+      "fetch": "fetching"
+    },
+    {
+      "time": "2026-10-17T08:01:56.849Z",
+      "event": "observerResultsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:56.849Z",
+      "event": "updated",
+      "action": "success",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    },
+    {
+      "time": "2026-10-17T08:01:56.880Z",
+      "event": "observerOptionsUpdated",
+      "key": [
+        "forms",
+        "shanghai",
+        "all"
+      ],
+      "invalidated": false,
+      "fetch": "idle"
+    }
+  ],
+  "timing": [
+    {
+      "time": "2026-10-17T08:01:53.358Z",
+      "phase": "hold real response"
+    },
+    {
+      "time": "2026-10-17T08:01:56.338Z",
+      "phase": "release real response"
+    }
+  ],
+  "samples": [
+    {
+      "time": "2026-10-17T08:01:54.220Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 3,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.358Z",
+          "type": "open"
+        },
+        {
+          "time": "2026-10-17T08:01:52.359Z",
+          "type": "open"
+        },
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        }
+      ],
+      "form_requests": 4
+    },
+    {
+      "time": "2026-10-17T08:01:55.331Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 3,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.358Z",
+          "type": "open"
+        },
+        {
+          "time": "2026-10-17T08:01:52.359Z",
+          "type": "open"
+        },
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        }
+      ],
+      "form_requests": 4
+    },
+    {
+      "time": "2026-10-17T08:01:56.447Z",
+      "phase": "submitted",
+      "row": null,
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 4
+    },
+    {
+      "time": "2026-10-17T08:01:57.463Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:01:58.477Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:01:59.494Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:00.514Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:01.529Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:02.543Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:03.559Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:04.574Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:05.597Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:06.620Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:07.651Z",
+      "phase": "submitted",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:08.708Z",
+      "phase": "all",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:09.724Z",
+      "phase": "all",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    },
+    {
+      "time": "2026-10-17T08:02:10.738Z",
+      "phase": "all",
+      "row": "form_efa12ba129d744248fb4merchant_infoshanghairestaurantvalidated撤回查看",
+      "badge": "ws",
+      "frames": 5,
+      "last": [
+        {
+          "time": "2026-10-17T08:01:52.694Z",
+          "type": "message",
+          "frame": {
+            "seq": 13,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "submitted"
+            },
+            "sent_at": "2026-10-17T08:01:52.692329+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.335Z",
+          "type": "message",
+          "frame": {
+            "seq": 14,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validating"
+            },
+            "sent_at": "2026-10-17T08:01:56.334796+00:00"
+          }
+        },
+        {
+          "time": "2026-10-17T08:01:56.338Z",
+          "type": "message",
+          "frame": {
+            "seq": 15,
+            "type": "form.status_changed",
+            "payload": {
+              "form_id": "form_efa12ba129d744248fb4",
+              "status": "validated"
+            },
+            "sent_at": "2026-10-17T08:01:56.334864+00:00"
+          }
+        }
+      ],
+      "form_requests": 6
+    }
+  ]
+}
