@@ -88,7 +88,11 @@ const ERROR_MESSAGES: Record<string, string> = {
   batch_canceled: "批次已取消（表单项已全部撤回），无法运行",
   version_conflict: "版本冲突：数据已被更新，请刷新后重试",
   invalid_bbox: "视野范围参数不合法",
-  validation_error: "提交的数据未通过校验"
+  validation_error: "提交的数据未通过校验",
+  invalid_file_type: "附件格式不支持，请选择图片、PDF、Office、TXT 或 Markdown 文件",
+  file_too_large: "单个附件不得超过 5MB",
+  invalid_file_reference: "附件不存在或不属于当前租户，请重新上传",
+  invalid_shop: "店铺不存在或不属于当前租户"
 };
 
 function describeError(status: number, body: string): string {
@@ -102,9 +106,9 @@ function describeError(status: number, body: string): string {
   return body || `HTTP ${status}`;
 }
 
-export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(path: string, init: RequestInit = {}, responseType: "json" | "blob" = "json"): Promise<T> {
   const headers = new Headers(init.headers);
-  headers.set("Content-Type", headers.get("Content-Type") ?? "application/json");
+  if (!(init.body instanceof FormData)) headers.set("Content-Type", headers.get("Content-Type") ?? "application/json");
   const token = getAccessToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
   let response = await fetch(`${API_BASE}${path}`, {...init, headers});
@@ -123,7 +127,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     }
     throw new Error(describeError(response.status, detail));
   }
-  return (await response.json()) as T;
+  return (responseType === "blob" ? await response.blob() : await response.json()) as T;
 }
 
 export async function apiFetchWithEtag<T>(
