@@ -78,6 +78,22 @@ class User(Base):
     region_code: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
 
+class Shop(Base):
+    __tablename__ = "shops"
+    __table_args__ = (Index("ix_shops_tenant_city", "tenant_id", "city_code"),)
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(26), index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    city_code: Mapped[str] = mapped_column(String(32), nullable=False)
+    district_code: Mapped[str] = mapped_column(String(32), nullable=False)
+    address: Mapped[str] = mapped_column(String(255), nullable=False)
+    lng: Mapped[float] = mapped_column(nullable=False)
+    lat: Mapped[float] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
 class Form(Base):
     __tablename__ = "forms"
     __table_args__ = (
@@ -87,6 +103,7 @@ class Form(Base):
 
     id: Mapped[str] = mapped_column(String(26), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(26), index=True, nullable=False)
+    shop_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
     form_type: Mapped[FormType] = mapped_column(Enum(FormType), nullable=False)
     status: Mapped[FormStatus] = mapped_column(Enum(FormStatus), nullable=False)
     idempotency_key: Mapped[str] = mapped_column(String(64), nullable=False)

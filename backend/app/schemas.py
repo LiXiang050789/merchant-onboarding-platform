@@ -31,6 +31,16 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class ShopOut(BaseModel):
+    id: str
+    name: str
+    city_code: str
+    district_code: str
+    address: str
+    lng: float
+    lat: float
+
+
 class FormCreate(BaseModel):
     form_type: FormType
     city_code: str = Field(min_length=1, max_length=32)

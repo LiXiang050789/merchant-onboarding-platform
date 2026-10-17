@@ -21,7 +21,7 @@ from .config import settings
 from .db import get_session
 from .dependencies import current_user
 from .docs_store import DocNotFoundError, DocsRepository, DocVersionConflictError, get_docs_repo
-from .models import Batch, BatchItem, BatchStatus, Form, FormAuditEvent, FormStatus, FormType, SubmissionEvent, SubmissionEventType, User
+from .models import Batch, BatchItem, BatchStatus, Form, FormAuditEvent, FormStatus, FormType, Shop, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
 from .realtime import GLOBAL_TOPIC, event_to_dict, events_since, publish_event, subscribe, unsubscribe
 from .schemas import (
@@ -40,6 +40,7 @@ from .schemas import (
     FormOut,
     LoginRequest,
     RefreshRequest,
+    ShopOut,
     StatusPatch,
     SuccessRateResponse,
     TokenResponse,
@@ -171,6 +172,23 @@ async def refresh(payload: RefreshRequest, session: AsyncSession = Depends(get_s
         refresh_token=create_refresh_token(user.id, user.tenant_id, user.role.value),
         expires_in=settings.access_token_minutes * 60,
     )
+
+
+@app.get("/api/v1/shops", response_model=list[ShopOut])
+async def list_shops(
+    city: str | None = None,
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> list[ShopOut]:
+    stmt = select(Shop)
+    if actor.role.value != "admin":
+        stmt = stmt.where(Shop.tenant_id == actor.tenant_id)
+    if actor.role.value == "operator" and actor.region_code:
+        stmt = stmt.where(Shop.city_code == actor.region_code)
+    if city:
+        stmt = stmt.where(Shop.city_code == city)
+    result = await session.execute(stmt.order_by(Shop.name))
+    return [ShopOut.model_validate(shop, from_attributes=True) for shop in result.scalars()]
 
 
 @app.get("/api/v1/forms", response_model=FormListResponse)
