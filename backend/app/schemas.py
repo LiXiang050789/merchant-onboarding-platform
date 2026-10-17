@@ -15,6 +15,24 @@ REQUIRED_BY_TYPE = {
     FormType.report: {"report_name", "period"},
 }
 
+TEXT_LIMITS = {
+    "merchant_name": 128, "license_no": 128, "legal_person": 128,
+    "contact_phone": 64, "contact_email": 255, "business_scope": 2000,
+    "intro": 5000, "property_name": 128, "address": 255, "contact": 128,
+    "product_name": 128, "sku": 128, "category": 128,
+    "report_name": 128, "period": 64, "remark": 5000,
+}
+NUMBER_FIELDS = {"reg_capital", "area_sqm", "rent_monthly", "price", "revenue", "order_count", "customer_count"}
+FILE_FIELDS = {"license_photo", "file_id"}
+FILE_LIST_FIELDS = {"attachments", "photos", "lease_files", "cert_files", "report_files", "chart_images", "file_ids"}
+
+
+class FileOut(BaseModel):
+    file_id: str
+    filename: str
+    mime_type: str
+    size_bytes: int
+
 
 class LoginRequest(BaseModel):
     email: str
@@ -49,6 +67,7 @@ class FormCreate(BaseModel):
     lng: float
     lat: float
     payload: dict[str, Any]
+    shop_id: str | None = Field(default=None, min_length=1, max_length=64)
 
     @field_validator("lng")
     @classmethod
@@ -69,6 +88,22 @@ class FormCreate(BaseModel):
         missing = REQUIRED_BY_TYPE[self.form_type] - self.payload.keys()
         if missing:
             raise ValueError(f"missing required payload fields: {sorted(missing)}")
+        for key, value in self.payload.items():
+            if key in TEXT_LIMITS:
+                if not isinstance(value, str) or len(value) > TEXT_LIMITS[key]:
+                    raise ValueError(f"{key} must be a string of at most {TEXT_LIMITS[key]} characters")
+                if key in REQUIRED_BY_TYPE[self.form_type] and not value.strip():
+                    raise ValueError(f"{key} must not be blank")
+            if key in NUMBER_FIELDS:
+                if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 <= value <= 1e15:
+                    raise ValueError(f"{key} must be a finite number between 0 and 1e15")
+                if key in {"order_count", "customer_count"} and value != int(value):
+                    raise ValueError(f"{key} must be an integer")
+            if key in FILE_FIELDS and (not isinstance(value, str) or not value.startswith("f_") or len(value) > 26):
+                raise ValueError(f"{key} must be a file id")
+            if key in FILE_LIST_FIELDS:
+                if not isinstance(value, list) or len(value) > 20 or any(not isinstance(item, str) or not item.startswith("f_") or len(item) > 26 for item in value):
+                    raise ValueError(f"{key} must be a list of at most 20 file ids")
         return self
 
 
@@ -90,6 +125,12 @@ class FormOut(BaseModel):
     updated_at: datetime
     withdrawn_at: datetime | None = None
     withdraw_reason: str | None = None
+    shop_id: str | None = None
+    shop_name: str | None = None
+
+
+class FormDetailOut(FormOut):
+    batch_id: str | None = None
 
 
 class FormListResponse(BaseModel):

@@ -28,6 +28,7 @@ from backend.app.models import (  # noqa: E402
     BatchItem,
     BatchStatus,
     DLQItem,
+    File,
     Form,
     FormAuditEvent,
     Shop,
@@ -353,7 +354,7 @@ def add_demo_shops(forms: list[dict], end: datetime) -> list[dict]:
 
 
 async def reset_tables(conn) -> None:
-    for table in [DLQItem, BatchCheckpoint, BatchItem, Batch, FormAuditEvent, SubmissionEvent, Form, Shop, User, Tenant]:
+    for table in [DLQItem, BatchCheckpoint, BatchItem, Batch, FormAuditEvent, SubmissionEvent, Form, File, Shop, User, Tenant]:
         await conn.execute(delete(table))
 
 

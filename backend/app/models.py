@@ -94,6 +94,19 @@ class Shop(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
 
+class File(Base):
+    __tablename__ = "files"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(26), index=True, nullable=False)
+    uploader_id: Mapped[str] = mapped_column(String(26), nullable=False)
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(nullable=False)
+    storage_path: Mapped[str] = mapped_column(String(512), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+
+
 class Form(Base):
     __tablename__ = "forms"
     __table_args__ = (

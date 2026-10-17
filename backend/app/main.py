@@ -3,16 +3,18 @@ from __future__ import annotations
 import logging
 import time
 import asyncio
+from pathlib import Path
+import re
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect, status
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, Request, Response, UploadFile, WebSocket, WebSocketDisconnect, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from jwt import InvalidTokenError
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .batch_pipeline import build_batches, get_batch_for_actor, list_batches, run_batch
@@ -21,7 +23,7 @@ from .config import settings
 from .db import get_session
 from .dependencies import current_user
 from .docs_store import DocNotFoundError, DocsRepository, DocVersionConflictError, get_docs_repo
-from .models import Batch, BatchItem, BatchStatus, Form, FormAuditEvent, FormStatus, FormType, Shop, SubmissionEvent, SubmissionEventType, User
+from .models import Batch, BatchItem, BatchStatus, File, Form, FormAuditEvent, FormStatus, FormType, Shop, SubmissionEvent, SubmissionEventType, User
 from .repositories import FormRepository
 from .realtime import GLOBAL_TOPIC, event_to_dict, events_since, publish_event, subscribe, unsubscribe
 from .schemas import (
@@ -36,6 +38,10 @@ from .schemas import (
     DocRollbackRequest,
     DocUpdate,
     FormCreate,
+    FormDetailOut,
+    FileOut,
+    FILE_FIELDS,
+    FILE_LIST_FIELDS,
     FormListResponse,
     FormOut,
     LoginRequest,
@@ -53,6 +59,15 @@ from .status_worker import start_status_worker, stop_status_worker
 
 
 logger = logging.getLogger("merchant.telemetry")
+UPLOAD_ROOT = Path(__file__).resolve().parents[1] / "uploads"
+MAX_FILE_BYTES = 5 * 1024 * 1024
+UPLOAD_TYPES = {
+    ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+    ".webp": "image/webp", ".gif": "image/gif", ".pdf": "application/pdf",
+    ".doc": "application/msword", ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".xls": "application/vnd.ms-excel", ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".txt": "text/plain", ".md": "text/plain",
+}
 
 
 @asynccontextmanager
@@ -177,11 +192,12 @@ async def refresh(payload: RefreshRequest, session: AsyncSession = Depends(get_s
 @app.get("/api/v1/shops", response_model=list[ShopOut])
 async def list_shops(
     city: str | None = None,
+    own_tenant: bool = False,
     actor: User = Depends(current_user),
     session: AsyncSession = Depends(get_session),
 ) -> list[ShopOut]:
     stmt = select(Shop)
-    if actor.role.value != "admin":
+    if own_tenant or actor.role.value != "admin":
         stmt = stmt.where(Shop.tenant_id == actor.tenant_id)
     if actor.role.value == "operator" and actor.region_code:
         stmt = stmt.where(Shop.city_code == actor.region_code)
@@ -191,27 +207,88 @@ async def list_shops(
     return [ShopOut.model_validate(shop, from_attributes=True) for shop in result.scalars()]
 
 
+@app.post("/api/v1/files", response_model=FileOut)
+async def upload_file(
+    file: UploadFile,
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> FileOut:
+    filename = re.sub(r"[\x00-\x1f\x7f]", "", (file.filename or "").replace("\\", "/").split("/")[-1]).strip()
+    ext = Path(filename).suffix.lower()
+    if ext not in UPLOAD_TYPES or len(filename) > 255:
+        await file.close()
+        raise HTTPException(422, detail={"code": "invalid_file_type"})
+    file_id = f"f_{uuid4().hex[:20]}"
+    relative = Path(actor.tenant_id) / f"{file_id}{ext}"
+    destination = (UPLOAD_ROOT / relative).resolve()
+    if not destination.is_relative_to(UPLOAD_ROOT.resolve()):
+        await file.close()
+        raise HTTPException(422, detail={"code": "invalid_file_type"})
+    size = 0
+    try:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with destination.open("xb") as output:
+            while chunk := await file.read(64 * 1024):
+                size += len(chunk)
+                if size > MAX_FILE_BYTES:
+                    raise HTTPException(413, detail={"code": "file_too_large"})
+                output.write(chunk)
+        session.add(File(id=file_id, tenant_id=actor.tenant_id, uploader_id=actor.id,
+                         filename=filename, mime_type=UPLOAD_TYPES[ext], size_bytes=size,
+                         storage_path=str(relative)))
+        await session.commit()
+    except Exception:
+        destination.unlink(missing_ok=True)
+        raise
+    finally:
+        await file.close()
+    return FileOut(file_id=file_id, filename=filename, mime_type=UPLOAD_TYPES[ext], size_bytes=size)
+
+
+@app.get("/api/v1/files/{file_id}")
+async def download_file(
+    file_id: str,
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> FileResponse:
+    record = await session.scalar(select(File).where(File.id == file_id, File.tenant_id == actor.tenant_id))
+    path = (UPLOAD_ROOT / record.storage_path).resolve() if record else None
+    if path is None or not path.is_relative_to(UPLOAD_ROOT.resolve()) or not path.is_file():
+        raise HTTPException(404, detail={"code": "not_found"})
+    return FileResponse(path, media_type=record.mime_type, filename=record.filename,
+                        headers={"X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store"})
+
+
+async def form_output(session: AsyncSession, form: Form, detail: bool = False) -> FormOut:
+    shop_name = await session.scalar(select(Shop.name).where(Shop.id == form.shop_id, Shop.tenant_id == form.tenant_id)) if form.shop_id else None
+    model = FormDetailOut if detail else FormOut
+    return model.model_validate(form, from_attributes=True).model_copy(update={"shop_name": shop_name})
+
+
 @app.get("/api/v1/forms", response_model=FormListResponse)
 async def list_forms(
     city: str | None = None,
     status_filter: FormStatus | None = Query(None, alias="status"),
     form_type: str | None = None,
     industry: str | None = None,
+    shop_id: str | None = None,
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
     actor: User = Depends(current_user),
     session: AsyncSession = Depends(get_session),
 ) -> FormListResponse:
     repo = FormRepository(session, actor)
-    result = await repo.list(
-        city=city,
-        status=status_filter,
-        form_type=form_type,
-        industry=industry,
-        page=page,
-        size=size,
-    )
-    return FormListResponse(items=[FormOut.model_validate(item, from_attributes=True) for item in result.items], total=result.total, page=page, size=size)
+    stmt = repo.scoped(select(Form))
+    for column, value in [(Form.city_code, city), (Form.status, status_filter),
+                          (Form.form_type, form_type), (Form.industry, industry), (Form.shop_id, shop_id)]:
+        if value:
+            stmt = stmt.where(column == value)
+    total = int(await session.scalar(select(func.count()).select_from(stmt.subquery())) or 0)
+    forms = list((await session.scalars(stmt.order_by(Form.created_at.desc(), Form.id.desc()).offset((page - 1) * size).limit(size))).all())
+    shop_ids = {form.shop_id for form in forms if form.shop_id}
+    shops = {(shop.id, shop.tenant_id): shop.name for shop in (await session.scalars(select(Shop).where(Shop.id.in_(shop_ids)))).all()} if shop_ids else {}
+    items = [FormOut.model_validate(form, from_attributes=True).model_copy(update={"shop_name": shops.get((form.shop_id, form.tenant_id))}) for form in forms]
+    return FormListResponse(items=items, total=total, page=page, size=size)
 
 
 @app.post("/api/v1/forms", response_model=FormOut)
@@ -223,8 +300,21 @@ async def create_form(
     session: AsyncSession = Depends(get_session),
 ) -> FormOut:
     repo = FormRepository(session, actor)
+    if payload.shop_id and not await session.scalar(select(Shop.id).where(Shop.id == payload.shop_id, Shop.tenant_id == actor.tenant_id)):
+        raise HTTPException(422, detail={"code": "invalid_shop"})
+    file_ids = set()
+    for key, value in payload.payload.items():
+        if key in FILE_FIELDS:
+            file_ids.add(value)
+        elif key in FILE_LIST_FIELDS:
+            file_ids.update(value)
+    if file_ids:
+        found = set((await session.scalars(select(File.id).where(File.id.in_(file_ids), File.tenant_id == actor.tenant_id))).all())
+        if found != file_ids:
+            raise HTTPException(422, detail={"code": "invalid_file_reference"})
     form, created = await repo.create(payload, idempotency_key)
     if created:
+        form.shop_id = payload.shop_id
         session.add(
             SubmissionEvent(
                 tenant_id=form.tenant_id,
@@ -239,21 +329,22 @@ async def create_form(
     await session.commit()
     if created:
         await publish_event(form.tenant_id, "form.status_changed", {"form_id": form.id, "status": form.status.value})
+        await session.refresh(form)
     if not created:
         response.status_code = status.HTTP_200_OK
-    return FormOut.model_validate(form, from_attributes=True)
+    return await form_output(session, form)
 
 
-@app.get("/api/v1/forms/{form_id}", response_model=FormOut)
+@app.get("/api/v1/forms/{form_id}", response_model=FormDetailOut)
 async def get_form(
     form_id: str,
     actor: User = Depends(current_user),
     session: AsyncSession = Depends(get_session),
-) -> FormOut:
+) -> FormDetailOut:
     form = await FormRepository(session, actor).get(form_id)
     if form is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found"})
-    return FormOut.model_validate(form, from_attributes=True)
+    return await form_output(session, form, detail=True)
 
 
 @app.get("/api/v1/forms/{form_id}/audit")
