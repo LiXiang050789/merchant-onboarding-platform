@@ -5,9 +5,11 @@ import maplibregl from "maplibre-gl";
 import {RefreshCw} from "lucide-react";
 import {useEffect, useRef} from "react";
 import {useMapViewModel} from "@/features/map/view-model/use-map-view-model";
+import {ClusterPanel} from "./cluster-panel";
 
 export function MapView() {
-  const {city, setCity, status, setStatus, zoom, setZoom, query} = useMapViewModel();
+  const {city, setCity, status, setStatus, zoom, setZoom, query, selectedClusterId, setSelectedClusterId,
+    selectedFormId, setSelectedFormId, membersQuery, detailQuery} = useMapViewModel();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -36,9 +38,21 @@ export function MapView() {
       element.className = "cluster-marker";
       element.textContent = String(feature.properties.count);
       element.title = feature.properties.cluster_id;
+      element.type = "button";
+      element.dataset.testid = `cluster-marker-${feature.properties.cluster_id}`;
+      element.setAttribute("aria-label", `查看簇 ${feature.properties.cluster_id}`);
+      element.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setSelectedClusterId(feature.properties.cluster_id);
+      });
       return new maplibregl.Marker({element}).setLngLat(feature.geometry.coordinates).addTo(map);
     });
-  }, [query.data]);
+    if (query.data.features.length) {
+      const bounds = new maplibregl.LngLatBounds();
+      query.data.features.forEach(feature => bounds.extend(feature.geometry.coordinates));
+      map.fitBounds(bounds, {padding: 40, maxZoom: zoom, duration: 0});
+    }
+  }, [query.data, setSelectedClusterId, zoom]);
 
   return (
     <div className="map-layout">
@@ -77,6 +91,8 @@ export function MapView() {
       </section>
       <section className="panel map-canvas" data-testid="map-canvas">
         <div ref={containerRef} className="maplibregl-map" />
+        {selectedClusterId ? <ClusterPanel clusterId={selectedClusterId} membersQuery={membersQuery} detailQuery={detailQuery}
+          selectedFormId={selectedFormId} onSelectForm={setSelectedFormId} onClose={() => setSelectedClusterId(null)}/> : null}
       </section>
     </div>
   );
