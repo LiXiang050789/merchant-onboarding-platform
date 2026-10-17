@@ -1,0 +1,12 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-8.4.2, pluggy-1.6.0
+rootdir: /home/lx/快课python/merchant-onboarding-platform
+configfile: pytest.ini
+plugins: asyncio-1.2.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 13 items
+
+backend/tests/test_dlq_retry.py .............                            [100%]
+
+- generated xml file: /home/lx/快课python/merchant-onboarding-platform/artifacts/test/p15_targeted.xml -
+============================= 13 passed in 39.48s ==============================
