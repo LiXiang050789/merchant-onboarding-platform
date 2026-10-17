@@ -85,7 +85,7 @@ async def build_batches(
         stmt = stmt.where(Form.city_code == city)
     if form_type:
         stmt = stmt.where(Form.form_type == form_type)
-    result = await session.execute(stmt.order_by(Form.city_code, Form.id))
+    result = await session.execute(stmt.order_by(Form.city_code, Form.id).with_for_update())
     forms = list(result.scalars())
     by_scope: dict[tuple[str, str], list[Form]] = {}
     for form in forms:

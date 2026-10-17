@@ -68,6 +68,7 @@ async def cluster_geojson(
     industry: str | None,
 ) -> tuple[dict, str, bool]:
     filters = {
+        "scope": "admin" if actor.role == UserRole.admin else f"{actor.role.value}:{actor.region_code or '-'}",
         "city": city,
         "status": status.value if status else None,
         "form_type": form_type.value if form_type else None,

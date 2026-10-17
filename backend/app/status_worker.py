@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from contextlib import suppress
 from datetime import UTC, datetime
 
@@ -13,6 +14,7 @@ from .realtime import publish_event
 from .schemas import REQUIRED_BY_TYPE
 
 SYSTEM_ACTOR_ID = "system_worker"
+logger = logging.getLogger(__name__)
 
 
 def payload_is_complete(form: Form) -> bool:
@@ -82,7 +84,7 @@ async def status_worker_loop(interval_seconds: int) -> None:
                 await process_status_once(session)
         except Exception:
             # Worker failure must not affect the API process; next tick retries.
-            pass
+            logger.exception("status_worker_failed")
 
 
 def start_status_worker(interval_seconds: int) -> asyncio.Task:
