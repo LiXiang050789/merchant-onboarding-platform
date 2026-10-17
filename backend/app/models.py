@@ -200,6 +200,12 @@ class BatchCheckpoint(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
 
+class DLQState(StrEnum):
+    pending = "pending"
+    resolved = "resolved"
+    exhausted = "exhausted"
+
+
 class DLQItem(Base):
     __tablename__ = "dlq_items"
 
@@ -210,5 +216,6 @@ class DLQItem(Base):
     error_code: Mapped[str] = mapped_column(String(64), nullable=False)
     error_message: Mapped[str] = mapped_column(String(255), nullable=False)
     retry_count: Mapped[int] = mapped_column(nullable=False, default=0)
+    state: Mapped[DLQState] = mapped_column(Enum(DLQState), nullable=False, default=DLQState.pending, server_default="pending", index=True)
     next_retry_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)

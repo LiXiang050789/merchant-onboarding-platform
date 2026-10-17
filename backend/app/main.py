@@ -57,6 +57,7 @@ from .security import create_access_token, create_refresh_token, decode_token, v
 from .stats import compute_success_rate, default_window
 from .state_machine import can_transition
 from .status_worker import start_status_worker, stop_status_worker
+from .dlq_worker import start_dlq_worker, stop_dlq_worker
 
 
 logger = logging.getLogger("merchant.telemetry")
@@ -74,9 +75,11 @@ UPLOAD_TYPES = {
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     worker_task = start_status_worker(settings.validate_worker_interval_seconds)
+    dlq_task = start_dlq_worker(settings.dlq_retry_interval_seconds)
     try:
         yield
     finally:
+        await stop_dlq_worker(dlq_task)
         await stop_status_worker(worker_task)
 
 

@@ -32,6 +32,7 @@ class Settings:
     mongo_url: str = os.getenv("MONGO_URL", "mongodb://127.0.0.1:27017")
     mongo_db: str = os.getenv("MONGO_DB", "merchant_docs")
     validate_worker_interval_seconds: int = int(os.getenv("VALIDATE_WORKER_INTERVAL_SECONDS", "5" if os.getenv("APP_ENV", "development") == "development" else "30"))
+    dlq_retry_interval_seconds: int = int(os.getenv("DLQ_RETRY_INTERVAL_SECONDS", "30"))
     access_token_minutes: int = 30
     refresh_token_days: int = 7
 

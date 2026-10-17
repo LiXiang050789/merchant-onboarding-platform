@@ -332,6 +332,26 @@ async def ensure_v5_schema(conn) -> None:
         await conn.execute(text("ALTER TABLE forms ADD INDEX ix_forms_shop_id (shop_id)"))
 
 
+async def ensure_v6_schema(conn) -> None:
+    database = await conn.scalar(text("SELECT DATABASE()"))
+    column = await conn.scalar(text(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+        "WHERE TABLE_SCHEMA=:database AND TABLE_NAME='dlq_items' AND COLUMN_NAME='state'"
+    ), {"database": database})
+    if column is None:
+        await conn.execute(text(
+            "ALTER TABLE dlq_items ADD COLUMN state "
+            "ENUM('pending','resolved','exhausted') NOT NULL DEFAULT 'pending'"
+        ))
+    index = await conn.scalar(text(
+        "SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS "
+        "WHERE TABLE_SCHEMA=:database AND TABLE_NAME='dlq_items' AND COLUMN_NAME='state' AND SEQ_IN_INDEX=1 LIMIT 1"
+    ), {"database": database})
+    if index is None:
+        await conn.execute(text("ALTER TABLE dlq_items ADD INDEX ix_dlq_items_state (state)"))
+    await conn.execute(text("UPDATE dlq_items SET state='exhausted' WHERE state='pending' AND retry_count>=3"))
+
+
 def add_demo_shops(forms: list[dict], end: datetime) -> list[dict]:
     shops = []
     for tenant, city in sorted({(form["tenant_id"], form["city_code"]) for form in forms}):
@@ -452,6 +472,7 @@ async def main_async(args) -> int:
         await conn.run_sync(Base.metadata.create_all)
         await ensure_v4_schema(conn)
         await ensure_v5_schema(conn)
+        await ensure_v6_schema(conn)
         if args.reset:
             await reset_tables(conn)
         await bulk_insert(conn, Tenant, tenant_rows)

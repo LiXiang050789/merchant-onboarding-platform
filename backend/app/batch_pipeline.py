@@ -16,6 +16,7 @@ from .models import (
     BatchItem,
     BatchStatus,
     DLQItem,
+    DLQState,
     Form,
     FormStatus,
     FormType,
@@ -194,6 +195,7 @@ async def write_dlq(session: AsyncSession, form: Form, stage: str, error_code: s
             error_code=error_code,
             error_message=message[:255],
             retry_count=form.retry_count,
+            state=DLQState.exhausted if form.retry_count >= 3 else DLQState.pending,
             next_retry_at=now + timedelta(minutes=delay_minutes),
             created_at=now,
         )
