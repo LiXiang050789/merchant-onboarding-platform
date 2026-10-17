@@ -14,10 +14,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from jwt import InvalidTokenError
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import String, cast, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .batch_pipeline import build_batches, get_batch_for_actor, list_batches, run_batch
+from .aggregation import grid_size_for_zoom
 from .cluster_service import bbox_tuple, cluster_geojson
 from .config import settings
 from .db import get_session
@@ -637,6 +638,55 @@ async def success_rate(
     )
     payload.pop("cache_hit", None)
     return payload
+
+
+@app.get("/api/v1/clusters/members")
+async def cluster_members(
+    cluster_id: str,
+    city: str | None = None,
+    status_filter: FormStatus | None = Query(None, alias="status"),
+    form_type: FormType | None = None,
+    industry: str | None = None,
+    actor: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    match = re.fullmatch(r"z([0-9]+):(-?[0-9]+):(-?[0-9]+)", cluster_id)
+    try:
+        if match is None:
+            raise ValueError("invalid cluster")
+        zoom, cx, cy = map(int, match.groups())
+        if not 1 <= zoom <= 20:
+            raise ValueError("invalid zoom")
+        size = grid_size_for_zoom(zoom)
+    except (ValueError, OverflowError):
+        raise HTTPException(422, detail={"code": "invalid_cluster"})
+
+    # MySQL FLOAT is returned as decimal text by the driver. Match the same
+    # double conversion before floor, including points on rounded cell edges.
+    stmt = FormRepository(session, actor).scoped(select(Form)).where(
+        func.floor(cast(Form.lng, String) / size) == cx,
+        func.floor(cast(Form.lat, String) / size) == cy,
+    )
+    for column, value in [(Form.city_code, city), (Form.status, status_filter),
+                          (Form.form_type, form_type), (Form.industry, industry)]:
+        if value:
+            stmt = stmt.where(column == value)
+    total = int(await session.scalar(select(func.count()).select_from(stmt.subquery())) or 0)
+    forms = list((await session.scalars(stmt.order_by(Form.created_at.desc(), Form.id.desc()).limit(20))).all())
+    shop_ids = {form.shop_id for form in forms if form.shop_id}
+    shops = {(shop.id, shop.tenant_id): shop.name for shop in (await session.scalars(select(Shop).where(Shop.id.in_(shop_ids)))).all()} if shop_ids else {}
+    name_keys = {FormType.merchant_info: "merchant_name", FormType.property: "property_name",
+                 FormType.product: "product_name", FormType.report: "report_name"}
+    members = []
+    for form in forms:
+        name = form.payload.get(name_keys[form.form_type])
+        members.append({
+            "id": form.id, "form_type": form.form_type, "status": form.status,
+            "city_code": form.city_code, "industry": form.industry,
+            "display_name": name if isinstance(name, str) and name.strip() else form.id,
+            "shop_name": shops.get((form.shop_id, form.tenant_id)), "created_at": form.created_at,
+        })
+    return {"cluster_id": cluster_id, "total": total, "members": members}
 
 
 @app.get("/api/v1/clusters", response_model=None)
