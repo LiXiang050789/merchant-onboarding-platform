@@ -1,0 +1,25 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-8.4.2, pluggy-1.6.0
+rootdir: /home/lx/快课python/merchant-onboarding-platform
+configfile: pytest.ini
+plugins: asyncio-1.2.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 84 items
+
+backend/tests/test_aggregation.py ..                                     [  2%]
+backend/tests/test_auth.py ...                                           [  5%]
+backend/tests/test_batch_pipeline.py ....                                [ 10%]
+backend/tests/test_build_concurrency.py .                                [ 11%]
+backend/tests/test_cluster_cache_scope.py ..                             [ 14%]
+backend/tests/test_docs.py ....                                          [ 19%]
+backend/tests/test_form_submission.py ................................   [ 57%]
+backend/tests/test_forms.py ..........                                   [ 69%]
+backend/tests/test_frontend_contract.py ..                               [ 71%]
+backend/tests/test_realtime_scope.py ...                                 [ 75%]
+backend/tests/test_shops.py .....                                        [ 80%]
+backend/tests/test_success_rate.py ....                                  [ 85%]
+backend/tests/test_withdraw.py .........                                 [ 96%]
+backend/tests/test_worker.py ...                                         [100%]
+
+- generated xml file: /home/lx/快课python/merchant-onboarding-platform/artifacts/test/p13.xml -
+======================== 84 passed in 273.14s (0:04:33) ========================

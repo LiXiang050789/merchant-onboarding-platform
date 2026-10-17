@@ -1,0 +1,33 @@
+{
+  "checked_at": "2026-10-17T12:45:05.139Z",
+  "results": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "dialog": {
+        "x": 620,
+        "y": 0,
+        "width": 660,
+        "height": 900
+      },
+      "page_overflow": false,
+      "inputs_within_dialog": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "dialog": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844
+      },
+      "page_overflow": false,
+      "inputs_within_dialog": true
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "before_reset": {
+    "database": "merchant",
+    "checked_at": "2026-10-17T12:45:32.872281+00:00",
+    "shops": 103,
+    "forms": 97382,
+    "shop_id_null": 2,
+    "batches": 215,
+    "created_batches": 214,
+    "withdrawn": 17,
+    "file_rows": 1,
+    "mismatched_shops": 2,
+    "upload_check": {
+      "file_id": "f_679ccac30f3d407fa7f9",
+      "filename": "门店照片.png",
+      "mime_type": "image/png",
+      "tenant_id": "tenant_01",
+      "uploader_id": "user_01",
+      "storage_path": "tenant_01/f_679ccac30f3d407fa7f9.png",
+      "recorded_bytes": 147,
+      "disk_bytes": 147,
+      "sha256": "2dd29e41e3a239c89aa5d4647babe76343baa489b8eafc1eb8fac59075390380",
+      "download_status": 200,
+      "download_matches_disk": true,
+      "form_id": "form_484192e9bfa442e6b590",
+      "shop_id": "shop_tenant_01_shanghai_2",
+      "form_status": "validated"
+    }
+  },
+  "after_reset": {
+    "database": "merchant",
+    "checked_at": "2026-10-17T12:48:21.367944+00:00",
+    "shops": 103,
+    "forms": 97379,
+    "shop_id_null": 0,
+    "batches": 10,
+    "created_batches": 10,
+    "withdrawn": 15,
+    "file_rows": 0,
+    "mismatched_shops": 0,
+    "time_anchor": {
+      "original_min": "2026-09-01T00:00:00",
+      "original_max": "2026-09-14T23:59:14",
+      "shifted_min": "2026-10-03T12:46:35",
+      "shifted_max": "2026-10-17T12:45:49",
+      "shift_seconds": 2810795
+    }
+  }
+}
