@@ -14,7 +14,7 @@
 | 10w+ 表单聚合 | 地图渲染聚合和业务批次不是一件事 | bbox/zoom 网格簇用于渲染；tenant/city 分区批次用于处理 | `docs/02-地理聚合与性能优化.md`, `artifacts/bench/aggregation.json` |
 | 查询和渲染性能 | 不把 10w 点下发给前端 | Redis cluster cache、ETag/304、TanStack Query、MapLibre marker 对拍 | `docs/07-前端性能与缓存报告.md`, `artifacts/frontend/perf.json` |
 | 成功率统计 | 成功率要说明是谁的视角 | 提交成功率、落库成功率、端到端成功率、撤回率 | `docs/03-提交成功率统计设计.md`, `backend/tests/test_success_rate.py` |
-| 四类表单批处理 | 批处理要可重跑、可追责、可失败续跑 | checkpoint、DLQ、指数退避、202 异步运行、实时进度 | `docs/06-批处理流程设计.md`, `artifacts/test/p9.xml` |
+| 四类表单批处理 | 批处理要可重跑、可追责、可失败续跑 | checkpoint 留痕、按状态续跑、DLQ 自动退避重试与耗尽终态、202 异步运行、实时进度 | `docs/06-批处理流程设计.md`, `artifacts/test/p15.xml`, `artifacts/data/p15_dlq.json` |
 | 知识文档 CRUD/RAG | CRUD 是主线，RAG 是加分 | Mongo 版本/软删/回滚；DeepSeek 真实生成，失败降级 retrieval-only | `docs/04-知识文档存储与RAG设计.md`, `artifacts/rag/rag_demo.json` |
 | 跨端适配 | 交互密度随终端变化，不是简单响应式 | Web/移动 Web/小程序/大屏/PWA 的职责切分 | `docs/05-跨端适配方案.md` |
 
