@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-10-17T14:48:27.449Z",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "map": {
+    "x": 586,
+    "y": 92,
+    "width": 674,
+    "height": 620
+  },
+  "marker": {
+    "x": 610.6484375,
+    "y": 619,
+    "width": 32.703125,
+    "height": 32
+  },
+  "marker_id": "cluster-marker-z11:2426:621"
+}

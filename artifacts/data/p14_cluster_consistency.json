@@ -1,0 +1,228 @@
+{
+  "checked_at": "2026-10-17T14:43:01.918126+00:00",
+  "database": "merchant",
+  "city": "shanghai",
+  "status": "published",
+  "zoom": 11,
+  "source_forms": 24838,
+  "clusters": 36,
+  "all_counts_match": true,
+  "results": [
+    {
+      "cluster_id": "z11:2426:621",
+      "expected": 20,
+      "actual": 20,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2426:622",
+      "expected": 100,
+      "actual": 100,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2426:623",
+      "expected": 10,
+      "actual": 10,
+      "returned": 10
+    },
+    {
+      "cluster_id": "z11:2427:620",
+      "expected": 1,
+      "actual": 1,
+      "returned": 1
+    },
+    {
+      "cluster_id": "z11:2427:621",
+      "expected": 483,
+      "actual": 483,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2427:622",
+      "expected": 2621,
+      "actual": 2621,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2427:623",
+      "expected": 235,
+      "actual": 235,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2427:624",
+      "expected": 28,
+      "actual": 28,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2427:625",
+      "expected": 3,
+      "actual": 3,
+      "returned": 3
+    },
+    {
+      "cluster_id": "z11:2428:620",
+      "expected": 1,
+      "actual": 1,
+      "returned": 1
+    },
+    {
+      "cluster_id": "z11:2428:621",
+      "expected": 221,
+      "actual": 221,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2428:622",
+      "expected": 1167,
+      "actual": 1167,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2428:623",
+      "expected": 457,
+      "actual": 457,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2428:624",
+      "expected": 2534,
+      "actual": 2534,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2428:625",
+      "expected": 307,
+      "actual": 307,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2429:621",
+      "expected": 1,
+      "actual": 1,
+      "returned": 1
+    },
+    {
+      "cluster_id": "z11:2429:622",
+      "expected": 5,
+      "actual": 5,
+      "returned": 5
+    },
+    {
+      "cluster_id": "z11:2429:623",
+      "expected": 597,
+      "actual": 597,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2429:624",
+      "expected": 6526,
+      "actual": 6526,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2429:625",
+      "expected": 1577,
+      "actual": 1577,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2429:626",
+      "expected": 3,
+      "actual": 3,
+      "returned": 3
+    },
+    {
+      "cluster_id": "z11:2430:623",
+      "expected": 94,
+      "actual": 94,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2430:624",
+      "expected": 2025,
+      "actual": 2025,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2430:625",
+      "expected": 822,
+      "actual": 822,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2430:626",
+      "expected": 4,
+      "actual": 4,
+      "returned": 4
+    },
+    {
+      "cluster_id": "z11:2431:622",
+      "expected": 10,
+      "actual": 10,
+      "returned": 10
+    },
+    {
+      "cluster_id": "z11:2431:623",
+      "expected": 668,
+      "actual": 668,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2431:624",
+      "expected": 512,
+      "actual": 512,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2431:625",
+      "expected": 14,
+      "actual": 14,
+      "returned": 14
+    },
+    {
+      "cluster_id": "z11:2432:622",
+      "expected": 30,
+      "actual": 30,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2432:623",
+      "expected": 1945,
+      "actual": 1945,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2432:624",
+      "expected": 1593,
+      "actual": 1593,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2432:625",
+      "expected": 25,
+      "actual": 25,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2433:622",
+      "expected": 5,
+      "actual": 5,
+      "returned": 5
+    },
+    {
+      "cluster_id": "z11:2433:623",
+      "expected": 115,
+      "actual": 115,
+      "returned": 20
+    },
+    {
+      "cluster_id": "z11:2433:624",
+      "expected": 79,
+      "actual": 79,
+      "returned": 20
+    }
+  ]
+}

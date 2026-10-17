@@ -1,0 +1,75 @@
+{
+  "checked_at": "2026-10-17T14:44:20.796Z",
+  "results": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "marker_id": "cluster-marker-z11:2426:621",
+      "map": {
+        "x": 586,
+        "y": 92,
+        "width": 674,
+        "height": 788
+      },
+      "first_marker": {
+        "x": 610.6484375,
+        "y": 703,
+        "width": 32.703125,
+        "height": 32
+      },
+      "panel": {
+        "x": 827,
+        "y": 105,
+        "width": 420,
+        "height": 762
+      },
+      "controls": {
+        "x": 269,
+        "y": 109,
+        "width": 74,
+        "height": 36
+      },
+      "controls_overlap": false,
+      "page_overflow": false,
+      "total": 20,
+      "detail_visible": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "marker_id": "cluster-marker-z11:2426:621",
+      "map": {
+        "x": 20,
+        "y": 225.390625,
+        "width": 350,
+        "height": 620
+      },
+      "first_marker": {
+        "x": 44.6484375,
+        "y": 624.390625,
+        "width": 32.703125,
+        "height": 32
+      },
+      "panel": {
+        "x": 33,
+        "y": 238.390625,
+        "width": 324,
+        "height": 594
+      },
+      "controls": {
+        "x": 37,
+        "y": -358.609375,
+        "width": 74,
+        "height": 36
+      },
+      "controls_overlap": false,
+      "page_overflow": false,
+      "total": 20,
+      "detail_visible": true
+    }
+  ]
+}

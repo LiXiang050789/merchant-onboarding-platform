@@ -1,0 +1,57 @@
+import {expect, test} from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
+
+const screenshotDir = path.resolve(__dirname, "../../../artifacts/playwright");
+
+test("cluster marker opens members and the original form inside the map panel", async ({page}) => {
+  fs.mkdirSync(screenshotDir, {recursive: true});
+  await page.goto("/login");
+  await page.getByRole("button", {name: "登录", exact: true}).click();
+  await expect(page.getByText("地图聚合")).toBeVisible();
+  await expect(page.getByLabel("城市")).toHaveValue("shanghai");
+  await expect(page.getByLabel("状态")).toHaveValue("published");
+  await expect(page.getByLabel("zoom")).toHaveValue("11");
+  const marker = page.locator('[data-testid^="cluster-marker-"]').first();
+  await expect(marker).toBeVisible();
+  const started = Date.now();
+  await marker.click();
+  const panel = page.getByTestId("cluster-panel");
+  await expect(panel).toBeVisible();
+  await expect.poll(async () => Number(await page.getByTestId("cluster-total").textContent())).toBeGreaterThan(0);
+  const first = panel.getByTestId("cluster-member-row").first();
+  await expect(first).toBeVisible();
+  const count = await panel.getByTestId("cluster-member-row").count();
+  expect(count).toBeGreaterThanOrEqual(1);
+  expect(count).toBeLessThanOrEqual(20);
+  const total = Number(await page.getByTestId("cluster-total").textContent());
+  const name = (await first.getByTestId("member-name").textContent())!;
+  const shop = (await first.getByTestId("member-shop").textContent())!;
+  const status = (await first.getByTestId("member-status").textContent())!;
+  await first.getByRole("button", {name: "查看", exact: true}).click();
+  const original = panel.getByTestId("form-original");
+  await expect(original).toBeVisible();
+  await expect(original).toContainText(name);
+  await expect(original.getByTestId("detail-shop")).toHaveText(shop);
+  await expect(original.getByTestId("detail-status")).toHaveText(status);
+  await panel.getByRole("button", {name: "返回列表", exact: true}).click();
+  await expect(first).toBeVisible();
+  await expect(original).toHaveCount(0);
+  await page.screenshot({path: path.join(screenshotDir, "cluster_drill.png"), fullPage: true});
+  const changed = page.waitForResponse(response => {
+    const url = new URL(response.url());
+    return url.pathname === "/api/v1/clusters/members" && url.searchParams.get("status") === "validated";
+  });
+  await page.getByLabel("状态").selectOption("validated");
+  const response = await changed;
+  expect(response.status()).toBe(200);
+  const filtered = await response.json() as {total: number; members: unknown[]};
+  await expect(page.getByTestId("cluster-total")).toHaveText(String(filtered.total));
+  await expect(panel.getByTestId("cluster-member-row")).toHaveCount(filtered.members.length);
+  if (filtered.total === 0) await expect(panel).toContainText("该簇当前筛选下无成员");
+  await page.getByTestId("close-cluster").click();
+  await expect(panel).toHaveCount(0);
+  await expect(page.getByLabel("状态")).toHaveValue("validated");
+  await expect(page.getByLabel("城市")).toHaveValue("shanghai");
+  console.log(`cluster drill total=${total} rows=${count} elapsedMs=${Date.now() - started}`);
+});

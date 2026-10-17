@@ -1,0 +1,11 @@
+
+Running 1 test using 1 worker
+
+(node:76626) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:76626) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+cluster drill total=20 rows=20 elapsedMs=2247
+  ✓  1 [chromium] › tests/e2e/cluster_drill.spec.ts:7:5 › cluster marker opens members and the original form inside the map panel (7.9s)
+
+  1 passed (9.6s)

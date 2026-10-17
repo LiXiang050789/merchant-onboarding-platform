@@ -1,0 +1,91 @@
+
+Running 8 tests using 1 worker
+
+(node:75241) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:75241) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/cluster_drill.spec.ts:7:5 › cluster marker opens members and the original form inside the map panel (1.0m)
+(node:75548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:75548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium] › tests/e2e/golden.spec.ts:9:5 › golden path covers MVVM pages and frontend cache surface (15.7s)
+realtime status propagation ms=4915
+  ✓  3 [chromium] › tests/e2e/realtime.spec.ts:9:5 › form status advances on the list without refresh (11.1s)
+admin other-tenant batch realtime ms=398 batch=batch_ff886373ba4e41428d9
+  ✓  4 [chromium] › tests/e2e/realtime.spec.ts:55:5 › admin sees realtime progress for other tenant batches (11.6s)
+role=商户 elapsedMs=3091
+merchant build status=403 elapsedMs=4071
+role=运营 elapsedMs=6909
+operator cities=["shanghai"] rows=20 elapsedMs=7709
+operator beijing items=0
+role=管理员 elapsedMs=10560
+admin build status=200 elapsedMs=11319
+admin beijing items=20
+  ✓  5 [chromium] › tests/e2e/roles.spec.ts:7:5 › switch accounts to demonstrate role permissions and region scope (12.3s)
+withdrawal numerator 3->4, denominator=86, form=form_042360
+  ✓  6 [chromium] › tests/e2e/stats_withdraw_rate.spec.ts:32:5 › withdrawing a seed form increments the stats withdrawal numerator (7.9s)
+submit form propagation ms=3333 form=form_ee50e49c2d0e43eab57d file=f_cc7447f8a6094f72bed6
+  ✓  7 [chromium] › tests/e2e/submit_form.spec.ts:32:5 › merchant submits a shop application with an image and sees the original form advance (9.0s)
+  ✓  8 [chromium] › tests/e2e/withdraw.spec.ts:9:5 › creator withdraws a submitted form from the forms page (7.2s)
+
+
+  1) [chromium] › tests/e2e/cluster_drill.spec.ts:7:5 › cluster marker opens members and the original form inside the map panel 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('[data-testid^="cluster-marker-"]').first()[22m
+    [2m    - locator resolved to <button type="button" role="button" title="z11:2426:621" aria-label="查看簇 z11:2426:621" data-testid="cluster-marker-z11:2426:621" class="cluster-marker maplibregl-marker maplibregl-marker-anchor-center">20</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <section class="panel">…</section> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <section class="panel">…</section> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    104 × waiting for element to be visible, enabled and stable[22m
+    [2m        - element is visible, enabled and stable[22m
+    [2m        - scrolling into view if needed[22m
+    [2m        - done scrolling[22m
+    [2m        - <section class="panel">…</section> intercepts pointer events[22m
+    [2m      - retrying click action[22m
+    [2m        - waiting 500ms[22m
+
+
+      16 |   await expect(marker).toBeVisible();
+      17 |   const started = Date.now();
+    > 18 |   await marker.click();
+         |                ^
+      19 |   const panel = page.getByTestId("cluster-panel");
+      20 |   await expect(panel).toBeVisible();
+      21 |   await expect.poll(async () => Number(await page.getByTestId("cluster-total").textContent())).toBeGreaterThan(0);
+        at /home/lx/快课python/merchant-onboarding-platform/frontend/tests/e2e/cluster_drill.spec.ts:18:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/cluster_drill-cluster-mark-fffb5-l-form-inside-the-map-panel-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/cluster_drill-cluster-mark-fffb5-l-form-inside-the-map-panel-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/cluster_drill-cluster-mark-fffb5-l-form-inside-the-map-panel-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/cluster_drill-cluster-mark-fffb5-l-form-inside-the-map-panel-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/e2e/cluster_drill.spec.ts:7:5 › cluster marker opens members and the original form inside the map panel 
+  7 passed (2.3m)

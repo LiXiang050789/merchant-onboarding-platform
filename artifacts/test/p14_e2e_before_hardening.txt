@@ -1,0 +1,70 @@
+
+Running 8 tests using 1 worker
+
+(node:78040) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78040) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+cluster drill total=20 rows=20 elapsedMs=1966
+  ✓  1 [chromium] › tests/e2e/cluster_drill.spec.ts:7:5 › cluster marker opens members and the original form inside the map panel (6.9s)
+  ✓  2 [chromium] › tests/e2e/golden.spec.ts:9:5 › golden path covers MVVM pages and frontend cache surface (14.5s)
+realtime status propagation ms=389
+  ✓  3 [chromium] › tests/e2e/realtime.spec.ts:9:5 › form status advances on the list without refresh (7.6s)
+admin other-tenant batch realtime ms=568 batch=batch_ff7771f6e96f48b0a75
+  ✓  4 [chromium] › tests/e2e/realtime.spec.ts:55:5 › admin sees realtime progress for other tenant batches (11.2s)
+role=商户 elapsedMs=3302
+merchant build status=403 elapsedMs=4569
+role=运营 elapsedMs=7419
+operator cities=["shanghai"] rows=20 elapsedMs=8422
+operator beijing items=0
+role=管理员 elapsedMs=11697
+admin build status=200 elapsedMs=12720
+admin beijing items=20
+  ✓  5 [chromium] › tests/e2e/roles.spec.ts:7:5 › switch accounts to demonstrate role permissions and region scope (13.6s)
+withdrawal numerator 3->4, denominator=86, form=form_042360
+  ✓  6 [chromium] › tests/e2e/stats_withdraw_rate.spec.ts:32:5 › withdrawing a seed form increments the stats withdrawal numerator (8.0s)
+submit form propagation ms=2394 form=form_bde3aaab53a6450aa5b2 file=f_afc2b15722284710946a
+  ✓  7 [chromium] › tests/e2e/submit_form.spec.ts:32:5 › merchant submits a shop application with an image and sees the original form advance (8.1s)
+  ✘  8 [chromium] › tests/e2e/withdraw.spec.ts:9:5 › creator withdraws a submitted form from the forms page (16.8s)
+
+
+  1) [chromium] › tests/e2e/withdraw.spec.ts:9:5 › creator withdraws a submitted form from the forms page 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  locator('tr').filter({ hasText: 'form_43ac642e76c9448bbbb3' })
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  10000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('tr').filter({ hasText: 'form_43ac642e76c9448bbbb3' })[22m
+
+
+      38 |   await page.getByLabel("状态").selectOption("submitted");
+      39 |   const row = page.locator("tr", {hasText: form.id});
+    > 40 |   await expect(row).toBeVisible();
+         |                     ^
+      41 |   page.once("dialog", async (dialog) => {
+      42 |     expect(dialog.type()).toBe("prompt");
+      43 |     await dialog.accept("E2E 撤回");
+        at /home/lx/快课python/merchant-onboarding-platform/frontend/tests/e2e/withdraw.spec.ts:40:21
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/withdraw-creator-withdraws-aebc2-ed-form-from-the-forms-page-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/withdraw-creator-withdraws-aebc2-ed-form-from-the-forms-page-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/withdraw-creator-withdraws-aebc2-ed-form-from-the-forms-page-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/withdraw-creator-withdraws-aebc2-ed-form-from-the-forms-page-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/e2e/withdraw.spec.ts:9:5 › creator withdraws a submitted form from the forms page 
+  7 passed (1.5m)

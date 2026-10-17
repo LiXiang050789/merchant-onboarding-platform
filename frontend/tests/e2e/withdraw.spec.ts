@@ -15,6 +15,15 @@ test("creator withdraws a submitted form from the forms page", async ({page}) =>
   const token = await page.evaluate(() => window.localStorage.getItem("merchant_access_token"));
   expect(token).toBeTruthy();
 
+  await page.goto("/forms");
+  const submittedResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return url.pathname === "/api/v1/forms" && url.searchParams.get("status") === "submitted" && response.status() === 200;
+  });
+  await page.getByLabel("状态").selectOption("submitted");
+  await submittedResponse;
+  await expect(page.getByTestId("realtime-state")).toHaveText(/ws|polling/);
+
   const idempotencyKey = `withdraw-e2e-${Date.now()}`;
   const created = await page.request.post(`${apiBase}/api/v1/forms`, {
     headers: {
@@ -34,8 +43,6 @@ test("creator withdraws a submitted form from the forms page", async ({page}) =>
   expect(created.ok()).toBeTruthy();
   const form = await created.json();
 
-  await page.goto("/forms");
-  await page.getByLabel("状态").selectOption("submitted");
   const row = page.locator("tr", {hasText: form.id});
   await expect(row).toBeVisible();
   page.once("dialog", async (dialog) => {

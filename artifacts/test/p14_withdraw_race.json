@@ -1,0 +1,82 @@
+{
+  "checked_at": "2026-10-17T14:53:17.886652+00:00",
+  "database": "merchant",
+  "form_id": "form_43ac642e76c9448bbbb3",
+  "status": "validated",
+  "created_at": "2026-10-17 14:49:13",
+  "updated_at": "2026-10-17 14:49:15",
+  "events": [
+    {
+      "from": null,
+      "to": "submitted",
+      "at": "2026-10-17 14:49:14"
+    },
+    {
+      "from": "submitted",
+      "to": "validating",
+      "at": "2026-10-17 14:49:14"
+    },
+    {
+      "from": "validating",
+      "to": "validated",
+      "at": "2026-10-17 14:49:14"
+    }
+  ],
+  "browser_forms_requests": [
+    {
+      "at": "2026-10-17T14:49:13.046Z",
+      "path": "/api/v1/forms",
+      "method": "POST",
+      "filters": {},
+      "http_status": 200,
+      "total": null,
+      "returned_form_id": "form_43ac642e76c9448bbbb3",
+      "returned_form_status": "submitted",
+      "target_statuses": []
+    },
+    {
+      "at": "2026-10-17T14:49:16.552Z",
+      "path": "/api/v1/forms",
+      "method": "GET",
+      "filters": {
+        "city": [
+          "shanghai"
+        ],
+        "status": [
+          "submitted"
+        ],
+        "size": [
+          "20"
+        ]
+      },
+      "http_status": 200,
+      "total": 0,
+      "returned_form_id": null,
+      "returned_form_status": null,
+      "target_statuses": []
+    },
+    {
+      "at": "2026-10-17T14:49:16.431Z",
+      "path": "/api/v1/forms",
+      "method": "GET",
+      "filters": {
+        "city": [
+          "shanghai"
+        ],
+        "status": [
+          "published"
+        ],
+        "size": [
+          "20"
+        ]
+      },
+      "http_status": 200,
+      "total": 24842,
+      "returned_form_id": null,
+      "returned_form_status": null,
+      "target_statuses": []
+    }
+  ],
+  "failing_assertion": "frontend/tests/e2e/withdraw.spec.ts:40 expects the created row in status=submitted",
+  "existing_spec_modified": false
+}

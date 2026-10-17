@@ -1,0 +1,30 @@
+
+Running 8 tests using 1 worker
+
+(node:83255) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:83255) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+cluster drill total=20 rows=20 elapsedMs=2211
+  ✓  1 [chromium] › tests/e2e/cluster_drill.spec.ts:7:5 › cluster marker opens members and the original form inside the map panel (8.7s)
+  ✓  2 [chromium] › tests/e2e/golden.spec.ts:9:5 › golden path covers MVVM pages and frontend cache surface (21.0s)
+realtime status propagation ms=4926
+  ✓  3 [chromium] › tests/e2e/realtime.spec.ts:9:5 › form status advances on the list without refresh (11.9s)
+admin other-tenant batch realtime ms=530 batch=batch_fe9003cfb8084b05828
+  ✓  4 [chromium] › tests/e2e/realtime.spec.ts:55:5 › admin sees realtime progress for other tenant batches (10.9s)
+role=商户 elapsedMs=3032
+merchant build status=403 elapsedMs=4269
+role=运营 elapsedMs=7067
+operator cities=["shanghai"] rows=20 elapsedMs=8650
+operator beijing items=0
+role=管理员 elapsedMs=11513
+admin build status=200 elapsedMs=12452
+admin beijing items=20
+  ✓  5 [chromium] › tests/e2e/roles.spec.ts:7:5 › switch accounts to demonstrate role permissions and region scope (13.4s)
+withdrawal numerator 3->4, denominator=86, form=form_042360
+  ✓  6 [chromium] › tests/e2e/stats_withdraw_rate.spec.ts:32:5 › withdrawing a seed form increments the stats withdrawal numerator (7.6s)
+submit form propagation ms=3347 form=form_a631643eee534f7fb5c3 file=f_09a6c54c387b4bb4a432
+  ✓  7 [chromium] › tests/e2e/submit_form.spec.ts:32:5 › merchant submits a shop application with an image and sees the original form advance (9.0s)
+  ✓  8 [chromium] › tests/e2e/withdraw.spec.ts:9:5 › creator withdraws a submitted form from the forms page (6.4s)
+
+  8 passed (1.5m)
