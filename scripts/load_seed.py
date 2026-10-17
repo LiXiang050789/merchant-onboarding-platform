@@ -30,6 +30,7 @@ from backend.app.models import (  # noqa: E402
     DLQItem,
     Form,
     FormAuditEvent,
+    Shop,
     SubmissionEvent,
     SubmissionEventType,
     Tenant,
@@ -39,6 +40,7 @@ from backend.app.models import (  # noqa: E402
 )
 from backend.app.schemas import REQUIRED_BY_TYPE  # noqa: E402
 from backend.app.security import hash_password  # noqa: E402
+from scripts.seed import CITY_CENTERS  # noqa: E402
 
 
 VALID_STATUSES = {"draft", "submitted", "validating", "validated", "rejected", "batched", "processing", "published", "failed", "withdrawn"}
@@ -313,8 +315,45 @@ async def ensure_v4_schema(conn) -> None:
     )
 
 
+async def ensure_v5_schema(conn) -> None:
+    database = await conn.scalar(text("SELECT DATABASE()"))
+    column = await conn.scalar(text(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+        "WHERE TABLE_SCHEMA=:database AND TABLE_NAME='forms' AND COLUMN_NAME='shop_id'"
+    ), {"database": database})
+    if column is None:
+        await conn.execute(text("ALTER TABLE forms ADD COLUMN shop_id VARCHAR(64) NULL"))
+    index = await conn.scalar(text(
+        "SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS "
+        "WHERE TABLE_SCHEMA=:database AND TABLE_NAME='forms' AND COLUMN_NAME='shop_id' AND SEQ_IN_INDEX=1 LIMIT 1"
+    ), {"database": database})
+    if index is None:
+        await conn.execute(text("ALTER TABLE forms ADD INDEX ix_forms_shop_id (shop_id)"))
+
+
+def add_demo_shops(forms: list[dict], end: datetime) -> list[dict]:
+    shops = []
+    for tenant, city in sorted({(form["tenant_id"], form["city_code"]) for form in forms}):
+        lng, lat = CITY_CENTERS[city][0]
+        shops.append({
+            "id": f"shop_{tenant}_{city}", "tenant_id": tenant, "name": f"{tenant} {city} 默认店",
+            "city_code": city, "district_code": "core", "address": f"演示地址：{city} core",
+            "lng": lng, "lat": lat, "created_at": end, "updated_at": end,
+        })
+    for city, name in (("shanghai", "上海旗舰二店"), ("beijing", "北京朝阳二店"), ("chengdu", "成都春熙二店")):
+        lng, lat = CITY_CENTERS[city][0]
+        shops.append({
+            "id": f"shop_tenant_01_{city}_2", "tenant_id": "tenant_01", "name": name,
+            "city_code": city, "district_code": "core", "address": f"演示地址：{city} core 二店",
+            "lng": lng + 0.001, "lat": lat + 0.001, "created_at": end, "updated_at": end,
+        })
+    for form in forms:
+        form["shop_id"] = f"shop_{form['tenant_id']}_{form['city_code']}"
+    return shops
+
+
 async def reset_tables(conn) -> None:
-    for table in [DLQItem, BatchCheckpoint, BatchItem, Batch, FormAuditEvent, SubmissionEvent, Form, User, Tenant]:
+    for table in [DLQItem, BatchCheckpoint, BatchItem, Batch, FormAuditEvent, SubmissionEvent, Form, Shop, User, Tenant]:
         await conn.execute(delete(table))
 
 
@@ -405,15 +444,18 @@ async def main_async(args) -> int:
 
     demo_withdrawals, audit_rows = add_demo_withdrawals(rows, form_rows, event_rows, parse_time(timeline["shifted_max"]))
     demo_batches, batch_rows, batch_item_rows = add_demo_batches(form_rows, parse_time(timeline["shifted_max"]))
+    shop_rows = add_demo_shops(form_rows, parse_time(timeline["shifted_max"]))
 
     engine = create_async_engine(settings.mysql_dsn, pool_pre_ping=True)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         await ensure_v4_schema(conn)
+        await ensure_v5_schema(conn)
         if args.reset:
             await reset_tables(conn)
         await bulk_insert(conn, Tenant, tenant_rows)
         await bulk_insert(conn, User, user_rows)
+        await bulk_insert(conn, Shop, shop_rows)
         await bulk_insert(conn, Form, form_rows)
         await bulk_insert(conn, SubmissionEvent, event_rows)
         await bulk_insert(conn, FormAuditEvent, audit_rows)
@@ -421,6 +463,8 @@ async def main_async(args) -> int:
         await bulk_insert(conn, BatchItem, batch_item_rows)
         total_forms = int(await conn.scalar(select(func.count()).select_from(Form)) or 0)
         total_events = int(await conn.scalar(select(func.count()).select_from(SubmissionEvent)) or 0)
+        total_shops = int(await conn.scalar(select(func.count()).select_from(Shop)) or 0)
+        forms_shop_id_null = int(await conn.scalar(select(func.count()).select_from(Form).where(Form.shop_id.is_(None))) or 0)
 
     summary = {
         "source": str(csv_path.relative_to(ROOT)),
@@ -434,6 +478,14 @@ async def main_async(args) -> int:
         "time_anchor": timeline,
         "demo_withdrawals": demo_withdrawals,
         "demo_batches": demo_batches,
+        "demo_shops": {
+            "total_shops": total_shops,
+            "tenant_01": {
+                city: [{key: shop[key] for key in ("id", "name", "lng", "lat")} for shop in shop_rows if shop["tenant_id"] == "tenant_01" and shop["city_code"] == city]
+                for city in sorted(CITY_CENTERS)
+            },
+            "forms_shop_id_null": forms_shop_id_null,
+        },
         "tenants": len(tenants),
         "demo_accounts": {
             "merchant": "tenant_01@example.com / seed-pass",

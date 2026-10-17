@@ -397,9 +397,9 @@
   "time_anchor": {
     "original_min": "2026-09-01T00:00:00",
     "original_max": "2026-09-14T23:59:14",
-    "shifted_min": "2026-10-01T05:10:26",
-    "shifted_max": "2026-10-15T05:09:40",
-    "shift_seconds": 2610626
+    "shifted_min": "2026-10-03T08:46:35",
+    "shifted_max": "2026-10-17T08:45:49",
+    "shift_seconds": 2796395
   },
   "demo_withdrawals": {
     "beijing": {
@@ -805,6 +805,70 @@
         }
       ]
     }
+  },
+  "demo_shops": {
+    "total_shops": 103,
+    "tenant_01": {
+      "beijing": [
+        {
+          "id": "shop_tenant_01_beijing",
+          "name": "tenant_01 beijing 默认店",
+          "lng": 116.4074,
+          "lat": 39.9042
+        },
+        {
+          "id": "shop_tenant_01_beijing_2",
+          "name": "北京朝阳二店",
+          "lng": 116.4084,
+          "lat": 39.9052
+        }
+      ],
+      "chengdu": [
+        {
+          "id": "shop_tenant_01_chengdu",
+          "name": "tenant_01 chengdu 默认店",
+          "lng": 104.0665,
+          "lat": 30.5723
+        },
+        {
+          "id": "shop_tenant_01_chengdu_2",
+          "name": "成都春熙二店",
+          "lng": 104.06750000000001,
+          "lat": 30.5733
+        }
+      ],
+      "hangzhou": [
+        {
+          "id": "shop_tenant_01_hangzhou",
+          "name": "tenant_01 hangzhou 默认店",
+          "lng": 120.1551,
+          "lat": 30.2741
+        }
+      ],
+      "shanghai": [
+        {
+          "id": "shop_tenant_01_shanghai",
+          "name": "tenant_01 shanghai 默认店",
+          "lng": 121.4737,
+          "lat": 31.2304
+        },
+        {
+          "id": "shop_tenant_01_shanghai_2",
+          "name": "上海旗舰二店",
+          "lng": 121.4747,
+          "lat": 31.2314
+        }
+      ],
+      "shenzhen": [
+        {
+          "id": "shop_tenant_01_shenzhen",
+          "name": "tenant_01 shenzhen 默认店",
+          "lng": 114.0579,
+          "lat": 22.5431
+        }
+      ]
+    },
+    "forms_shop_id_null": 0
   },
   "tenants": 20,
   "demo_accounts": {
