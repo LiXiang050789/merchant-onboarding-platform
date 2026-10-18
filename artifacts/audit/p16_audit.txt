@@ -1,0 +1,1 @@
+{"status": "pass", "evidence": "/home/lx/快课python/merchant-onboarding-platform/artifacts/audit/requirements.json"}

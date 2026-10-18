@@ -44,7 +44,7 @@
         {
           "path": "docs/02-地理聚合与性能优化.md",
           "pattern": "payload",
-          "line": 39,
+          "line": 41,
           "ok": true
         }
       ]
@@ -62,7 +62,7 @@
         {
           "path": "frontend/src/features/map/view-model/use-map-view-model.ts",
           "pattern": "staleTime",
-          "line": 19,
+          "line": 23,
           "ok": true
         },
         {
@@ -92,7 +92,7 @@
         {
           "path": "docs/03-提交成功率统计设计.md",
           "pattern": "三种口径",
-          "line": 19,
+          "line": 20,
           "ok": true
         }
       ]
@@ -158,7 +158,7 @@
         {
           "path": "backend/app/main.py",
           "pattern": "trace_and_telemetry",
-          "line": 78,
+          "line": 98,
           "ok": true
         },
         {
@@ -176,7 +176,7 @@
         {
           "path": "backend/app/batch_pipeline.py",
           "pattern": "run_batch",
-          "line": 206,
+          "line": 208,
           "ok": true
         },
         {
@@ -200,7 +200,7 @@
         {
           "path": "backend/app/main.py",
           "pattern": "websocket_endpoint",
-          "line": 665,
+          "line": 827,
           "ok": true
         },
         {

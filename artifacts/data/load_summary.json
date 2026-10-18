@@ -397,9 +397,9 @@
   "time_anchor": {
     "original_min": "2026-09-01T00:00:00",
     "original_max": "2026-09-14T23:59:14",
-    "shifted_min": "2026-10-04T03:56:50",
-    "shifted_max": "2026-10-18T03:56:04",
-    "shift_seconds": 2865410
+    "shifted_min": "2026-10-04T04:25:27",
+    "shifted_max": "2026-10-18T04:24:41",
+    "shift_seconds": 2867127
   },
   "demo_withdrawals": {
     "beijing": {

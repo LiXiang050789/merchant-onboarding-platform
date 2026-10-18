@@ -1,0 +1,252 @@
+{
+  "status": "pass",
+  "checked_at": "2026-10-18T04:28:43.338105+00:00",
+  "scope": "Supplemental path/marker checks, not a replacement for code review or behavioral tests.",
+  "legacy_audit_scope": "R0-R8/JD; existing audit rules unchanged",
+  "matrix_rows": {
+    "R0": {
+      "matrix_line": 7,
+      "evidence_paths": [
+        "backend/tests/test_auth.py",
+        "backend/tests/test_forms.py"
+      ],
+      "all_paths_exist": true
+    },
+    "R1": {
+      "matrix_line": 8,
+      "evidence_paths": [
+        "artifacts/data/seed_summary.json",
+        "artifacts/bench/aggregation.json",
+        "artifacts/bench/explain.txt",
+        "docs/02-地理聚合与性能优化.md"
+      ],
+      "all_paths_exist": true
+    },
+    "R2": {
+      "matrix_line": 9,
+      "evidence_paths": [
+        "frontend/src/shared/api/client.ts",
+        "frontend/src/shared/realtime/realtime.ts",
+        "backend/app/cluster_service.py",
+        "backend/app/realtime.py",
+        "artifacts/frontend/perf.json",
+        "docs/07-前端性能与缓存报告.md"
+      ],
+      "all_paths_exist": true
+    },
+    "R3": {
+      "matrix_line": 10,
+      "evidence_paths": [
+        "backend/app/stats.py",
+        "backend/app/main.py",
+        "backend/tests/test_success_rate.py",
+        "artifacts/test/p3.xml",
+        "docs/03-提交成功率统计设计.md"
+      ],
+      "all_paths_exist": true
+    },
+    "R4": {
+      "matrix_line": 11,
+      "evidence_paths": [
+        "backend/app/docs_store.py",
+        "backend/tests/test_docs.py",
+        "artifacts/test/p6_docs.xml",
+        "docs/04-知识文档存储与RAG设计.md"
+      ],
+      "all_paths_exist": true
+    },
+    "R5": {
+      "matrix_line": 12,
+      "evidence_paths": [
+        "docs/05-跨端适配方案.md"
+      ],
+      "all_paths_exist": true
+    },
+    "R6": {
+      "matrix_line": 13,
+      "evidence_paths": [
+        "backend/app/main.py",
+        "backend/tests/test_forms.py"
+      ],
+      "all_paths_exist": true
+    },
+    "R7": {
+      "matrix_line": 14,
+      "evidence_paths": [
+        "backend/app/batch_pipeline.py",
+        "backend/app/dlq_worker.py",
+        "backend/tests/test_batch_pipeline.py",
+        "backend/tests/test_dlq_retry.py",
+        "artifacts/test/p15.xml",
+        "artifacts/data/p15_dlq.json",
+        "docs/06-批处理流程设计.md"
+      ],
+      "all_paths_exist": true
+    },
+    "R8": {
+      "matrix_line": 15,
+      "evidence_paths": [
+        "backend/app/realtime.py",
+        "frontend/src/shared/realtime/realtime.ts",
+        "scripts/rag_demo.py",
+        "artifacts/rag/rag_demo.json",
+        "docs/04-知识文档存储与RAG设计.md"
+      ],
+      "all_paths_exist": true
+    },
+    "R9": {
+      "matrix_line": 16,
+      "evidence_paths": [
+        "frontend/src/features/forms/view/create-form-drawer.tsx",
+        "frontend/src/features/forms/view/form-original.tsx",
+        "frontend/src/features/forms/view/forms-view.tsx",
+        "backend/app/main.py",
+        "artifacts/test/p13.xml",
+        "artifacts/playwright/submit_form.png",
+        "artifacts/playwright/form_detail_original.png"
+      ],
+      "all_paths_exist": true,
+      "code_locations": [
+        {
+          "path": "frontend/src/features/forms/view/create-form-drawer.tsx",
+          "pattern": "crypto.randomUUID()",
+          "line": 17
+        },
+        {
+          "path": "frontend/src/features/forms/model/fields.ts",
+          "pattern": "property: \"门店 / 房源\"",
+          "line": 3
+        },
+        {
+          "path": "frontend/src/features/forms/view/forms-view.tsx",
+          "pattern": "原始表单",
+          "line": 90
+        },
+        {
+          "path": "frontend/src/features/forms/view/forms-view.tsx",
+          "pattern": "流转记录",
+          "line": 91
+        },
+        {
+          "path": "backend/app/main.py",
+          "pattern": "@app.post(\"/api/v1/files\"",
+          "line": 214
+        },
+        {
+          "path": "backend/app/main.py",
+          "pattern": "File.tenant_id == actor.tenant_id",
+          "line": 258
+        },
+        {
+          "path": "backend/app/main.py",
+          "pattern": "@app.get(\"/api/v1/forms/{form_id}\"",
+          "line": 342
+        }
+      ]
+    },
+    "R10": {
+      "matrix_line": 17,
+      "evidence_paths": [
+        "backend/app/main.py",
+        "backend/tests/test_cluster_members.py",
+        "frontend/src/features/map/view/cluster-panel.tsx",
+        "artifacts/test/p14.xml",
+        "artifacts/playwright/cluster_drill.png"
+      ],
+      "all_paths_exist": true,
+      "code_locations": [
+        {
+          "path": "backend/app/main.py",
+          "pattern": "@app.get(\"/api/v1/clusters/members\")",
+          "line": 646
+        },
+        {
+          "path": "backend/app/main.py",
+          "pattern": "size = grid_size_for_zoom(zoom)",
+          "line": 663
+        },
+        {
+          "path": "backend/app/main.py",
+          "pattern": "stmt = FormRepository(session, actor).scoped(select(Form)).where(",
+          "line": 669
+        },
+        {
+          "path": "backend/app/main.py",
+          "pattern": "stmt.order_by(Form.created_at.desc(), Form.id.desc()).limit(20)",
+          "line": 678
+        },
+        {
+          "path": "frontend/src/features/map/view/cluster-panel.tsx",
+          "pattern": "<FormOriginal form={detailQuery.data}/>",
+          "line": 25
+        },
+        {
+          "path": "frontend/src/features/map/view-model/use-map-view-model.ts",
+          "pattern": "fetchFormDetail(selectedFormId as string)",
+          "line": 32
+        }
+      ]
+    },
+    "R11": {
+      "matrix_line": 18,
+      "evidence_paths": [
+        "backend/app/models.py",
+        "scripts/load_seed.py",
+        "backend/tests/test_shops.py",
+        "artifacts/data/load_summary.json"
+      ],
+      "all_paths_exist": true,
+      "code_locations": [
+        {
+          "path": "backend/app/models.py",
+          "pattern": "class Shop(Base):",
+          "line": 81
+        },
+        {
+          "path": "backend/app/models.py",
+          "pattern": "shop_id: Mapped[str | None]",
+          "line": 119
+        },
+        {
+          "path": "scripts/load_seed.py",
+          "pattern": "async def ensure_v5_schema",
+          "line": 319
+        },
+        {
+          "path": "scripts/load_seed.py",
+          "pattern": "def add_demo_shops",
+          "line": 355
+        },
+        {
+          "path": "backend/app/batch_pipeline.py",
+          "pattern": "by_scope.setdefault((form.tenant_id, form.city_code), []).append(form)",
+          "line": 93
+        }
+      ]
+    },
+    "JD": {
+      "matrix_line": 19,
+      "evidence_paths": [
+        "backend/app/stats.py",
+        "frontend/src/features",
+        "scripts/compare_spark_python.py",
+        "artifacts/bench/spark_compare.json",
+        "scripts/forecast_reports.py",
+        "artifacts/bench/report_forecast.json"
+      ],
+      "all_paths_exist": true
+    }
+  },
+  "submission_event_types": 7,
+  "total_shops": 103,
+  "readme_v5_evidence_paths": [
+    "artifacts/test/p13.xml",
+    "artifacts/playwright/submit_form.png",
+    "artifacts/playwright/form_detail_original.png",
+    "artifacts/test/p14.xml",
+    "artifacts/playwright/cluster_drill.png",
+    "artifacts/test/p15.xml",
+    "artifacts/data/p15_dlq.json",
+    "artifacts/test/p16.xml"
+  ]
+}

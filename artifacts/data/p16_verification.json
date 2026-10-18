@@ -1,0 +1,22 @@
+{
+  "database": "merchant",
+  "checked_at": "2026-10-18T04:28:41.924382+00:00",
+  "forms": 97379,
+  "shops": 103,
+  "shop_id_null": 0,
+  "batches": 10,
+  "created_batches": 10,
+  "withdrawn": 15,
+  "files": 0,
+  "dlq_items": 0,
+  "mismatched_shops": 0,
+  "time_anchor": {
+    "original_min": "2026-09-01T00:00:00",
+    "original_max": "2026-09-14T23:59:14",
+    "shifted_min": "2026-10-04T04:25:27",
+    "shifted_max": "2026-10-18T04:24:41",
+    "shift_seconds": 2867127
+  },
+  "anchor_utc": "2026-10-18T04:24:41+00:00",
+  "anchor_asia_shanghai": "2026-10-18T12:24:41+08:00"
+}
