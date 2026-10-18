@@ -49,25 +49,31 @@
 | admin | `admin@example.com` | `seed-pass` | 构建/运行批次、全局管理视角 |
 | operator | `operator-shanghai@example.com` | `seed-pass` | 上海区域运营视角 |
 
+`tenant_01` 在上海有默认店与「上海旗舰二店」（北京、成都也各有两店）；提交时选择所属店铺，在「门店照片」上传本地 PNG/JPG 图片，提交后通过「原始表单」核对图片。附件下载需要同租户登录，不使用公开文件 URL。
+
 ## 启动顺序
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d mysql mongo
 redis-server
 backend/.venv/bin/python scripts/load_seed.py --reset
-backend/.venv/bin/uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+backend/.venv/bin/uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --no-access-log --log-level warning > /tmp/merchant-onboarding-backend.log 2>&1
 cd frontend && npm run dev
 ```
 
 前端地址：`http://127.0.0.1:3000`。后端地址：`http://127.0.0.1:8000`。
 
+后端和前端分别在两个终端启动。uvicorn INFO 日志会输出含 token 的 WebSocket URL，P13 已记录该问题；因此后端关闭访问日志、使用 warning 级别，并把输出重定向到本地临时日志。
+
 `next build` 和 `next dev` 都会写 `.next`，演示时不要让二者同时操作同一目录；如果刚跑过 `npm run build`，请重启 `npm run dev`。
 
 ## 演示动线
 
-1. 用 `admin@example.com / seed-pass` 登录。
-2. `/map` 查看上海聚合 marker，切换状态为 `validated`。
-3. `/forms` 查看表单，撤回本人表单，观察状态时间线。
+**第 0 步（商户视角）**：用 `tenant_01@example.com / seed-pass` 登录 → `/forms` 点击「＋ 新建申请」→ 选「门店 / 房源」与「上海旗舰二店」→ 填门店名称、门店地址，在「门店照片」上传一张图片 → 提交 → 点击该行「查看」，核对「原始表单」→ 停留观察状态自动变为 `validated`，切换「流转记录」核对时间线。
+
+1. 退出商户账号，用 `admin@example.com / seed-pass` 登录。
+2. `/map` 查看上海聚合 marker，点击聚合气泡 → 右侧栏查看簇内成员的名称、状态和店铺 →「查看」进入原始表单，再返回列表；切换状态为 `validated`。
+3. `/forms` 查看表单，撤回本人表单，观察状态时间线；切换商户账号时选择上海、状态「全部」，用「店铺筛选」对照默认店与「上海旗舰二店」，随后换回 admin。
 4. `/batches` 构建/运行批次，观察 `202 Accepted`、实时进度与终态变化（reset 后每城自带 2 个待运行样例批次）。
 5. `/stats` 查看近 24h 成功率、端到端成功率和撤回率（种子自带少量撤回样例）；撤回近期 seed 表单后，撤回率分子会随之增加。
 6. `/docs` 创建知识文档、生成新版本、软删除。
@@ -100,6 +106,14 @@ bash scripts/demo.sh
 
 - `artifacts/audit/requirements.json`：需求覆盖审计。
 - `artifacts/test/backend_all.xml`：后端真库集成测试。
+- `artifacts/test/p13.xml`：提交、字段校验、附件上传/鉴权下载与详情的后端回归。
+- `artifacts/playwright/submit_form.png`：商户选择店铺并上传图片的提交抽屉。
+- `artifacts/playwright/form_detail_original.png`：原始表单、店铺、附件预览与自动流转后的状态。
+- `artifacts/test/p14.xml`：簇成员边界对拍、作用域、过滤与 limit/total 测试。
+- `artifacts/playwright/cluster_drill.png`：地图气泡点击后的簇成员侧栏。
+- `artifacts/test/p15.xml`：DLQ 自动重试、耗尽、幂等、异常隔离与迁移的全量回归。
+- `artifacts/data/p15_dlq.json`：注入时钟下真实执行的成功重试与连续失败耗尽时间线。
+- `artifacts/test/p16.xml`：v5 仓库侧收口的最终后端全量回归。
 - `artifacts/frontend/perf.json`、`artifacts/playwright/map.png`：前端性能与地图证据。
 - `artifacts/playwright/realtime_before.png`、`artifacts/playwright/realtime_after.png`、`artifacts/playwright/realtime_admin_batch.png`：不刷新实时流转与 admin 跨租户批次实时进度证据。
 - `artifacts/rag/rag_demo.json`：DeepSeek 真实生成或 retrieval-only 降级证据。

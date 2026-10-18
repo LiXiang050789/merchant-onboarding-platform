@@ -21,6 +21,7 @@ backend/.venv/bin/python scripts/rag_demo.py
 backend/.venv/bin/python scripts/forecast_reports.py
 
 echo "[5/5] start services"
-echo "Backend:  backend/.venv/bin/uvicorn backend.app.main:app --host 127.0.0.1 --port 8000"
+echo "Backend:  backend/.venv/bin/uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --no-access-log --log-level warning > /tmp/merchant-onboarding-backend.log 2>&1"
+echo "Use warning logging: INFO WebSocket URLs can contain tokens."
 echo "Frontend: cd frontend && npm run dev"
 echo "Demo login: admin@example.com / seed-pass"
