@@ -1,8 +1,8 @@
 {
-  "first_contentful_paint_ms": 336,
+  "first_contentful_paint_ms": 252,
   "map_features": 23,
   "initial_map_features": 34,
-  "filter_refresh_ms": 165,
-  "golden_path_ms": 13997,
+  "filter_refresh_ms": 965,
+  "golden_path_ms": 30529,
   "screenshot_path": "artifacts/playwright/map.png"
 }

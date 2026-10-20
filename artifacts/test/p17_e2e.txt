@@ -1,0 +1,32 @@
+
+Running 9 tests using 1 worker
+
+(node:75839) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:75839) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+cluster drill total=20 rows=20 elapsedMs=3480
+  ✓  1 [chromium] › tests/e2e/cluster_drill.spec.ts:7:5 › cluster marker opens members and the original form inside the map panel (27.0s)
+  ✓  2 [chromium] › tests/e2e/golden.spec.ts:9:5 › golden path covers MVVM pages and frontend cache surface (30.8s)
+lifecycle build ms=230 run ms=2923 navigations=0 form=form_4d9c45c25e934f8cbdbd
+  ✓  3 [chromium] › tests/e2e/lifecycle.spec.ts:8:5 › merchant form advances through build and run without refreshing and retains pipeline audits (14.1s)
+realtime status propagation ms=5916
+  ✓  4 [chromium] › tests/e2e/realtime.spec.ts:9:5 › form status advances on the list without refresh (13.1s)
+admin other-tenant batch realtime ms=958 batch=batch_fdaac674390149c78c4
+  ✓  5 [chromium] › tests/e2e/realtime.spec.ts:55:5 › admin sees realtime progress for other tenant batches (15.6s)
+role=商户 elapsedMs=4889
+merchant build status=403 elapsedMs=6774
+role=运营 elapsedMs=12750
+operator cities=["shanghai"] rows=20 elapsedMs=14862
+operator beijing items=0
+role=管理员 elapsedMs=18710
+admin build status=200 elapsedMs=20100
+admin beijing items=20
+  ✓  6 [chromium] › tests/e2e/roles.spec.ts:7:5 › switch accounts to demonstrate role permissions and region scope (21.4s)
+withdrawal numerator 3->4, denominator=86, form=form_042360
+  ✓  7 [chromium] › tests/e2e/stats_withdraw_rate.spec.ts:32:5 › withdrawing a seed form increments the stats withdrawal numerator (9.0s)
+submit form propagation ms=4515 form=form_2ba103e30d9443b5a6a4 file=f_65a9b9a72d41454e9c86
+  ✓  8 [chromium] › tests/e2e/submit_form.spec.ts:32:5 › merchant submits a shop application with an image and sees the original form advance (11.4s)
+  ✓  9 [chromium] › tests/e2e/withdraw.spec.ts:9:5 › creator withdraws a submitted form from the forms page (7.6s)
+
+  9 passed (2.6m)

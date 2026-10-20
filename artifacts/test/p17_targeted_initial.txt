@@ -1,0 +1,100 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-8.4.2, pluggy-1.6.0
+rootdir: /home/lx/快课python/merchant-onboarding-platform
+configfile: pytest.ini
+plugins: asyncio-1.2.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 5 items
+
+backend/tests/test_lifecycle_events.py .F...                             [100%]
+
+=================================== FAILURES ===================================
+____ test_run_emits_one_bulk_and_idempotent_rerun_adds_no_events_or_audits _____
+backend/tests/test_lifecycle_events.py:105: in test_run_emits_one_bulk_and_idempotent_rerun_adds_no_events_or_audits
+    assert len(await audits(session,form.id)) == 2
+                                    ^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/attributes.py:569: in __get__
+    return self.impl.get(state, dict_)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/attributes.py:1096: in get
+    value = self._fire_loader_callables(state, key, passive)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/attributes.py:1126: in _fire_loader_callables
+    return state._load_expired(state, passive)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/state.py:803: in _load_expired
+    self.manager.expired_attribute_loader(self, toload, passive)
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/loading.py:1674: in load_scalar_attributes
+    result = load_on_ident(
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/loading.py:510: in load_on_ident
+    return load_on_pk_identity(
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/loading.py:695: in load_on_pk_identity
+    session.execute(
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2365: in execute
+    return self._execute_internal(
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2241: in _execute_internal
+    conn = self._connection_for_bind(bind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2110: in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:2: in _connection_for_bind
+    ???
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:1189: in _connection_for_bind
+    conn = bind.connect()
+           ^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:3277: in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:143: in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:3301: in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/pool/base.py:447: in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/pool/base.py:1264: in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/pool/base.py:711: in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/pool/impl.py:306: in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/pool/base.py:388: in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/pool/base.py:673: in __init__
+    self.__connect()
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/pool/base.py:899: in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/util/langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/pool/base.py:895: in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/engine/create.py:661: in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py:629: in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/mysql/asyncmy.py:165: in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/.venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py:123: in await_only
+    raise exc.MissingGreenlet(
+E   sqlalchemy.exc.MissingGreenlet: greenlet_spawn has not been called; can't call await_only() here. Was IO attempted in an unexpected place? (Background on this error at: https://sqlalche.me/e/20/xd2s)
+------------------------------ Captured log setup ------------------------------
+WARNING  asyncmy:asyncio.py:213 Can't create database 'merchant_test'; database exists
+- generated xml file: /home/lx/快课python/merchant-onboarding-platform/artifacts/test/p17_targeted.xml -
+=========================== short test summary info ============================
+FAILED backend/tests/test_lifecycle_events.py::test_run_emits_one_bulk_and_idempotent_rerun_adds_no_events_or_audits
+========================= 1 failed, 4 passed in 19.85s =========================

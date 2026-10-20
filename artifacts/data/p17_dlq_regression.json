@@ -1,0 +1,62 @@
+{
+  "database": "merchant_test",
+  "success": [
+    {
+      "checked_at": "2026-10-20T02:54:49.652687+00:00",
+      "injected_now": null,
+      "form_status": "failed",
+      "form_retry_count": 1,
+      "retry_count": 1,
+      "next_retry_at": "2026-10-20T02:56:50",
+      "state": "pending",
+      "batch_status": "failed",
+      "business_events": 0
+    },
+    {
+      "checked_at": "2026-10-20T02:54:49.840107+00:00",
+      "injected_now": "2026-10-20T02:56:50",
+      "form_status": "published",
+      "form_retry_count": 1,
+      "retry_count": 1,
+      "next_retry_at": "2026-10-20T02:56:50",
+      "state": "resolved",
+      "batch_status": "completed",
+      "business_events": 1
+    }
+  ],
+  "exhaustion": [
+    {
+      "checked_at": "2026-10-20T02:54:49.951017+00:00",
+      "injected_now": null,
+      "form_status": "failed",
+      "form_retry_count": 1,
+      "retry_count": 1,
+      "next_retry_at": "2026-10-20T02:56:50",
+      "state": "pending",
+      "batch_status": "failed",
+      "business_events": 0
+    },
+    {
+      "checked_at": "2026-10-20T02:54:50.031702+00:00",
+      "injected_now": "2026-10-20T02:56:50",
+      "form_status": "failed",
+      "form_retry_count": 2,
+      "retry_count": 2,
+      "next_retry_at": "2026-10-20T03:00:50",
+      "state": "pending",
+      "batch_status": "failed",
+      "business_events": 0
+    },
+    {
+      "checked_at": "2026-10-20T02:54:50.139412+00:00",
+      "injected_now": "2026-10-20T03:00:50",
+      "form_status": "failed",
+      "form_retry_count": 3,
+      "retry_count": 3,
+      "next_retry_at": "2026-10-20T03:00:50",
+      "state": "exhausted",
+      "batch_status": "failed",
+      "business_events": 0
+    }
+  ]
+}
