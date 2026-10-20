@@ -18,6 +18,7 @@ from .models import (
     DLQItem,
     DLQState,
     Form,
+    FormAuditEvent,
     FormStatus,
     FormType,
     SubmissionEvent,
@@ -34,6 +35,14 @@ PIPELINE_STAGE = {
     FormType.product: "product_pipeline",
     FormType.report: "report_pipeline",
 }
+
+
+def write_pipeline_audit(session: AsyncSession, form: Form, previous: FormStatus, *, actor_id: str = "batch_pipeline") -> None:
+    session.add(FormAuditEvent(
+        tenant_id=form.tenant_id, form_id=form.id, actor_id=actor_id,
+        event_type="status_pipeline_changed", from_status=previous.value,
+        to_status=form.status.value, payload_hash=actor_id,
+    ))
 
 
 @dataclass(frozen=True)
@@ -120,6 +129,7 @@ async def build_batches(
                 form.status = FormStatus.batched
                 form.batch_id = batch.id
                 form.updated_at = now
+                write_pipeline_audit(session, form, FormStatus.validated)
                 session.add(BatchItem(batch_id=batch.id, form_id=form.id, distance_m=int(round(float(distance)))))
     await session.flush()
     return created, len(forms)
@@ -232,10 +242,12 @@ async def run_batch(session: AsyncSession, batch: Batch, progress_callback: Prog
         if form.status == FormStatus.failed and form.retry_count >= 3:
             failed += 1
             continue
+        previous = form.status
         form.status = FormStatus.processing
         form.updated_at = now
         if not payload_is_valid(form):
             await write_dlq(session, form, stage, "validation_failed", "required payload fields missing")
+            write_pipeline_audit(session, form, previous)
             batch.status = BatchStatus.failed
             batch.updated_at = now
             failed += 1
@@ -243,6 +255,7 @@ async def run_batch(session: AsyncSession, batch: Batch, progress_callback: Prog
             return RunSummary(batch.id, batch.status, processed, published, failed, await checkpoint_stages(session, batch.id))
         if should_fail(form, stage):
             await write_dlq(session, form, stage, "pipeline_failed", "forced pipeline failure")
+            write_pipeline_audit(session, form, previous)
             batch.status = BatchStatus.failed
             batch.updated_at = now
             failed += 1
@@ -250,6 +263,7 @@ async def run_batch(session: AsyncSession, batch: Batch, progress_callback: Prog
             return RunSummary(batch.id, batch.status, processed, published, failed, await checkpoint_stages(session, batch.id))
         form.status = FormStatus.published
         form.updated_at = now
+        write_pipeline_audit(session, form, previous)
         await ensure_business_event(session, form)
         await upsert_checkpoint(session, batch.id, stage, form.id)
         processed += 1

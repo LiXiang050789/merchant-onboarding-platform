@@ -746,6 +746,15 @@ async def build_batch_endpoint(
     await session.commit()
     for batch in batches:
         await publish_event(batch.tenant_id, "batch.status_changed", {"batch_id": batch.id, "status": batch.status.value})
+    by_tenant: dict[str, list[Batch]] = {}
+    for batch in batches:
+        by_tenant.setdefault(batch.tenant_id, []).append(batch)
+    for tenant_id, tenant_batches in by_tenant.items():
+        await publish_event(tenant_id, "form.bulk_status_changed", {
+            "operation": "build", "status": "batched",
+            "batch_ids": [batch.id for batch in tenant_batches],
+            "forms": sum(batch.item_count for batch in tenant_batches),
+        })
     return BatchBuildResponse(
         batches=[BatchOut.model_validate(item, from_attributes=True) for item in batches],
         total_forms=total_forms,
@@ -770,7 +779,7 @@ async def list_batch_endpoint(
 
 async def run_batch_background(session: AsyncSession, batch_id: str) -> None:
     batch = await session.get(Batch, batch_id)
-    if batch is None or batch.status == BatchStatus.canceled:
+    if batch is None or batch.status in {BatchStatus.canceled, BatchStatus.completed}:
         return
 
     async def progress(processed: int, total: int, current_status: BatchStatus) -> None:
@@ -784,6 +793,9 @@ async def run_batch_background(session: AsyncSession, batch_id: str) -> None:
         summary = await run_batch(session, batch, progress_callback=progress)
         await session.commit()
         await publish_event(batch.tenant_id, "batch.status_changed", {"batch_id": batch.id, "status": summary.status.value})
+        await publish_event(batch.tenant_id, "form.bulk_status_changed", {
+            "operation": "run", "batch_id": batch.id, "published": summary.published, "failed": summary.failed,
+        })
     except Exception:
         await session.rollback()
         logger.exception("batch_background_failed", extra={"batch_id": batch_id})

@@ -25,6 +25,7 @@ function invalidate(queryClient: QueryClient, type: string) {
     void queryClient.cancelQueries({queryKey}).then(() => queryClient.invalidateQueries({queryKey}));
   };
   if (type.startsWith("form.")) {
+    // form.bulk_status_changed reuses the form prefix for lifecycle invalidation.
     refresh("forms");
     refresh("clusters");
     refresh("stats");

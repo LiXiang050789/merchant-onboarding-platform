@@ -8,7 +8,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .batch_pipeline import ensure_business_event, payload_is_valid, should_fail, upsert_checkpoint
+from .batch_pipeline import ensure_business_event, payload_is_valid, should_fail, upsert_checkpoint, write_pipeline_audit
 from .db import SessionLocal
 from .models import Batch, BatchItem, BatchStatus, DLQItem, DLQState, Form, FormStatus
 from .realtime import publish_event
@@ -76,10 +76,12 @@ async def process_dlq_once(session: AsyncSession, now: datetime | None = None) -
                 item.retry_count = form.retry_count
                 item.state = DLQState.exhausted
             else:
+                previous = form.status
                 form.status = FormStatus.processing
                 valid = payload_is_valid(form)
                 if valid and not should_fail(form, item.stage):
                     form.status = FormStatus.published
+                    write_pipeline_audit(session, form, previous, actor_id="dlq_worker")
                     await ensure_business_event(session, form)
                     if form.batch_id:
                         await upsert_checkpoint(session, form.batch_id, item.stage, form.id)
